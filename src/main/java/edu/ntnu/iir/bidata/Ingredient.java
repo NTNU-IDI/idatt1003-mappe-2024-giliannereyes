@@ -26,14 +26,20 @@ public class Ingredient {
    * @param expiryDate  The expiry date of the ingredient.
    */
   public Ingredient(
-      String name, double quantity, double price, String unit, LocalDate expiryDate
-  ) {
+      String name, double quantity, double price, String unit, LocalDate expiryDate)
+  {
     this.name = name;
     this.quantity = quantity;
     this.price = price;
     this.pricePerUnit = this.price / this.quantity;
     this.unit = unit;
     this.expiryDate = expiryDate;
+
+    validateName();
+    validateQuantity();
+    validatePrice();
+    validateUnit();
+    validateExpiryDate();
   }
 
   /**
