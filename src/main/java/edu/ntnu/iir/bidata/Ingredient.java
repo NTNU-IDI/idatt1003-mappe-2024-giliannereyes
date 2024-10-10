@@ -112,6 +112,14 @@ public class Ingredient {
     }
   }
 
+  public void removeQuantity(double quantity) {
+    this.quantity -= quantity;
+  }
+
+  public void addQuantity(double quantity) {
+    this.quantity += quantity;
+  }
+
   // Get-methods
   public String getName() {
     return this.name;
@@ -133,5 +141,8 @@ public class Ingredient {
     return this.unit;
   }
 
+  public LocalDate getExpiryDate() {
+    return this.expiryDate;
+  }
 
 }
