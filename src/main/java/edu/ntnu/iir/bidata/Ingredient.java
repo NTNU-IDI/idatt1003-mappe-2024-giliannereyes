@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents an ingredient in the fridge or a recipe.
@@ -12,7 +13,7 @@ public class Ingredient {
   private final String name;
   private double quantity;
   private double price;
-  private double pricePerUnit;
+  private final double pricePerUnit;
   private final String unit;
   private final LocalDate expiryDate;
 
@@ -21,23 +22,23 @@ public class Ingredient {
    *
    * @param name The name of the ingredient.
    * @param quantity The quantity of the ingredient.
-   * @param price The price per unit of the ingredient.
+   * @param pricePerUnit The price per unit of the ingredient.
    * @param unit  The unit of measurement.
    * @param expiryDate  The expiry date of the ingredient.
    */
   public Ingredient(
-      String name, double quantity, double price, String unit, LocalDate expiryDate)
+      String name, double quantity, double pricePerUnit, String unit, LocalDate expiryDate)
   {
     this.name = name;
     this.quantity = quantity;
-    this.price = price;
-    this.pricePerUnit = this.price / this.quantity;
+    this.pricePerUnit = pricePerUnit;
+    this.price = pricePerUnit * quantity;
     this.unit = unit;
     this.expiryDate = expiryDate;
 
     validateName();
     validateQuantity();
-    validatePrice();
+    validatePricePerUnit();
     validateUnit();
     validateExpiryDate();
   }
@@ -78,8 +79,8 @@ public class Ingredient {
    *
    * @throws IllegalArgumentException if the price is negative.
    */
-  public void validatePrice() {
-    if (price < 0) {
+  public void validatePricePerUnit() {
+    if (pricePerUnit < 0) {
       throw new IllegalArgumentException("Ingredient price is negative.");
     }
   }
@@ -143,6 +144,18 @@ public class Ingredient {
 
   public LocalDate getExpiryDate() {
     return this.expiryDate;
+  }
+
+  @Override
+  public String toString() {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String formattedExpiryDate = expiryDate.format(formatter);
+
+    return "Ingredient: " + this.name
+        + "\nQuantity: " + this.quantity + " " + this.unit
+        + "\nPrice: " + this.price
+        + "\nPrice per unit: " + this.pricePerUnit
+        + "\nExpiry date: " + formattedExpiryDate;
   }
 
 }

@@ -29,15 +29,23 @@ public class Fridge {
    */
   public void removeIngredient(String ingredientName, double quantity) {
     for (Ingredient ingredient : inventory) {
-      if (ingredient.getName().equals(ingredientName)) {
+      if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
         ingredient.removeQuantity(quantity);
+
+        // Ingredient is removed from inventory if quantity = 0
+        if (ingredient.getQuantity() == 0) {
+          inventory.remove(ingredient);
+        }
       }
     }
+
+
+
   }
 
   public Ingredient searchIngredient(String ingredientName) {
     for (Ingredient ingredient : inventory) {
-      if (ingredient.getName().equals(ingredientName)) {
+      if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
         return ingredient;
       }
     }
@@ -48,6 +56,7 @@ public class Fridge {
   public void showAllIngredients() {
     for (Ingredient ingredient : inventory) {
       System.out.println(ingredient);
+      System.out.println();
     }
   }
 
