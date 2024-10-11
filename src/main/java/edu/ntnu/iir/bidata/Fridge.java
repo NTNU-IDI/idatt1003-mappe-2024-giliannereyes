@@ -2,6 +2,7 @@ package edu.ntnu.iir.bidata;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -27,6 +28,22 @@ public class Fridge {
    * @param quantity
    */
   public void removeIngredient(String ingredientName, double quantity) {
+    // Use an iterator to safely remove items from the inventory
+    Iterator<Ingredient> iterator = inventory.iterator();
+    while (iterator.hasNext()) {
+      Ingredient ingredient = iterator.next();
+      if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
+        ingredient.removeQuantity(quantity);
+
+        // Ingredient is removed from inventory if quantity = 0
+        if (ingredient.getQuantity() <= 0) { // Use <= to cover cases where quantity might go negative
+          iterator.remove(); // Safely remove the ingredient
+        }
+        // Break out of the loop after removing the ingredient
+        break; // Exit once we've found and processed the ingredient
+      }
+    }
+    /**
     for (Ingredient ingredient : inventory) {
       if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
         ingredient.removeQuantity(quantity);
@@ -37,6 +54,7 @@ public class Fridge {
         }
       }
     }
+     */
   }
 
   public Ingredient searchIngredient(String ingredientName) {
@@ -79,6 +97,18 @@ public class Fridge {
     }
 
     return totalValue;
+  }
+
+  // Used in Recipe-class
+  public boolean hasEnoughIngredient(String name, double quantity) {
+    for (Ingredient ingredient : inventory) {
+      if (ingredient.getName().equalsIgnoreCase(name)) {
+        if (ingredient.getQuantity() >= quantity) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 }

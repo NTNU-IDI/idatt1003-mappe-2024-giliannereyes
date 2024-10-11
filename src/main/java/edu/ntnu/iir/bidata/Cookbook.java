@@ -13,12 +13,21 @@ public class Cookbook {
     recipes.add(recipe);
   }
   
-  public void showAvailableRecipes() {
+  public void showAvailableRecipes(Fridge fridge) {
     for (Recipe recipe : recipes) {
-      if (recipe.available()) {
+      if (recipe.available(fridge)) {
         System.out.println(recipe.toString());
       }
     }
+  }
+
+  public Recipe getRecipeByName(String name) {
+    for (Recipe recipe : recipes) {
+      if (recipe.getName().equalsIgnoreCase(name)) {
+        return recipe;
+      }
+    }
+    return null;
   }
 
 }

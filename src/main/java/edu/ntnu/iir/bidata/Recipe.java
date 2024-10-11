@@ -10,14 +10,26 @@ public class Recipe {
   public Recipe(final String name, final String description) {
     this.name = name;
     this.description = description;
+    this.ingredients = new ArrayList<>();
   }
 
-  public void addIngredient(Ingredient ingredient, double quantity) {
+  public void addIngredient(Ingredient ingredient) {
     ingredients.add(ingredient);
   }
 
-  public boolean available() {
-    return false;
+  public boolean available(Fridge fridge) {
+    for (Ingredient ingredient : ingredients) {
+      String name = ingredient.getName();
+      double quantity = ingredient.getQuantity();
+      if (!fridge.hasEnoughIngredient(name, quantity)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public String getName() {
+    return name;
   }
 
   @Override
