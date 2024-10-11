@@ -2,7 +2,6 @@ package edu.ntnu.iir.bidata;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,9 +37,6 @@ public class Fridge {
         }
       }
     }
-
-
-
   }
 
   public Ingredient searchIngredient(String ingredientName) {
@@ -51,7 +47,6 @@ public class Fridge {
     }
     return null;
   }
-
 
   public void showAllIngredients() {
     for (Ingredient ingredient : inventory) {
