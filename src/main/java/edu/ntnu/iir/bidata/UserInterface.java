@@ -98,7 +98,7 @@ public class UserInterface {
     // New instance of Ingredient class
     Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
     fridge.addIngredient(newIngredient);
-    System.out.println("Ingredient added!");
+    System.out.println("Ingredient added to fridge!");
   }
 
   private void removeIngredient() {
@@ -111,6 +111,7 @@ public class UserInterface {
 
     fridge.removeIngredient(name, quantity);
     System.out.println("Removed " + quantity + " of " + name + "!");
+
   }
 
   private void searchIngredient() {

@@ -32,12 +32,13 @@ public class Recipe {
     return name;
   }
 
-  @Override
-  public String toString() {
-    return "Recipe: " + this.name
-        + "\nDescription: " + this.description
-        + "\nIngredients: " + this.ingredients;
+  public void showRecipe() {
+    System.out.println("Name: " + name);
+    System.out.println("Description: " + description);
+    System.out.println("Ingredients: ");
+    for (Ingredient ingredient : ingredients) {
+      System.out.println(ingredient.getName() + "\t" + ingredient.getQuantity());
+    }
   }
-
 
 }

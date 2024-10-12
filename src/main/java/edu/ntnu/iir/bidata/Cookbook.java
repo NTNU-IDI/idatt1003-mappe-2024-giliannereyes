@@ -3,7 +3,7 @@ package edu.ntnu.iir.bidata;
 import java.util.ArrayList;
 
 public class Cookbook {
-  private ArrayList<Recipe> recipes;
+  private final ArrayList<Recipe> recipes;
 
   public Cookbook() {
     recipes = new ArrayList<>();
@@ -16,7 +16,7 @@ public class Cookbook {
   public void showAvailableRecipes(Fridge fridge) {
     for (Recipe recipe : recipes) {
       if (recipe.available(fridge)) {
-        System.out.println(recipe.toString());
+        recipe.showRecipe();
       }
     }
   }
