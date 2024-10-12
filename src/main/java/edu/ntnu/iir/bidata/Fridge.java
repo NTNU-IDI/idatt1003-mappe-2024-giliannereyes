@@ -4,20 +4,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a fridge that stores ingredients.
- *
- * The fridge supports the following functionality:
+ *<br>
+ * Fridge supports the following functionality:
  * <ul>
  *   <li></li>
  * </ul>
  */
 public class Fridge {
-  private List<Ingredient> inventory; // List to hold the ingredients
+  private final List<Ingredient> inventory; // List to hold the ingredients
 
   /**
-   * Constructor of the Fridge class that initializes the inventory list.
+   * Constructs a new Fridge instance that initializes the inventory list.
    */
   public Fridge() {
     inventory = new ArrayList<>();  // Initialize the inventory as an empty ArrayList
@@ -69,24 +70,23 @@ public class Fridge {
    *
    * @param ingredientName The name of the ingredient to search for.
    *
-   * @return The ingredient.
+   * @return An Optional containing the ingredient if found, or an empty Optional if not found.
    */
-  public Ingredient searchIngredient(String ingredientName) {
-    for (Ingredient ingredient : inventory) {
-      if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
-        return ingredient;
-      }
-    }
-    return null;
+  public Optional<Ingredient> searchIngredient(String ingredientName) {
+    return inventory.stream()
+        // Filters by ingredient name
+        .filter(ingredient -> ingredient.getName().equalsIgnoreCase(ingredientName))
+        // Returns first instance of specified ingredient
+        .findFirst();
   }
 
   /**
    * Displays all the ingredients in the inventory.
    */
   public void showAllIngredients() {
-    // Loop through each ingredient
+    // Loops through each ingredient
     inventory.forEach(ingredient -> {
-      ingredient.showIngredientDetails(); // Call method to display ingredient details
+      ingredient.showIngredientDetails(); // Calls method to display ingredient details
       System.out.println();
     });
   }
@@ -95,7 +95,8 @@ public class Fridge {
    * Displays all expired ingredients from the inventory and their total value.
    * <p>
    *   This method retrieves the current date and filters the inventory to find
-   *   the expired ingredients. For each expired ingredient, it prints out its details to the console.
+   *   the expired ingredients. For each expired ingredient,
+   *   it prints out its details to the console.
    *   Then the total value of the expired ingredients is printed out.
    * </p>
    */
@@ -103,10 +104,14 @@ public class Fridge {
     LocalDate currentDate = LocalDate.now();  // Get the current date
 
     double totalValue = inventory.stream()
-        .filter(ingredient -> ingredient.getExpiryDate().isBefore(currentDate)) // Filters expired ingredients
-        .peek(Ingredient::showIngredientDetails)  // Displays each expired ingredient's details
-        .mapToDouble(Ingredient::getPrice)  // Maps each Ingredient-instance to its price (double value)
-        .sum(); // Calculates the sum of the prices of expired ingredients
+        // Filters expired ingredients
+        .filter(ingredient -> ingredient.getExpiryDate().isBefore(currentDate))
+        // Displays each expired ingredient's details
+        .peek(Ingredient::showIngredientDetails)
+        // Maps each Ingredient-instance to its price (double value)
+        .mapToDouble(Ingredient::getPrice)
+        // Calculates the sum of the prices of expired ingredients
+        .sum();
 
     System.out.println("The total value of expired ingredients is " + totalValue + " kr.");
   }
@@ -118,19 +123,12 @@ public class Fridge {
    */
   public double calculateTotalValue() {
     return inventory.stream()
-        .mapToDouble(Ingredient::getPrice) // Map each ingredient instance to its price
-        .sum(); // Sum the prices
+        .mapToDouble(Ingredient::getPrice) // Maps each ingredient instance to its price
+        .sum(); // Calculates the sum of the prices
   }
-
 
   /**
    * Checks if the fridge has enough of the specified ingredient.
-   *
-   * <p>
-   *   This method filters the inventory to find ingredients that mach the provided name.
-   *   It then checks if at least one of those matching ingredients has the required quantity
-   *   and is not expired.
-   * </p>
    *
    * @param name The name of the ingredient to check for.
    * @param quantity The required amount of the ingredient.
@@ -140,9 +138,12 @@ public class Fridge {
    */
   public boolean hasEnoughIngredient(String name, double quantity) {
     return inventory.stream()
-        .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name))  // Filter by ingredient name
-        .anyMatch(ingredient -> ingredient.getQuantity() >= quantity  // Check for sufficient quantity
-                  && ingredient.getExpiryDate().isAfter(LocalDate.now()));  // Check if not expired
+        // Filters by ingredient name
+        .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name))
+        // Checks for sufficient quantity
+        .anyMatch(ingredient -> ingredient.getQuantity() >= quantity
+            // Checks if ingredient is not expired
+            && ingredient.getExpiryDate().isAfter(LocalDate.now()));
   }
 
 }
