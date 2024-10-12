@@ -2,6 +2,7 @@ package edu.ntnu.iir.bidata;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -62,7 +63,7 @@ public class UserInterface {
           cookbook.showAvailableRecipes(fridge);
           break;
         case 9:
-          checkRecipe();
+          checkIfRecipeAvailable();
           break;
         case 0:
           running = false;
@@ -117,14 +118,16 @@ public class UserInterface {
   private void searchIngredient() {
     System.out.println("Enter ingredient name:");
     String name = scanner.nextLine();
-    Ingredient targetIngredient = fridge.searchIngredient(name);
+    Optional<Ingredient> optionalIngredient = fridge.searchIngredient(name);
 
-    if (targetIngredient == null) {
-      System.out.println("Ingredient not found!");
-    } else {
-      System.out.println("Ingredient found!");
-      System.out.println(targetIngredient);
-    }
+    optionalIngredient.ifPresentOrElse(
+        ingredient -> {
+          System.out.println("Ingredient " + ingredient.getName() + " found!");
+          System.out.println("Details of ingredient " + ingredient.getName() + ":");
+          ingredient.showDetails();
+        },
+        () -> System.out.println("Ingredient not found!")
+    );
   }
 
   private void calculateTotalValue() {
@@ -175,16 +178,22 @@ public class UserInterface {
     System.out.println("Recipe added to cookbook.");
   }
 
-  private void checkRecipe() {
+  private void checkIfRecipeAvailable() {
     System.out.println("Enter recipe name:");
     String name = scanner.nextLine();
-    Recipe recipe = cookbook.getRecipeByName(name);
+    Optional<Recipe> optionalRecipe = cookbook.getRecipeByName(name);
 
-    if (recipe != null && recipe.available(fridge)) {
-      System.out.println("You have all the ingredients to make " + name + "!");
-    } else {
-      System.out.println("You are missing ingredients to make " + name + "!");
-    }
+    optionalRecipe.ifPresentOrElse(
+        recipe -> {
+          if (recipe.available(fridge)) {
+            System.out.println("You have all the ingredients to make " + name + "!");
+          } else {
+            System.out.println("You are missing ingredients to make " + name + "!");
+          }
+        },
+        () -> System.out.println("Recipe '" + name + "' not found!")
+    );
+
   }
 
 }
