@@ -17,7 +17,7 @@ public class Cookbook {
   private final ArrayList<Recipe> recipes;
 
   /**
-   * Constructs a new Cookbook with an empty list of recipes.
+   * Constructs a new Cookbook instance with an empty list of recipes.
    */
   public Cookbook() {
     recipes = new ArrayList<>();

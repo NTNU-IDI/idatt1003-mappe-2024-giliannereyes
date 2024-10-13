@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * Represents a fridge that stores ingredients.
  *<br>
- * Fridge supports the following functionality:
+ * Fridge has the following functionalities:
  * <ul>
  *   <li></li>
  * </ul>
@@ -86,7 +86,7 @@ public class Fridge {
   public void showAllIngredients() {
     // Loops through each ingredient
     inventory.forEach(ingredient -> {
-      ingredient.showIngredientDetails(); // Calls method to display ingredient details
+      ingredient.showDetails(); // Calls method to display ingredient details
       System.out.println();
     });
   }
@@ -107,7 +107,7 @@ public class Fridge {
         // Filters expired ingredients
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(currentDate))
         // Displays each expired ingredient's details
-        .peek(Ingredient::showIngredientDetails)
+        .peek(Ingredient::showDetails)
         // Maps each Ingredient-instance to its price (double value)
         .mapToDouble(Ingredient::getPrice)
         // Calculates the sum of the prices of expired ingredients

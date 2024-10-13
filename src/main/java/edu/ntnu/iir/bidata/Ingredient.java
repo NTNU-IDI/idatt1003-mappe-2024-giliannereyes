@@ -129,7 +129,7 @@ public class Ingredient {
    */
   public void removeQuantity(double quantity) {
     if ((this.quantity - quantity) < 0) {
-      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove" + quantity + " " + this.unit);
+      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + quantity + " " + this.unit);
     }
     this.quantity -= quantity;  // Decrease the available quantity
   }
@@ -141,7 +141,7 @@ public class Ingredient {
    *   unit of measurement and expiry date to the console.
    * </p>
    */
-  public void showIngredientDetails() {
+  public void showDetails() {
     System.out.println("Name: " + name);
     System.out.println("Quantity: " + quantity + " " + unit);
     System.out.println("Price: " + price + " kr");
@@ -172,7 +172,7 @@ public class Ingredient {
   /**
    * Returns the total price of the ingredient.
    *
-   * @return the price of the ingredient.
+   * @return the total price of the ingredient.
    */
   public double getPrice() {
     return this.price;

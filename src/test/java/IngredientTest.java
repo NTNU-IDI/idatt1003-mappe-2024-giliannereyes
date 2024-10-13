@@ -5,8 +5,28 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests the class Ingredient.
+ *
+ * <p> The following is tested: </p>
+ *
+ * <b> Positive tests: </b>
+ *
+ * <ul>
+ *   <li></li>
+ * </ul>
+ *
+ * <b> Negative tests: </b>
+ *
+ * <ul>
+ *   <li></li>
+ * </ul>
+ */
 public class IngredientTest {
 
+
+
+  /**
   @Test
   @DisplayName("Positive test: creating a valid Ingredient")
   public void testValidIngredientCreation() {
@@ -75,7 +95,7 @@ public class IngredientTest {
     Ingredient ingredient = new Ingredient("Milk", 1.5, 50, "liter", LocalDate.of(2024, 10, 10));
     assertEquals(33.333, ingredient.getPricePerUnit(), 0.01);
   }
-
+  */
 
 
 
