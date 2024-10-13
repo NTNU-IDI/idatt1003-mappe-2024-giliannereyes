@@ -49,13 +49,13 @@ public class Ingredient {
   /**
    * Validates the name of the ingredient.
    *
-   * <p> Checks if the name is null or empty.
+   * <p> Checks if the name is null, empty or blank.
    * If either condition is true, an IllegalArgumentException is thrown.</p>
    *
-   * @throws IllegalArgumentException if the name is null or empty.
+   * @throws IllegalArgumentException if the name is null, empty or blank.
    */
   public void validateName() {
-    if (name == null || name.isEmpty()) {
+    if (name == null || name.isEmpty() || name.isBlank()) {
       throw new IllegalArgumentException("Ingredient name is null or empty.");
     }
   }
@@ -91,14 +91,14 @@ public class Ingredient {
   /**
    * Validates the unit of measurement for the ingredient.
    *
-   * <p> Checks if the unit null or empty.
+   * <p> Checks if the unit null, empty or blank.
    * If either condition is true, an IllegalArgumentException is thrown.</p>
    *
-   * @throws IllegalArgumentException if the unit is null or empty
+   * @throws IllegalArgumentException if the unit is null, empty or blank.
    */
   public void validateUnit()  {
-    if (unit == null || unit.isEmpty()) {
-      throw new IllegalArgumentException("Ingredient unit is null or empty.");
+    if (unit == null || unit.isEmpty() || unit.isBlank()) {
+      throw new IllegalArgumentException("Ingredient unit is null, empty or blank.");
     }
   }
 
@@ -120,8 +120,8 @@ public class Ingredient {
    * Removes a specified quantity from the ingredient.
    * <p>
    *   Decreases the quantity of the ingredient by the specified amount.
-   *   If specified amount is greater than the available quantity,
-   *   an IllegalArgumentException is thrown to prevent the quantity from becoming negative.
+   *   If specified amount is negative or greater than the available quantity,
+   *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
    * </p>
    *
    * @param quantity The amount of quantity to remove.
@@ -130,6 +130,8 @@ public class Ingredient {
   public void removeQuantity(double quantity) {
     if ((this.quantity - quantity) < 0) {
       throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + quantity + " " + this.unit);
+    } else if (quantity < 0) {
+      throw new IllegalArgumentException("Provided quantity is negative. Cannot remove " + quantity + " " + this.unit);
     }
     this.quantity -= quantity;  // Decrease the available quantity
   }
