@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents a fridge that stores ingredients.
@@ -70,25 +69,36 @@ public class Fridge {
    *
    * @param ingredientName The name of the ingredient to search for.
    *
-   * @return An Optional containing the ingredient if found, or an empty Optional if not found.
+   * @return An ingredient that matches the provided name.
+   *
+   * @throws IllegalArgumentException if there is no ingredient in the fridge
+   *                                  with the provided name.
    */
-  public Optional<Ingredient> searchIngredient(String ingredientName) {
+  public Ingredient getIngredient(String ingredientName) {
     return inventory.stream()
         // Filters by ingredient name
         .filter(ingredient -> ingredient.getName().equalsIgnoreCase(ingredientName))
         // Returns first instance of specified ingredient
-        .findFirst();
+        .findFirst()
+        // Throws an IllegalArgumentException if no ingredient is found
+        .orElseThrow(() ->
+            new IllegalArgumentException("Ingredient '" + ingredientName + "' not found."));
   }
 
   /**
-   * Displays all the ingredients in the inventory.
+   * Displays all the ingredients in the inventory. For each ingredient,
+   * the name, quantity, price, price per unit and expiry date are displayed.
    */
   public void showAllIngredients() {
     // Loops through each ingredient
-    inventory.forEach(ingredient -> {
-      ingredient.showDetails(); // Calls method to display ingredient details
-      System.out.println();
-    });
+    if (inventory.isEmpty()) {
+      System.out.println("There are no ingredients in the fridge.");
+    } else {
+      inventory.forEach(ingredient -> {
+        ingredient.showDetails(); // Calls method to display ingredient details
+        System.out.println();
+      });
+    }
   }
 
   /**
@@ -103,17 +113,24 @@ public class Fridge {
   public void showAllExpiredIngredients() {
     LocalDate currentDate = LocalDate.now();  // Get the current date
 
-    double totalValue = inventory.stream()
+    List<Ingredient> expiredIngredients = inventory.stream()
         // Filters expired ingredients
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(currentDate))
-        // Displays each expired ingredient's details
-        .peek(Ingredient::showDetails)
-        // Maps each Ingredient-instance to its price (double value)
-        .mapToDouble(Ingredient::getPrice)
-        // Calculates the sum of the prices of expired ingredients
-        .sum();
+        // Collects expired ingredients in a list
+        .toList();
 
-    System.out.println("The total value of expired ingredients is " + totalValue + " kr.");
+    if (expiredIngredients.isEmpty()) {
+      System.out.println("There are no expired ingredients in the fridge.");
+    } else {
+      double totalValue = 0;
+
+      for (Ingredient ingredient : expiredIngredients) {
+        totalValue += ingredient.getPrice();
+        ingredient.showDetails();
+      }
+
+      System.out.println("Total value of all expired ingredients: " + totalValue + " kr.");
+    }
   }
 
   /**
@@ -134,7 +151,8 @@ public class Fridge {
    * @param quantity The required amount of the ingredient.
    *
    * @return {@code true} if fridge has enough of the ingredient, and it is not expired.
-   *         {@code false} if there is not enough of the ingredient, or it has expired.
+   *         {@code false} if the ingredient has expired, has insufficient quantity,
+   *         or is not in the fridge.
    */
   public boolean hasEnoughIngredient(String name, double quantity) {
     return inventory.stream()
