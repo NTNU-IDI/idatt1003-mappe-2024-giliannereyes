@@ -55,13 +55,12 @@ public class Recipe {
    *
    * @param fridge The fridge instance to check.
    *
-   * @return {@code true} if fridge has all ingredients needed.
-   *         {@code false} if fridge does not have all the ingredients needed.
+   * @return {@code true} if fridge has all ingredients required.
+   *         {@code false} if fridge does not have all the ingredients required.
    */
   public boolean hasRequiredIngredients(Fridge fridge) {
     return ingredients.stream()
-        .allMatch(ingredient -> // Checks if fridge has enough of each ingredient
-            fridge.hasEnoughIngredient(ingredient.getName(), ingredient.getQuantity()));
+        .allMatch(ingredient -> fridge.hasEnoughIngredient(ingredient.getName(), ingredient.getQuantity()));
   }
 
   /**
