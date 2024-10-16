@@ -152,10 +152,16 @@ public class UserInterface {
     System.out.println("Enter expiry date in this format: dd/MM/yyyy");
     LocalDate expiryDate = readDate();
 
-    // New instance of Ingredient class
-    Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
-    fridge.addIngredient(newIngredient);
-    System.out.println("\nIngredient added to fridge!");
+    // Attempts to create a new instance of Ingredient class
+    try {
+      Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
+      fridge.addIngredient(newIngredient);
+      System.out.println("\nIngredient added to fridge!");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      System.out.println("\nIngredient could not be added.");
+    }
+
   }
 
   /**
@@ -172,8 +178,15 @@ public class UserInterface {
     System.out.println("Enter quantity to remove:");
     double quantity = readDouble();
 
-    fridge.removeIngredient(name, quantity);
-    System.out.println("\nRemoved " + quantity + " of " + name + "!");
+    // Attempts to remove a specific quantity of an ingredient
+    try {
+      fridge.removeIngredient(name, quantity);
+      System.out.println("\nRemoved " + quantity + " of " + name + "!");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      System.out.println("\nIngredient could not be removed.");
+    }
+
   }
 
   /**
@@ -192,7 +205,7 @@ public class UserInterface {
     optionalIngredient.ifPresentOrElse(
         ingredient -> {
           System.out.println("\nIngredient " + ingredient.getName() + " found!");
-          System.out.println("Details of ingredient " + ingredient.getName() + ":");
+          System.out.println("\nDetails of ingredient " + ingredient.getName() + ":");
           ingredient.showDetails();
         },
         () -> System.out.println("\nIngredient not found!")
@@ -305,7 +318,7 @@ public class UserInterface {
       System.out.println("Enter 'YES' or 'NO'");
       String continueAdding = readString();
 
-      // If user is done adding ingredients to the recipe
+      // If user is done adding instructions to the recipe
       if (continueAdding.equalsIgnoreCase("NO")) {
         addingInstructions = false;
       }
@@ -360,7 +373,7 @@ public class UserInterface {
       try {
         return Integer.parseInt(scanner.nextLine());
       } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Try again.");
+        System.out.println("Invalid input. Enter a valid whole number.");
       }
     }
   }
@@ -379,7 +392,7 @@ public class UserInterface {
       try {
         return Double.parseDouble(scanner.nextLine().replace(",", "."));
       } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Try again.");
+        System.out.println("Invalid input. Enter a valid number.");
       }
     }
   }
@@ -398,7 +411,7 @@ public class UserInterface {
       try {
         return LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
       } catch (DateTimeParseException e) {
-        System.out.println("Invalid date format. Try again.");
+        System.out.println("Invalid date format. Enter a valid date.");
       }
     }
   }
