@@ -3,7 +3,6 @@ package edu.ntnu.iir.bidata;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -38,7 +37,7 @@ public class UserInterface {
   // public void init() {}
 
   /**
-   * Starts the main loop of the UserInterface to provide a menu-based interaction.
+   * Starts the main loop of the user interface to provide a menu-based interaction.
    * <br>
    * The menu offers the following operations:
    * <ul>
@@ -71,7 +70,7 @@ public class UserInterface {
         }
         case 3 -> {
           System.out.println("You chose to search for an ingredient.\n");
-          searchIngredient();
+          searchForIngredient();
         }
         case 4 -> {
           System.out.println("You chose to view all ingredients.\n");
@@ -90,12 +89,12 @@ public class UserInterface {
           addRecipe();
         }
         case 8 -> {
-          System.out.println("You chose to show all available recipes.\n");
+          System.out.println("You chose to view all recipes that can be made.\n");
           cookbook.showAvailableRecipes(fridge);
         }
         case 9 -> {
-          System.out.println("You chose to check if a recipe is available.\n");
-          checkIfRecipeAvailable();
+          System.out.println("You chose to check if a recipe can be made.\n");
+          checkIfRecipeCanBeMade();
         }
         case 0 -> {
           System.out.println("You chose to exit the application.\n");
@@ -124,7 +123,7 @@ public class UserInterface {
     System.out.println("[5] View all expired ingredients");
     System.out.println("[6] Calculate the total value of all ingredients");
     System.out.println("[7] Add a recipe");
-    System.out.println("[8] View available recipes");
+    System.out.println("[8] View recipes that can be made");
     System.out.println("[9] Check if a recipe can be made");
     System.out.println("[0] Exit");
   }
@@ -197,19 +196,18 @@ public class UserInterface {
    *   on the console if it is found. Otherwise informs the user that ingredient is not found.
    * </p>
    */
-  private void searchIngredient() {
+  private void searchForIngredient() {
     System.out.println("Enter ingredient name:");
     String name = readString();
-    Optional<Ingredient> optionalIngredient = fridge.searchIngredient(name);
 
-    optionalIngredient.ifPresentOrElse(
-        ingredient -> {
-          System.out.println("\nIngredient " + ingredient.getName() + " found!");
-          System.out.println("\nDetails of ingredient " + ingredient.getName() + ":");
-          ingredient.showDetails();
-        },
-        () -> System.out.println("\nIngredient not found!")
-    );
+    try {
+      Ingredient ingredient = fridge.getIngredient(name);
+      System.out.println("\nIngredient " + ingredient.getName() + " found!");
+      System.out.println("\nDetails of ingredient " + ingredient.getName() + ":");
+      ingredient.showDetails();
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   /**
@@ -326,28 +324,28 @@ public class UserInterface {
   }
 
   /**
-   * Checks if a recipe is available.
+   * Checks if the fridge has the required ingredients to make a recipe.
    * <p>
    *   Prompts the user to enter the recipe's name. Informs the user
    *   if there are enough ingredients to make the recipe, or if there are missing ingredients.
    *   Informs the user if recipe is not in the cookbook.
    * </p>
    */
-  private void checkIfRecipeAvailable() {
+  private void checkIfRecipeCanBeMade() {
     System.out.println("Enter recipe name:");
-    String name = readString();
-    Optional<Recipe> optionalRecipe = cookbook.getRecipeByName(name);
+    String recipeName = readString();
 
-    optionalRecipe.ifPresentOrElse(
-        recipe -> {
-          if (recipe.available(fridge)) {
-            System.out.println("You have all the ingredients to make " + name + "!");
-          } else {
-            System.out.println("You are missing ingredients to make " + name + "!");
-          }
-        },
-        () -> System.out.println("Recipe '" + name + "' not found!")
-    );
+    try {
+      boolean recipeCanBeMade = cookbook.canMakeRecipe(fridge, recipeName);
+
+      if (recipeCanBeMade ) {
+        System.out.println("You have all the ingredients to make " + recipeName + "!");
+      } else {
+        System.out.println("You are missing ingredients to make " + recipeName + "!");
+      }
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   /**
