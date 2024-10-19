@@ -55,6 +55,17 @@ public enum Unit {
   }
 
   /**
+   * Converts a value from the base unit.
+   *
+   * @param value The value in base unit to convert.
+   *
+   * @return The value in specified unit.
+   */
+  public double convertFromBaseUnit(double value) {
+    return value / conversionFactor;
+  }
+
+  /**
    * Retrieves a Unit instance that matches the provided symbol.
    *
    * @param symbol The symbol of the unit to retrieve.
