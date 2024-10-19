@@ -1,4 +1,5 @@
 import edu.ntnu.iir.bidata.Ingredient;
+import edu.ntnu.iir.bidata.Unit;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -43,18 +44,18 @@ public class IngredientTest {
    */
   @Test
   public void createInstanceWithValidAttributes() {
-    Ingredient ingredient = new Ingredient("Milk", 2, 15, "liter", LocalDate.of(2025, 10, 14));
+    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
 
     String actualName = ingredient.getName();
     double actualQuantity = ingredient.getQuantity();
     double actualPricePerUnit = ingredient.getPricePerUnit();
-    String actualUnit = ingredient.getUnit();
+    Unit actualUnit = ingredient.getUnit();
     LocalDate actualExpiryDate = ingredient.getExpiryDate();
 
     assertEquals("Milk", actualName);
     assertEquals(2.0, actualQuantity);
     assertEquals(15.0, actualPricePerUnit);
-    assertEquals("liter", actualUnit);
+    assertEquals(Unit.LITRE, actualUnit);
     assertEquals(LocalDate.of(2025, 10, 14), actualExpiryDate);
   }
 
@@ -66,7 +67,7 @@ public class IngredientTest {
    */
   @Test
   public void calculateCorrectPrice() {
-    Ingredient ingredient = new Ingredient("Milk", 2, 15, "liter", LocalDate.of(2025, 10, 14));
+    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
 
     double actualPricePerUnit = ingredient.getPricePerUnit();
     double actualQuantity = ingredient.getQuantity();
@@ -83,9 +84,15 @@ public class IngredientTest {
    */
   @Test
   public void removeValidQuantity() {
-    Ingredient ingredient = new Ingredient("Milk", 2, 15, "liter", LocalDate.of(2025, 10, 14));
-    ingredient.removeQuantity(1);
+    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
+
+    // Test removing a valid quantity of the same unit
+    ingredient.removeQuantity(1, Unit.LITRE);
     assertEquals(1, ingredient.getQuantity());
+
+    // Test removing a valid quantity of a different unit
+    ingredient.removeQuantity(10, Unit.DECILITRE);  // Note: 10 dL = 1 L
+    assertEquals(0, ingredient.getQuantity());
   }
 
   // --------------------------- NEGATIVE TESTS ----------------------------------
@@ -102,15 +109,15 @@ public class IngredientTest {
   public void createInstanceWithInvalidName() {
     // Ingredient instance with a blank name
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("    ", 2, 15, "liter", LocalDate.of(2025, 10, 14)));
+        new Ingredient("    ", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14)));
 
     // Ingredient instance with an empty name
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("", 2, 15, "liter", LocalDate.of(2025, 10, 14)));
+        new Ingredient("", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14)));
 
     // Ingredient instance with a null name
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient(null, 2, 15, "liter", LocalDate.of(2025, 10, 14)));
+        new Ingredient(null, 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14)));
   }
 
   /**
@@ -123,7 +130,7 @@ public class IngredientTest {
   @Test
   public void createInstanceWithInvalidQuantity() {
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("Milk", -2, 15, "liter", LocalDate.of(2025, 10, 14)));
+        new Ingredient("Milk", -2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14)));
   }
 
   /**
@@ -136,7 +143,7 @@ public class IngredientTest {
   @Test
   public void createInstanceWithInvalidPricePerUnit() {
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("Milk", 2, -17, "liter", LocalDate.of(2025, 10, 14)));
+        new Ingredient("Milk", 2, -17, Unit.LITRE, LocalDate.of(2025, 10, 14)));
   }
 
   /**
@@ -144,19 +151,10 @@ public class IngredientTest {
    * are invalid values of {@code blank}, {@code empty} and {@code null}.
    *
    * <p> Expected outcome: An instance should not be created if the
-   * unit is set to {@code blank}, {@code empty} or {@code null}.
-   * An IllegalArgumentException should be thrown in all 3 cases.</p>
+   * unit is set to {@code null}. An IllegalArgumentException should be thrown.</p>
    */
   @Test
   public void createInstanceWithInvalidUnit() {
-    // Ingredient instance with a blank unit
-    assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("Milk", 2, 15, "     ", LocalDate.of(2025, 10, 14)));
-
-    // Ingredient instance with an empty unit
-    assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("Milk", 2, 15, "", LocalDate.of(2025, 10, 14)));
-
     // Ingredient instance with a null unit
     assertThrows(IllegalArgumentException.class, () ->
         new Ingredient("Milk", 2, 15, null, LocalDate.of(2025, 10, 14)));
@@ -172,7 +170,7 @@ public class IngredientTest {
   @Test
   public void createInstanceWithInvalidExpiryDate() {
     assertThrows(IllegalArgumentException.class, () ->
-        new Ingredient("Milk", 2, 15, "liter", null));
+        new Ingredient("Milk", 2, 15, Unit.LITRE, null));
   }
 
   /**
@@ -187,16 +185,16 @@ public class IngredientTest {
   @Test
   public void removeInvalidQuantity() {
     Ingredient ingredient =
-        new Ingredient("Milk", 2, 15, "liter", LocalDate.of(2025, 10, 14));
+        new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
 
     // Test that an IllegalArgumentException is being thrown
     assertThrows(IllegalArgumentException.class, () -> {
-      ingredient.removeQuantity(5);  // Larger value than the available quantity
+      ingredient.removeQuantity(5, Unit.LITRE);  // Larger value than the available quantity
     });
 
     // Test that an IllegalArgumentException is being thrown
     assertThrows(IllegalArgumentException.class, () -> {
-      ingredient.removeQuantity(-2);  // Negative value
+      ingredient.removeQuantity(-2, Unit.LITRE);  // Negative value
     });
 
     // Verify that the quantity did not change
