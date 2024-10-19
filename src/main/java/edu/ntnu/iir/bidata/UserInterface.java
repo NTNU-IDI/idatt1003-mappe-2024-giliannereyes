@@ -3,6 +3,8 @@ package edu.ntnu.iir.bidata;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -74,11 +76,11 @@ public class UserInterface {
         }
         case 4 -> {
           System.out.println("\nYou chose to view all ingredients.\n");
-          fridge.showAllIngredients();
+          showIngredients(fridge.getAllIngredients());
         }
         case 5 -> {
           System.out.println("\nYou chose to view all expired ingredients.\n");
-          fridge.showAllExpiredIngredients();
+          showIngredients(fridge.getExpiredIngredients());
         }
         case 6 -> {
           System.out.println("\nYou chose to calculate the total value of all ingredients.\n");
@@ -235,11 +237,33 @@ public class UserInterface {
   }
 
   /**
+   * <p> Shows details of each ingredient from a provided list. The ingredient
+   * information is printed to the console.</p>
+   *
+   * @param ingredientList The list of ingredients to show.
+   */
+  private void showIngredients(List<Ingredient> ingredientList) {
+    try {
+      // Shows ingredient information for each ingredient
+      for (Ingredient ingredient : ingredientList) {
+        System.out.println(ingredient);
+      }
+
+      // Total value of ingredients in the list
+      double totalValue = fridge.calculateValue(ingredientList);
+      System.out.printf("\nTotal value of ingredients: %.2f kr.\n", totalValue);
+
+    } catch (NoSuchElementException e) {  // Handles empty list of ingredients
+      System.out.println(e.getMessage());
+    }
+  }
+
+  /**
    * Calculates the total value of all ingredients in the fridge.
    * Displays the total value, rounded with 2 decimals, on the console.
    */
   private void calculateTotalValue() {
-    double totalValue = fridge.calculateTotalValue();
+    double totalValue = fridge.calculateValue(fridge.getAllIngredients());
     System.out.printf("Total value of ingredients: %.2f kr\n", totalValue);
   }
 

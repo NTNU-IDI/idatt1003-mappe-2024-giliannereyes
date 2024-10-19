@@ -1,9 +1,9 @@
 package edu.ntnu.iir.bidata;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Represents a fridge that stores ingredients.
@@ -85,10 +85,11 @@ public class Fridge {
             new IllegalArgumentException("Ingredient '" + ingredientName + "' not found."));
   }
 
+  /*
   /**
    * Displays all the ingredients in the inventory. For each ingredient,
    * the name, quantity, price, price per unit and expiry date are displayed.
-   */
+
   public void showAllIngredients() {
     // Loops through each ingredient
     if (inventory.isEmpty()) {
@@ -100,7 +101,46 @@ public class Fridge {
       });
     }
   }
+  */
 
+
+  /**
+   * Retrieves all the ingredients in the fridge.
+   *
+   * @return A List containing all the ingredients.
+   *
+   * @throws NoSuchElementException if there are no ingredients in the fridge.
+   */
+  public List<Ingredient> getAllIngredients() {
+    // If there are no ingredients in the fridge
+    if (inventory.isEmpty()) {
+      throw new NoSuchElementException("There are no ingredients in the fridge.");
+    } else {
+      return inventory; // Returns all ingredients in the fridge
+    }
+  }
+
+  /**
+   * Retrieves all the expired ingredients in the fridge.
+   *
+   * @return A List containing all the expired ingredients.
+   *
+   * @throws NoSuchElementException if there are no expired ingredients in the fridge.
+   */
+  public List<Ingredient> getExpiredIngredients() {
+    List<Ingredient> expiredIngredients = inventory.stream()
+        .filter(Ingredient::isExpired)  // Filter expired ingredients
+        .toList();  // Collects expired ingredients in a list
+
+    // If there are no expired ingredients
+    if (expiredIngredients.isEmpty()) {
+      throw new NoSuchElementException("There are no expired ingredients in the fridge.");
+    }
+
+    return expiredIngredients;
+  }
+
+  /*
   /**
    * Displays all expired ingredients from the inventory and their total value.
    * <p>
@@ -109,7 +149,7 @@ public class Fridge {
    *   it prints out its details to the console.
    *   Then the total value of the expired ingredients is printed out.
    * </p>
-   */
+
   public void showAllExpiredIngredients() {
     LocalDate currentDate = LocalDate.now();  // Get the current date
 
@@ -132,14 +172,17 @@ public class Fridge {
       System.out.println("Total value of all expired ingredients: " + totalValue + " kr.");
     }
   }
+  */
 
   /**
-   * Calculates the total value of all ingredients in the inventory.
+   * Calculates the total value of all ingredients in the provided list.
    *
-   * @return The total value of the ingredients.
+   * @param ingredientList The list of ingredients.
+   *
+   * @return The total value of the ingredients in the list.
    */
-  public double calculateTotalValue() {
-    return inventory.stream()
+  public double calculateValue(List<Ingredient> ingredientList) {
+    return ingredientList.stream()
         .mapToDouble(Ingredient::getPrice) // Maps each ingredient instance to its price
         .sum(); // Calculates the sum of the prices
   }
@@ -160,7 +203,7 @@ public class Fridge {
       Ingredient ingredient = getIngredient(name);  // Retrieves the ingredient
 
       // Checks if ingredient is expired
-      if (ingredient.getExpiryDate().isBefore(LocalDate.now())) {
+      if (ingredient.isExpired()) {
         return false; // Ingredient is expired
       }
 
@@ -174,16 +217,6 @@ public class Fridge {
     } catch (IllegalArgumentException e) {
       return false; // Handles exceptions where ingredient is not found
     }
-
-    /*
-    return inventory.stream()
-        // Filters by ingredient name
-        .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name))
-        // Checks for sufficient quantity
-        .anyMatch(ingredient -> ingredient.getQuantity() >= quantity
-            // Checks if ingredient is not expired
-            && ingredient.getExpiryDate().isAfter(LocalDate.now()));
-     */
   }
 
 }

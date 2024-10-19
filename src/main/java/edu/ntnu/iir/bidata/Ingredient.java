@@ -217,4 +217,30 @@ public class Ingredient {
     return this.expiryDate;
   }
 
+  /**
+   * Checks if the ingredient is expired.
+   *
+   * @return {@code true} if the ingredient is expired.
+   *         {@code false} if the ingredient is not expired.
+   */
+  public boolean isExpired() {
+    return this.expiryDate.isBefore(LocalDate.now());
+  }
+
+  /**
+   * Returns a string representation of the ingredient, including its name,
+   * quantity, unit of measurement, total price, price per unit, and
+   * expiry date.
+   *
+   * @return A string formatted to display the ingredient's details.
+   */
+  @Override
+  public String toString() {
+    return "Name: " + name + "\n" +
+        "Quantity: " + quantity + " " + unit + "\n" +
+        "Price: " + price + " kr\n" +
+        "Price per unit: " + pricePerUnit + " kr/" + unit + "\n" +
+        "Expiry Date: " + expiryDate;
+  }
+
 }
