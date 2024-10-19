@@ -13,9 +13,9 @@ import java.time.LocalDate;
 public class Ingredient {
   private final String name;  // Name of the ingredient
   private double quantity;  // Quantity of the ingredient
-  private double price; // Total price for the quantity of the ingredient
+  private final double price; // Total price for the quantity of the ingredient
   private final double pricePerUnit;  // Price per unit of the ingredient
-  private final String unit;  // Unit of measurement for the ingredient
+  private final Unit unit;  // Unit of measurement for the ingredient
   private final LocalDate expiryDate; // Expiry date of the ingredient
 
   /**
@@ -29,8 +29,7 @@ public class Ingredient {
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
   public Ingredient(
-      String name, double quantity, double pricePerUnit, String unit, LocalDate expiryDate)
-  {
+      String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate) {
     this.name = name;
     this.quantity = quantity;
     this.pricePerUnit = pricePerUnit;
@@ -91,13 +90,13 @@ public class Ingredient {
   /**
    * Validates the unit of measurement for the ingredient.
    *
-   * <p> Checks if the unit null, empty or blank.
-   * If either condition is true, an IllegalArgumentException is thrown.</p>
+   * <p> Checks if the unit is null.
+   * If so, an IllegalArgumentException is thrown.</p>
    *
-   * @throws IllegalArgumentException if the unit is null, empty or blank.
+   * @throws IllegalArgumentException if the unit is null.
    */
   public void validateUnit()  {
-    if (unit == null || unit.isEmpty() || unit.isBlank()) {
+    if (unit == null) {
       throw new IllegalArgumentException("Ingredient unit is null, empty or blank.");
     }
   }
@@ -124,16 +123,27 @@ public class Ingredient {
    *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
    * </p>
    *
-   * @param quantity The amount of quantity to remove.
+   * @param quantity The quantity to remove.
+   * @param unit The unit of measurement of the quantity to remove.
+   *
    * @throws IllegalArgumentException if specified quantity is greater than available quantity.
    */
-  public void removeQuantity(double quantity) {
-    if ((this.quantity - quantity) < 0) {
-      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + quantity + " " + this.unit);
+  public void removeQuantity(double quantity, Unit unit) {
+    // Convert quantities of ingredients to their base unit values
+    double availableBase = this.unit.convertToBaseUnit(this.quantity);
+    double removeBase = unit.convertToBaseUnit(quantity);
+
+    // Checks for invalid input
+    if ((availableBase - removeBase) < 0) {
+      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + quantity + " " + unit);
     } else if (quantity < 0) {
-      throw new IllegalArgumentException("Provided quantity is negative. Cannot remove " + quantity + " " + this.unit);
+      throw new IllegalArgumentException("Provided quantity is negative. Cannot remove " + quantity + " " + unit);
     }
-    this.quantity -= quantity;  // Decrease the available quantity
+
+    // Decrease the ingredient's available quantity in base unit
+    double newAvailableBase = availableBase - removeBase;
+    // Update the ingredient's quantity
+    this.quantity -= this.unit.convertFromBaseUnit(newAvailableBase);
   }
 
   /**
@@ -194,7 +204,7 @@ public class Ingredient {
    *
    * @return the unit of measurement.
    */
-  public String getUnit() {
+  public Unit getUnit() {
     return this.unit;
   }
 
