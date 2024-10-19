@@ -60,7 +60,8 @@ public class Recipe {
    */
   public boolean hasRequiredIngredients(Fridge fridge) {
     return ingredients.stream()
-        .allMatch(ingredient -> fridge.hasEnoughIngredient(ingredient.getName(), ingredient.getQuantity()));
+        .allMatch(ingredient ->
+            fridge.hasEnoughIngredient(ingredient.getName(), ingredient.getQuantity(), ingredient.getUnit()));
   }
 
   /**

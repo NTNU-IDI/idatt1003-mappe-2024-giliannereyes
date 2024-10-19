@@ -61,51 +61,51 @@ public class UserInterface {
 
       switch (choice) {
         case 1 -> {
-          System.out.println("You chose to add a new ingredient.\n");
+          System.out.println("\nYou chose to add a new ingredient.\n");
           addIngredient();
         }
         case 2 -> {
-          System.out.println("You chose to remove an amount of an ingredient.\n");
+          System.out.println("\nYou chose to remove an amount of an ingredient.\n");
           removeIngredient();
         }
         case 3 -> {
-          System.out.println("You chose to search for an ingredient.\n");
+          System.out.println("\nYou chose to search for an ingredient.\n");
           searchForIngredient();
         }
         case 4 -> {
-          System.out.println("You chose to view all ingredients.\n");
+          System.out.println("\nYou chose to view all ingredients.\n");
           fridge.showAllIngredients();
         }
         case 5 -> {
-          System.out.println("You chose to view all expired ingredients.\n");
+          System.out.println("\nYou chose to view all expired ingredients.\n");
           fridge.showAllExpiredIngredients();
         }
         case 6 -> {
-          System.out.println("You chose to calculate the total value of all ingredients.\n");
+          System.out.println("\nYou chose to calculate the total value of all ingredients.\n");
           calculateTotalValue();
         }
         case 7 -> {
-          System.out.println("You chose to add a new recipe.\n");
+          System.out.println("\nYou chose to add a new recipe.\n");
           addRecipe();
         }
         case 8 -> {
-          System.out.println("You chose to view all recipes that can be made.\n");
+          System.out.println("\nYou chose to view all recipes that can be made.\n");
           cookbook.showAvailableRecipes(fridge);
         }
         case 9 -> {
-          System.out.println("You chose to check if a recipe can be made.\n");
+          System.out.println("\nYou chose to check if a recipe can be made.\n");
           checkIfRecipeCanBeMade();
         }
         case 0 -> {
-          System.out.println("You chose to exit the application.\n");
+          System.out.println("\nYou chose to exit the application.\n");
           running = false;
           continue;
         }
         default ->
-            System.out.println("Invalid input. Try again.");
+            System.out.println("\nInvalid input. Try again.\n");
       }
 
-      System.out.println("\nPress 'enter' to go back to menu.");
+      System.out.println("\nPress 'enter' to go back to menu.\n");
       scanner.nextLine();
     }
   }
@@ -114,7 +114,7 @@ public class UserInterface {
    * Displays the main menu options for user interaction in the console.
    */
   private void displayMenu() {
-    System.out.println("\n--------Menu--------");
+    System.out.println("\n------------Menu------------");
     System.out.println("Choose an option and enter the number:");
     System.out.println("[1] Add a new ingredient");
     System.out.println("[2] Remove an amount of an ingredient");
@@ -136,18 +136,23 @@ public class UserInterface {
    * </p>
    */
   private void addIngredient() {
+    // Reads ingredient name from user
     System.out.println("Enter ingredient name:");
     String name = readString();
 
+    // Reads unit of measurement from user
+    System.out.println("Enter the ingredient's unit:");
+    Unit unit = readUnit();
+
+    // Reads ingredient quantity from user
     System.out.println("Enter quantity:");
-    int quantity = readInt();
+    double quantity = readDouble();
 
-    System.out.println("Enter unit:");
-    String unit = readString();
-
-    System.out.println("Enter price per unit: ");
+    // Reads price per unit from user
+    System.out.println("Enter price per " + unit + ":");
     double pricePerUnit = readDouble();
 
+    // Reads date from user
     System.out.println("Enter expiry date in this format: dd/MM/yyyy");
     LocalDate expiryDate = readDate();
 
@@ -171,17 +176,36 @@ public class UserInterface {
    * </p>
    */
   private void removeIngredient() {
+    // Reads ingredient name from user
     System.out.println("Enter ingredient name:");
     String name = readString();
 
-    System.out.println("Enter quantity to remove:");
-    double quantity = readDouble();
-
-    // Attempts to remove a specific quantity of an ingredient
     try {
-      fridge.removeIngredient(name, quantity);
-      System.out.println("\nRemoved " + quantity + " of " + name + "!");
-    } catch (IllegalArgumentException e) {
+      Ingredient ingredient = fridge.getIngredient(name); // Retrieves the ingredient
+      System.out.println("\nInformation about the ingredient: ");
+      ingredient.showDetails(); // Displays information about the ingredient
+
+      // Reads unit of measurement from user
+      System.out.println("\nEnter the unit of the quantity to remove from the list:");
+      Unit unit = readUnit();
+
+      // Reads ingredient quantity to remove from user
+      System.out.println("Enter quantity to remove:");
+      double quantity = readDouble();
+
+      try {
+        // Removes a quantity of the ingredient
+        fridge.removeIngredient(name, quantity, unit);
+        System.out.println("\nRemoved " + quantity + " " + unit.getSymbol() + " of " + name + "!");
+        System.out.println("\nUpdated information about the ingredient: ");
+        ingredient.showDetails(); // Displays the updated information about the ingredient
+
+      } catch (IllegalArgumentException e) {  // Handles cases where quantity is invalid
+        System.out.println(e.getMessage());
+        System.out.println("\nIngredient could not be removed.");
+      }
+
+    } catch (IllegalArgumentException e) {  // Handles cases where ingredient is not found
       System.out.println(e.getMessage());
       System.out.println("\nIngredient could not be removed.");
     }
@@ -258,15 +282,20 @@ public class UserInterface {
    */
   private void addRecipeIngredients(Recipe recipe) {
     boolean addingIngredients = true;
+
+    // Continuously prompts user to add ingredients until user exits
     while (addingIngredients) {
+      // Reads ingredient name from user
       System.out.println("\nEnter the ingredient name: ");
       String ingredientName = readString();
 
+      // Reads ingredient unit from user
+      System.out.println("Enter the ingredient's unit from the following list:");
+      Unit unit = readUnit();
+
+      // Reads ingredient quantity from user
       System.out.println("Enter quantity needed for this recipe: ");
       double quantity = readDouble();
-
-      System.out.println("Enter unit for this ingredient: ");
-      String unit = readString();
 
       // Create a new Ingredient instance
       Ingredient recipeIngredient = new Ingredient(
@@ -277,9 +306,11 @@ public class UserInterface {
           LocalDate.now() // Dummy value for irrelevant field
       );
 
+      // Adds ingredient to recipe
       recipe.addIngredient(recipeIngredient);
       System.out.println("Ingredient added to recipe!");
 
+      // Asks user if more ingredients should be added to the recipe
       System.out.println("\nWould you like to add more ingredients to recipe?");
       System.out.println("Enter 'YES' or 'NO'");
       String continueAdding = readString();
@@ -350,11 +381,22 @@ public class UserInterface {
 
   /**
    * Reads the next line of text from the console.
+   * <p>
+   *   Continuously prompts the user to enter a valid string.
+   *   Displays an error message if input is invalid and retries.
+   * </p>
    *
    * @return A string entered by the user.
    */
   private String readString() {
-    return scanner.nextLine().trim();
+    while (true) {
+      String input = scanner.nextLine().trim();
+      if (input.isEmpty() || input.isBlank()) {
+        System.out.println("Invalid input. Enter a new one.");
+      } else {
+        return input;
+      }
+    }
   }
 
   /**
@@ -365,6 +407,8 @@ public class UserInterface {
    * </p>
    *
    * @return A valid integer entered by the user.
+   *
+   * @throws NumberFormatException if the input is not a valid integer.
    */
   private int readInt() {
     while (true) {
@@ -384,6 +428,8 @@ public class UserInterface {
    * </p>
    *
    * @return A valid double entered by the user.
+   *
+   * @throws NumberFormatException if the input is not a valid double.
    */
   private double readDouble() {
     while (true) {
@@ -403,6 +449,8 @@ public class UserInterface {
    * </p>
    *
    * @return A valid {@link LocalDate} entered by the user.
+   *
+   * @throws NumberFormatException if the input is not a valid LocalDate.
    */
   private LocalDate readDate() {
     while (true) {
@@ -410,6 +458,34 @@ public class UserInterface {
         return LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
       } catch (DateTimeParseException e) {
         System.out.println("Invalid date format. Enter a valid date.");
+      }
+    }
+  }
+
+  /**
+   * Reads a unit of measurement from the console.
+   * <p>
+   *   A list of valid units are displayed on the console.
+   *   Continuously prompts the user to enter a valid unit. Displays
+   *   an error message if input is invalid and retries.
+   * </p>
+   *
+   * @return A valid {@link Unit} entered by the user.
+   *
+   * @throws IllegalArgumentException if the input is an invalid unit.
+   */
+  private Unit readUnit() {
+    // Displays a list of valid units on the console
+    for (Unit unit : Unit.values()) {
+      System.out.println("- " + unit.getSymbol());
+    }
+
+    // Prompts the user to enter a unit until it can be converted to a Unit instance
+    while (true) {
+      try {
+        return Unit.getUnitBySymbol(scanner.nextLine());
+      } catch (IllegalArgumentException e) {
+        System.out.println("Invalid unit. Enter a valid unit.");
       }
     }
   }

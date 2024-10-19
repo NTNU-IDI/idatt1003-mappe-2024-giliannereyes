@@ -41,7 +41,7 @@ public class Fridge {
    * @throws IllegalArgumentException if the ingredient is not found or if removing the quantity
    *                                  results in a negative quantity.
    */
-  public void removeIngredient(String ingredientName, double quantity) {
+  public void removeIngredient(String ingredientName, double quantity, Unit unit) {
     // Use an iterator to safely remove items from the inventory
     Iterator<Ingredient> iterator = inventory.iterator();
 
@@ -49,7 +49,7 @@ public class Fridge {
       Ingredient ingredient = iterator.next();
 
       if (ingredient.getName().equalsIgnoreCase(ingredientName)) {
-        ingredient.removeQuantity(quantity);  // Remove the specified quantity
+        ingredient.removeQuantity(quantity, unit);  // Remove the specified quantity
 
         // Ingredient is removed from inventory if quantity equals zero
         if (ingredient.getQuantity() == 0) {
@@ -149,12 +149,33 @@ public class Fridge {
    *
    * @param name The name of the ingredient to check for.
    * @param quantity The required amount of the ingredient.
+   * @param unit The unit of the required amount.
    *
    * @return {@code true} if fridge has enough of the ingredient, and it is not expired.
    *         {@code false} if the ingredient has expired, has insufficient quantity,
    *         or is not in the fridge.
    */
-  public boolean hasEnoughIngredient(String name, double quantity) {
+  public boolean hasEnoughIngredient(String name, double quantity, Unit unit) {
+    try {
+      Ingredient ingredient = getIngredient(name);  // Retrieves the ingredient
+
+      // Checks if ingredient is expired
+      if (ingredient.getExpiryDate().isBefore(LocalDate.now())) {
+        return false; // Ingredient is expired
+      }
+
+      // Converts available and needed quantities to base unit
+      double availableBaseQuantity = ingredient.getUnit().convertToBaseUnit(ingredient.getQuantity());
+      double neededBaseQuantity = unit.convertToBaseUnit(quantity);
+
+      // Check if there is enough of the ingredient
+      return availableBaseQuantity >= neededBaseQuantity;
+
+    } catch (IllegalArgumentException e) {
+      return false; // Handles exceptions where ingredient is not found
+    }
+
+    /*
     return inventory.stream()
         // Filters by ingredient name
         .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name))
@@ -162,6 +183,7 @@ public class Fridge {
         .anyMatch(ingredient -> ingredient.getQuantity() >= quantity
             // Checks if ingredient is not expired
             && ingredient.getExpiryDate().isAfter(LocalDate.now()));
+     */
   }
 
 }
