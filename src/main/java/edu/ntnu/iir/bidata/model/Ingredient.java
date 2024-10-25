@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata;
+package edu.ntnu.iir.bidata.model;
 
 import java.time.LocalDate;
 
@@ -128,7 +128,7 @@ public class Ingredient {
    *
    * @throws IllegalArgumentException if specified quantity is greater than available quantity.
    */
-  public void removeQuantity(double quantity, Unit unit) {
+  public void decreaseQuantity(double quantity, Unit unit) {
     // Convert quantities of ingredients to their base unit values
     double availableBase = this.unit.convertToBaseUnit(this.quantity);
     double removeBase = unit.convertToBaseUnit(quantity);
@@ -143,24 +143,27 @@ public class Ingredient {
     // Decrease the ingredient's available quantity in base unit
     double newAvailableBase = availableBase - removeBase;
     // Update the ingredient's quantity
-    this.quantity -= this.unit.convertFromBaseUnit(newAvailableBase);
+    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
   }
 
   /**
-   * Displays the details of the ingredient.
-   * <p>
-   *   Prints the ingredient's name, quantity, total price, price per unit,
-   *   unit of measurement and expiry date to the console.
-   * </p>
+   * Increases the ingredient's quantity by the specified amount.
+   *
+   * @param quantity The quantity to add.
+   * @param unit The unit of measurement of the quantity to add.
    */
-  public void showDetails() {
-    System.out.println("Name: " + name);
-    System.out.println("Quantity: " + quantity + " " + unit);
-    System.out.println("Price: " + price + " kr");
-    System.out.println("Price per unit: " + pricePerUnit + "kr/" + unit);
-    System.out.println("Expiry Date: " + expiryDate);
+  public void increaseQuantity(double quantity, Unit unit) {
+    // Convert quantities of ingredients to their base unit values
+    double availableBase = this.unit.convertToBaseUnit(this.quantity);
+    double addBase = unit.convertToBaseUnit(quantity);
+
+    // Increase the ingredient's available quantity in base unit
+    double newAvailableBase = availableBase + addBase;
+    // Update the ingredient's quantity
+    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
   }
 
+  /*
   // Getters for ingredient properties
 
   /**

@@ -1,11 +1,10 @@
-import edu.ntnu.iir.bidata.Ingredient;
-import edu.ntnu.iir.bidata.Unit;
+import edu.ntnu.iir.bidata.model.Ingredient;
+import edu.ntnu.iir.bidata.model.Unit;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests the class Ingredient.
@@ -87,12 +86,41 @@ public class IngredientTest {
     Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
 
     // Test removing a valid quantity of the same unit
-    ingredient.removeQuantity(1, Unit.LITRE);
+    ingredient.decreaseQuantity(1, Unit.LITRE);
     assertEquals(1, ingredient.getQuantity());
 
     // Test removing a valid quantity of a different unit
-    ingredient.removeQuantity(10, Unit.DECILITRE);  // Note: 10 dL = 1 L
+    ingredient.decreaseQuantity(10, Unit.DECILITRE);  // Note: 10 dL = 1 L
     assertEquals(0, ingredient.getQuantity());
+  }
+
+
+  /**
+   * Test checking if an ingredient is expired with an expired ingredient.
+   *
+   * <p> Expected outcome: The method that checks if an ingredient is expired
+   * should return {@code true} as the ingredient is expired.</p>
+   */
+  @Test
+  public void checkExpiredIngredient() {
+    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2000, 10, 14));
+
+    // Test checking if method isExpired returns true
+    assertTrue(ingredient.isExpired());
+  }
+
+  /**
+   * Test checking if an ingredient is expired with an ingredient that is not expired.
+   *
+   * <p> Expected outcome: The method that checks if an ingredient is expired
+   * should return {@code false} as the ingredient is not expired.</p>
+   */
+  @Test
+  public void checkNotExpiredIngredient() {
+    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
+
+    // Test checking if method isExpired returns true
+    assertFalse(ingredient.isExpired());
   }
 
   // --------------------------- NEGATIVE TESTS ----------------------------------
@@ -189,12 +217,12 @@ public class IngredientTest {
 
     // Test that an IllegalArgumentException is being thrown
     assertThrows(IllegalArgumentException.class, () -> {
-      ingredient.removeQuantity(5, Unit.LITRE);  // Larger value than the available quantity
+      ingredient.decreaseQuantity(5, Unit.LITRE);  // Larger value than the available quantity
     });
 
     // Test that an IllegalArgumentException is being thrown
     assertThrows(IllegalArgumentException.class, () -> {
-      ingredient.removeQuantity(-2, Unit.LITRE);  // Negative value
+      ingredient.decreaseQuantity(-2, Unit.LITRE);  // Negative value
     });
 
     // Verify that the quantity did not change
