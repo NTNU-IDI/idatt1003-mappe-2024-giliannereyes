@@ -5,7 +5,6 @@ import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.storage.Cookbook;
 import edu.ntnu.iir.bidata.storage.Fridge;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,18 +31,23 @@ public class MealPlanner {
     // Checks if the recipe exists
     if (optionalRecipe.isPresent()) {
       Recipe recipe = optionalRecipe.get();
-      ArrayList<Ingredient> recipeIngredients = recipe.getIngredients();
+      List<Ingredient> recipeIngredients = recipe.getIngredients();
 
       // Checks if there is enough of each required ingredient in the fridge
       return recipeIngredients.stream()
           .allMatch(ingredient -> {
-            try {
-              Ingredient fridgeIngredient = fridge.getIngredientByName(ingredient.getName());
-              return fridgeIngredient.getQuantity() >= ingredient.getQuantity();
+              Optional<Ingredient> optFridgeIngredient = fridge.findIngredientByName(ingredient.getName());
 
-            } catch (IllegalArgumentException e) {
-              return false;
-            }
+              if (optFridgeIngredient.isPresent()) {
+                Ingredient fridgeIngredient = optFridgeIngredient.get();
+
+                return fridgeIngredient.getQuantity() >= ingredient.getQuantity()
+                    && !fridgeIngredient.isExpired();
+
+              } else {
+                return false;
+              }
+
           });
 
     // Throws an exception if the recipe does not exist

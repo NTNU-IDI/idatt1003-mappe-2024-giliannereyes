@@ -62,6 +62,7 @@ public class Ui {
         case 4 -> {
           System.out.println("\nClosing the application...");
           exitMainMenu = true;
+          inputHandler.close();
         }
       }
     }

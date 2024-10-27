@@ -1,6 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a recipe by name, description, and a list of ingredients.
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 public class Recipe {
   private final String name;
   private final String description;
-  private final ArrayList<Ingredient> ingredients;
+  private final List<Ingredient> ingredients;
   private final String instruction;
 
   /**
@@ -23,6 +24,7 @@ public class Recipe {
    *
    * @param name The name of the recipe.
    * @param description A short description of the recipe.
+   * @param instruction The instruction for the recipe.
    */
   public Recipe(String name, String description, String instruction) {
     this.name = name;
@@ -54,7 +56,7 @@ public class Recipe {
    *
    * @return A list of ingredients.
    */
-  public ArrayList<Ingredient> getIngredients() {
+  public List<Ingredient> getIngredients() {
     return this.ingredients;
   }
 

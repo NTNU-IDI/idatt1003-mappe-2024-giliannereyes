@@ -52,7 +52,16 @@ public class InputHandler {
 
     while (true) {
       try {
-        return Integer.parseInt(scanner.nextLine());
+        int userInt = Integer.parseInt(scanner.nextLine());
+
+        // Check if the input is a negative number
+        if (userInt <= 0) {
+          System.out.println("Invalid input. Enter a positive integer.");
+          continue; // Prompt the user again
+        }
+
+        return userInt;   // Return a valid integer
+
       } catch (NumberFormatException e) {
         System.out.println("Invalid input. Enter a valid whole number.");
       }
@@ -75,7 +84,16 @@ public class InputHandler {
 
     while (true) {
       try {
-        return Double.parseDouble(scanner.nextLine().replace(",", "."));
+        double userDouble = Double.parseDouble(scanner.nextLine().replace(",", "."));
+
+        // Check if the input is a negative number
+        if (userDouble <= 0) {
+          System.out.println("Invalid input. Enter a positive double.");
+          continue; // Prompt the user again
+        }
+
+        return userDouble;  // Return a valid double
+
       } catch (NumberFormatException e) {
         System.out.println("Invalid input. Enter a valid number.");
       }
@@ -91,7 +109,7 @@ public class InputHandler {
    *
    * @return A valid {@link LocalDate} entered by the user.
    *
-   * @throws NumberFormatException if the input is not a valid LocalDate.
+   * @throws DateTimeParseException if the input is not a valid LocalDate.
    */
   public LocalDate readDate(String prompt) {
     System.out.print(prompt);
@@ -100,7 +118,7 @@ public class InputHandler {
       try {
         return LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
       } catch (DateTimeParseException e) {
-        System.out.println("Invalid date format. Enter a valid date.");
+        System.out.println("Invalid date format. Enter a valid date with format 'dd/MM/yyyy'.");
       }
     }
   }
@@ -133,5 +151,12 @@ public class InputHandler {
         System.out.println("Invalid unit. Enter a valid unit.");
       }
     }
+  }
+
+  /**
+   * Closes the scanner.
+   */
+  public void close() {
+    scanner.close();
   }
 }

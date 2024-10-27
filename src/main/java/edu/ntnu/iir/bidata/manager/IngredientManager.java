@@ -8,6 +8,7 @@ import edu.ntnu.iir.bidata.tui.InputHandler;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class IngredientManager {
   private final Fridge fridge;
@@ -33,7 +34,7 @@ public class IngredientManager {
     try {
       Ingredient ingredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
       fridge.addIngredient(ingredient);
-      System.out.println("Ingredient added to fridge!");
+      System.out.println("New ingredient added to fridge!");
 
       // If the ingredient details are invalid
     } catch (IllegalArgumentException e) {
@@ -49,17 +50,17 @@ public class IngredientManager {
    */
   public void searchForIngredient() {
     String name = inputHandler.readString("Enter ingredient name: ");
+    Optional<Ingredient> ingredient = fridge.findIngredientByName(name);
 
-    try {
-      Ingredient ingredient = fridge.getIngredientByName(name);
+    // Shows ingredient information if ingredient exists
+    if (ingredient.isPresent()) {
       System.out.printf("""
           Ingredient found!
           Here are the %s's information:
           %s
-          """, ingredient.getName(), ingredient);
-
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
+          """, ingredient.get().getName(), ingredient.get());
+    } else {
+      System.out.println("Ingredient not found!");
     }
   }
 
@@ -68,23 +69,12 @@ public class IngredientManager {
    */
   public void decreaseIngredientQuantity() {
     String name = inputHandler.readString("Enter ingredient name: ");
+    Unit unit = inputHandler.readUnit("Enter the unit of the quantity to remove: ");
+    double quantity = inputHandler.readDouble("Enter quantity to remove: ");
 
     try {
-      Ingredient ingredient = fridge.getIngredientByName(name);
-      System.out.println("Ingredient found! Here is the ingredient's current quantity: ");
-      System.out.println(ingredient.getQuantity() + " " + ingredient.getUnit());
-
-      Unit unit = inputHandler.readUnit("Enter the unit of the quantity to remove: ");
-      double quantity = inputHandler.readDouble("Enter quantity to remove: ");
-
-      try {
-        ingredient.decreaseQuantity(quantity, unit);
-        System.out.printf("%f.2f %s of %s was successfully removed from the fridge!\n", quantity, unit, name);
-
-      } catch (IllegalArgumentException e) {
-        System.out.println(e.getMessage());
-      }
-
+      fridge.decreaseIngredientQuantity(name, quantity, unit);
+      System.out.printf("%f.2f %s of %s was successfully removed from the fridge!\n", quantity, unit, name);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
     }
@@ -94,7 +84,7 @@ public class IngredientManager {
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
 
     try {
-      List<Ingredient> ingredients = fridge.getIngredientsBeforeDate(expiryDate);
+      List<Ingredient> ingredients = fridge.findIngredientsBeforeDate(expiryDate);
       System.out.println("Here are the ingredients that expire before " + expiryDate + ":");
 
       for (Ingredient ingredient : ingredients) {
@@ -110,7 +100,7 @@ public class IngredientManager {
    * JavaDocs!
    */
   public void showSortedIngredients() {
-    List<Ingredient> sortedIngredients = fridge.getSortedIngredients();
+    List<Ingredient> sortedIngredients = fridge.findSortedIngredients();
 
     try {
       System.out.println("Ingredients in the fridge sorted alphabetically: ");

@@ -11,18 +11,17 @@ import java.time.LocalDate;
  *</p>
  */
 public class Ingredient {
-  private final String name;  // Name of the ingredient
-  private double quantity;  // Quantity of the ingredient
-  private final double price; // Total price for the quantity of the ingredient
-  private final double pricePerUnit;  // Price per unit of the ingredient
-  private final Unit unit;  // Unit of measurement for the ingredient
-  private final LocalDate expiryDate; // Expiry date of the ingredient
+  private String name;  // Name of the ingredient
+  private double quantity;  // Quantity of the ingredient in specified unit
+  private double pricePerUnit;  // Price per unit of the ingredient
+  private Unit unit;  // Unit of measurement for the ingredient
+  private LocalDate expiryDate; // Expiry date of the ingredient
 
   /**
    * Constructs a new Ingredient instance.
    *
    * @param name The name of the ingredient.
-   * @param quantity The quantity of the ingredient.
+   * @param quantity The quantity of the ingredient in specified unit.
    * @param pricePerUnit The price per unit of the ingredient.
    * @param unit  The unit of measurement.
    * @param expiryDate  The expiry date of the ingredient.
@@ -30,89 +29,92 @@ public class Ingredient {
    */
   public Ingredient(
       String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate) {
+
+    setName(name);
+    setQuantity(quantity);
+    setPricePerUnit(pricePerUnit);
+    setUnit(unit);
+    setExpiryDate(expiryDate);
+  }
+
+  /**
+   * Sets the name of the ingredient.
+   *
+   * @param name The name of the ingredient. A name that is empty, blank or
+   *             {@code null} is not accepted.
+   *
+   * @throws IllegalArgumentException if the name is empty, blank or {@code null}.
+   */
+  private void setName(String name) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("Ingredient name cannot be null, empty or blank.");
+    }
+
     this.name = name;
-    this.quantity = quantity;
-    this.pricePerUnit = pricePerUnit;
-    this.price = pricePerUnit * quantity; // Calculate total price based on quantity and price per unit
-    this.unit = unit;
-    this.expiryDate = expiryDate;
-
-    // Validates parameters
-    validateName();
-    validateQuantity();
-    validatePricePerUnit();
-    validateUnit();
-    validateExpiryDate();
   }
 
   /**
-   * Validates the name of the ingredient.
+   * Sets the quantity of the ingredient.
    *
-   * <p> Checks if the name is null, empty or blank.
-   * If either condition is true, an IllegalArgumentException is thrown.</p>
+   * @param quantity The quantity of the ingredient. A quantity that is negative is
+   *                 not accepted.
    *
-   * @throws IllegalArgumentException if the name is null, empty or blank.
+   * @throws IllegalArgumentException if the quantity is negative.
    */
-  public void validateName() {
-    if (name == null || name.isEmpty() || name.isBlank()) {
-      throw new IllegalArgumentException("Ingredient name is null or empty.");
-    }
-  }
-
-  /**
-   * Validates the quantity of the ingredient.
-   *
-   * <p> Checks if the quantity is less than zero.
-   * If so, an IllegalArgumentException is thrown.</p>
-   *
-   * @throws IllegalArgumentException if the quantity is zero.
-   */
-  public void validateQuantity() {
+  private void setQuantity(double quantity) {
     if (quantity < 0) {
-      throw new IllegalArgumentException("Ingredient quantity is negative.");
+      throw new IllegalArgumentException("Ingredient quantity cannot be negative.");
     }
+
+    this.quantity = quantity;
   }
 
   /**
-   * Validates the price of the ingredient.
+   * Sets the price per unit of the ingredient.
    *
-   * <p> Checks if the price per unit is negative.
-   * If so, an IllegalArgumentException is thrown.</p>
+   * @param pricePerUnit The ingredient's price per unit. A price per unit that is
+   *                     negative or zero is not accepted.
    *
-   * @throws IllegalArgumentException if the price per unit is negative.
+   * @throws IllegalArgumentException if the price per unit is negative or zero.
    */
-  public void validatePricePerUnit() {
-    if (pricePerUnit < 0) {
-      throw new IllegalArgumentException("Ingredient price is negative.");
+  private void setPricePerUnit(double pricePerUnit) {
+    if (pricePerUnit <= 0) {
+      throw new IllegalArgumentException("Ingredient price cannot be negative or zero.");
     }
+
+    this.pricePerUnit = pricePerUnit;
   }
 
   /**
-   * Validates the unit of measurement for the ingredient.
+   * Sets the unit of measurement of the ingredient.
    *
-   * <p> Checks if the unit is null.
-   * If so, an IllegalArgumentException is thrown.</p>
+   * @param unit The ingredient's unit of measurement. The unit of measurement
+   *             cannot be {@code null}.
    *
-   * @throws IllegalArgumentException if the unit is null.
+   * @throws IllegalArgumentException if the unit of measurement is {@code null}.
    */
-  public void validateUnit()  {
+  private void setUnit(Unit unit)  {
     if (unit == null) {
-      throw new IllegalArgumentException("Ingredient unit is null, empty or blank.");
+      throw new IllegalArgumentException("Ingredient unit cannot be null.");
     }
+
+    this.unit = unit;
   }
 
   /**
-   * Validates the expiry date of the ingredient.
+   * Sets the expiry date of the ingredient.
    *
-   * <p> Checks if the expiry date is null.
-   * If so, an IllegalArgumentException is thrown.</p>
+   * @param expiryDate The ingredient's expiry date. Expiry date cannot be {@code null}.
+   *                   Expiry date can be a date in the past as an ingredient can be already expired.
    *
-   * @throws IllegalArgumentException if the expiry date is null.
+   * @throws IllegalArgumentException if the expiry date is {@code null}.
    */
-  public void validateExpiryDate() {
+  private void setExpiryDate(LocalDate expiryDate) {
     if (expiryDate == null) {
-      throw new IllegalArgumentException("Ingredient expiryDate is null.");
+      throw new IllegalArgumentException("Ingredient expiry date cannot be null.");
     }
+
+    this.expiryDate = expiryDate;
   }
 
   /**
@@ -151,8 +153,14 @@ public class Ingredient {
    *
    * @param quantity The quantity to add.
    * @param unit The unit of measurement of the quantity to add.
+   *
+   * @throws IllegalArgumentException if the quantity is negative.
    */
   public void increaseQuantity(double quantity, Unit unit) {
+    if (quantity < 0) {
+      throw new IllegalArgumentException("Provided quantity is negative. Cannot add " + quantity + " " + unit);
+    }
+
     // Convert quantities of ingredients to their base unit values
     double availableBase = this.unit.convertToBaseUnit(this.quantity);
     double addBase = unit.convertToBaseUnit(quantity);
@@ -163,7 +171,7 @@ public class Ingredient {
     this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
   }
 
-  /*
+
   // Getters for ingredient properties
 
   /**
@@ -186,11 +194,12 @@ public class Ingredient {
 
   /**
    * Returns the total price of the ingredient.
+   * Price is calculated based on the ingredient's current quantity and price per unit.
    *
    * @return the total price of the ingredient.
    */
   public double getPrice() {
-    return this.price;
+    return this.quantity * this.pricePerUnit;
   }
 
   /**
@@ -231,9 +240,9 @@ public class Ingredient {
   }
 
   /**
-   * Returns a string representation of the ingredient, including its name,
+   * <p>Returns a string representation of the ingredient, including its name,
    * quantity, unit of measurement, total price, price per unit, and
-   * expiry date.
+   * expiry date.</p>
    *
    * @return A string formatted to display the ingredient's details.
    */
@@ -241,8 +250,8 @@ public class Ingredient {
   public String toString() {
     return "Name: " + name + "\n" +
         "Quantity: " + quantity + " " + unit + "\n" +
-        "Price: " + price + " kr\n" +
-        "Price per unit: " + pricePerUnit + " kr/" + unit + "\n" +
+        "Price: " + getPrice() + " kr\n" +
+        "Price per unit: " + pricePerUnit + " kr/" + unit.getSymbol() + "\n" +
         "Expiry Date: " + expiryDate;
   }
 
