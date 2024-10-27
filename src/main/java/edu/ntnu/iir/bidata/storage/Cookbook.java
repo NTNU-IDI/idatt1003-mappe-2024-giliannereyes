@@ -9,9 +9,9 @@ import java.util.ArrayList;
  * <br>
  * Cookbook has the following functionalities:
  * <ul>
- *   <li> Add a recipe</li>
- *   <li> Display recipes that can be made with the ingredients in the fridge</li>
- *   <li> Retrieve a recipe by name</li>
+ *   <li>Add a recipe.</li>
+ *   <li>Display recipes that can be made with the ingredients in the fridge.</li>
+ *   <li>Retrieve a recipe by name.</li>
  * </ul>
  */
 public class Cookbook {
@@ -28,8 +28,14 @@ public class Cookbook {
    * Adds a recipe to the cookbook.
    *
    * @param recipe The recipe to be added.
+   *
+   * @throws IllegalArgumentException if the recipe is {@code null}.
    */
   public void addRecipe(Recipe recipe) {
+    if (recipe == null) {
+      throw new IllegalArgumentException("Recipe is null");
+    }
+
     recipes.add(recipe);
   }
 
@@ -41,5 +47,4 @@ public class Cookbook {
   public ArrayList<Recipe> getRecipes() {
     return this.recipes;
   }
-
 }
