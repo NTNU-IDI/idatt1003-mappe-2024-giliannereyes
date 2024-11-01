@@ -1,40 +1,33 @@
 package edu.ntnu.iir.bidata.tui;
 
-import edu.ntnu.iir.bidata.manager.IngredientManager;
+import edu.ntnu.iir.bidata.manager.Manager;
 import edu.ntnu.iir.bidata.manager.MealPlanner;
-import edu.ntnu.iir.bidata.manager.RecipeManager;
 import edu.ntnu.iir.bidata.storage.Cookbook;
 import edu.ntnu.iir.bidata.storage.Fridge;
 
 import java.util.Scanner;
 
 public class Ui {
-  private Fridge fridge;
-  private Cookbook cookbook;
-  private MealPlanner mealPlanner;
   private InputHandler inputHandler;
-  private IngredientManager ingredientManager;
-  private RecipeManager recipeManager;
+  private Manager manager;
   private Scanner scanner;
 
   /**
    * Constructs a new instance of the Ui class.
-   *
    */
   public Ui() {
     init();
   }
 
   /**
-   * Initializes new Fridge, Cookbook, MealPlanner, IngredientManager instances.
+   * Initializes new Fridge, Cookbook, MealPlanner, Manager instances.
    */
   private void init() {
-    this.fridge = new Fridge();
-    this.cookbook = new Cookbook();
-    this.mealPlanner = new MealPlanner(fridge, cookbook);
+    Fridge fridge = new Fridge();
+    Cookbook cookbook = new Cookbook();
+    MealPlanner mealPlanner = new MealPlanner(fridge, cookbook);
     this.inputHandler = new InputHandler();
-    this.ingredientManager = new IngredientManager(fridge, inputHandler);
-    this.recipeManager = new RecipeManager(inputHandler, cookbook, mealPlanner);
+    this.manager = new Manager(fridge, cookbook, mealPlanner,inputHandler);
     this.scanner = new Scanner(System.in);
   }
 
@@ -53,7 +46,7 @@ public class Ui {
         [4] Exit - Close the application.
         """);
 
-      int choice = inputHandler.readInt("\nPlease choose an option: ");
+      int choice = inputHandler.readInt("\nPlease choose an option: \n");
 
       switch (choice) {
         case 1 -> manageIngredientsMenu();
@@ -85,9 +78,9 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> ingredientManager.createIngredient();
-        case 2 -> ingredientManager.searchForIngredient();
-        case 3 -> ingredientManager.decreaseIngredientQuantity();
+        case 1 -> manager.addIngredient();
+        case 2 -> manager.searchForIngredient();
+        case 3 -> manager.decreaseIngredientQuantity();
         default -> System.out.println("Invalid input. Try again.");
       }
 
@@ -112,8 +105,8 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> ingredientManager.checkExpiringIngredients();
-        case 2 -> ingredientManager.showSortedIngredients();
+        case 1 -> manager.checkExpiringIngredients();
+        case 2 -> manager.showSortedIngredients();
         default -> System.out.println("Invalid input. Try again.");
       }
 
@@ -139,9 +132,9 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> recipeManager.createRecipe();
-        case 2 -> recipeManager.checkRecipeIngredients();
-        case 3 -> recipeManager.getSuggestedDishes();
+        case 1 -> manager.addRecipe();
+        case 2 -> manager.checkRecipeIngredients();
+        case 3 -> manager.getSuggestedDishes();
         default -> System.out.println("Invalid input. Try again.");
       }
     }
