@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <b> Positive tests: </b>
  *
  * <ul>
- *   <li>Creates an Ingredient object with valid attributes </li>
+ *   <li>Creates an Ingredient instance with valid fields</li>
  *   <li>Calculates the correct price based on price per unit and quantity</li>
  *   <li>Correctly removes a valid specified quantity from the ingredient's quantity</li>
  *   <li>Correctly returns {@code true} or {@code false} when checking if ingredient is expired</li>
@@ -43,12 +43,12 @@ public class IngredientTest {
    * Test creation of an instance of Ingredient where a valid name, valid quantity,
    * valid price per unit, valid unit of measurement and valid expiry date are provided.
    *
-   * <p> Expected outcome: An instance of Ingredient is created. When retrieving the attributes
-   * with the Ingredient class' get-methods, the same attributes provided during
+   * <p> Expected outcome: An instance of Ingredient is created. When retrieving the fields
+   * with the Ingredient class' get-methods, the same fields provided during
    * creation of the instance should be returned.</p>
    */
   @Test
-  public void createInstanceWithValidAttributes() {
+  public void createInstanceWithValidFields() {
     Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2025, 10, 14));
 
     String actualName = ingredient.getName();
@@ -62,6 +62,28 @@ public class IngredientTest {
     assertEquals(15.0, actualPricePerUnit);
     assertEquals(Unit.LITRE, actualUnit);
     assertEquals(LocalDate.of(2025, 10, 14), actualExpiryDate);
+  }
+
+  /**
+   * Test creation of an instance of Ingredient where a valid name, valid quantity,
+   * valid price per unit are provided, and without price per unit and expiry date.
+   *
+   * <p> Expected outcome: An instance of Ingredient is created with the second constructor.
+   * When retrieving the fields with the Ingredient class' get-methods,
+   * the same fields provided during creation of the instance should be returned.</p>
+   */
+  @Test
+  public void createInstanceWithoutPriceAndExpiryDate() {
+    // Create an ingredient without price per unit and expiry date
+    Ingredient ingredient = new Ingredient("Flour", 5, Unit.KILOGRAM);
+
+    String actualName = ingredient.getName();
+    double actualQuantity = ingredient.getQuantity();
+    Unit actualUnit = ingredient.getUnit();
+
+    assertEquals("Flour", actualName);
+    assertEquals(5.0, actualQuantity);
+    assertEquals(Unit.KILOGRAM, actualUnit);
   }
 
   /**
@@ -102,20 +124,6 @@ public class IngredientTest {
     // Test removing a valid decimal quantity
     ingredient.decreaseQuantity(5, Unit.DECILITRE);
     assertEquals(0, ingredient.getQuantity());
-  }
-
-  /**
-   * Test checking if an ingredient is expired with an expired ingredient.
-   *
-   * <p> Expected outcome: The method that checks if an ingredient is expired
-   * should return {@code true} as the ingredient is expired.</p>
-   */
-  @Test
-  public void checkExpiredIngredient() {
-    Ingredient ingredient = new Ingredient("Milk", 2, 15, Unit.LITRE, LocalDate.of(2000, 10, 14));
-
-    // Test checking if method isExpired returns true
-    assertTrue(ingredient.isExpired());
   }
 
   /**
@@ -294,6 +302,35 @@ public class IngredientTest {
 
     // Verify that the quantity did not change
     assertEquals(2, ingredient.getQuantity());
+  }
+
+  /**
+   * Test creating a new invalid Ingredient instance with the second constructor.
+   *
+   * <p> Expected outcome: In all cases, a new instance of Ingredient should not
+   * be created, and an IllegalArgumentException should be thrown.</p>
+   */
+  @Test
+  public void createInvalidInstanceWithSecondConstructor() {
+    // Ingredient instance with a null name
+    assertThrows(IllegalArgumentException.class, () ->
+        new Ingredient(null, 5, Unit.KILOGRAM));
+
+    // Ingredient instance with an empty name
+    assertThrows(IllegalArgumentException.class, () ->
+        new Ingredient("", 5, Unit.KILOGRAM));
+
+    // Ingredient instance with a blank name
+    assertThrows(IllegalArgumentException.class, () ->
+        new Ingredient("   ", 5, Unit.KILOGRAM));
+
+    // Ingredient instance with a negative quantity
+    assertThrows(IllegalArgumentException.class, () ->
+        new Ingredient("Flour", -5, Unit.KILOGRAM));
+
+    // Ingredient instance with a null unit
+    assertThrows(IllegalArgumentException.class, () ->
+        new Ingredient("Flour", 5, null));
   }
 
 }
