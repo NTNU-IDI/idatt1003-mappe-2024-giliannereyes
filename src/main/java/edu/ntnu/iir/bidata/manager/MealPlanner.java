@@ -24,36 +24,50 @@ public class MealPlanner {
     this.cookbook = cookbook;
   }
 
-
+  /**
+   * Verifies if all the ingredients required for a specified recipe
+   * are available in the fridge.
+   *
+   * @param recipeName The name of the recipe to check for.
+   *
+   * @return {@code true} if all ingredients required are available. Otherwise, {@code false}.
+   */
   public boolean verifyIngredientsForRecipe(String recipeName) {
-    Optional<Recipe> optionalRecipe = getRecipeByName(recipeName);
+    // Find the recipe with the specified name
+    Recipe recipe = findRecipeByName(recipeName)
+        .orElseThrow(() -> new NoSuchElementException("No recipe found with name " + recipeName));
 
-    // Checks if the recipe exists
-    if (optionalRecipe.isPresent()) {
-      Recipe recipe = optionalRecipe.get();
-      List<Ingredient> recipeIngredients = recipe.getIngredients();
+    // If the recipe exists, check if its ingredients are available
+    return recipe.getIngredients().stream()
+        .allMatch(this::isIngredientAvailable);
+  }
 
-      // Checks if there is enough of each required ingredient in the fridge
-      return recipeIngredients.stream()
-          .allMatch(ingredient -> {
-              Optional<Ingredient> optFridgeIngredient = fridge.findIngredientByName(ingredient.getName());
+  /**
+   * Checks if an ingredient required for a recipe is available, meaning there
+   * is a sufficient quantity in the fridge, and that the ingredient is not expired.
+   *
+   * @param recipeIngredient The ingredient from a recipe to check for.
+   *
+   * @return {@code true} if the ingredient is available. Otherwise, {@code false}.
+   */
+  private boolean isIngredientAvailable(Ingredient recipeIngredient) {
+    Optional<Ingredient> fridgeIngredientOpt = fridge.findIngredientByName(recipeIngredient.getName());
 
-              if (optFridgeIngredient.isPresent()) {
-                Ingredient fridgeIngredient = optFridgeIngredient.get();
-
-                return fridgeIngredient.getQuantity() >= ingredient.getQuantity()
-                    && !fridgeIngredient.isExpired();
-
-              } else {
-                return false;
-              }
-
-          });
-
-    // Throws an exception if the recipe does not exist
-    } else {
-      throw new NoSuchElementException("Recipe does not exist.");
+    if (fridgeIngredientOpt.isEmpty()) {
+      return false;
     }
+
+    Ingredient fridgeIngredient = fridgeIngredientOpt.get();
+
+    if (fridgeIngredient.isExpired() || !fridgeIngredient.getUnit().isSameType(recipeIngredient.getUnit())) {
+      return false;
+    }
+
+    // Compare quantities in base units
+    double availableQuantity = fridgeIngredient.getUnit().convertToBaseUnit(fridgeIngredient.getQuantity());
+    double requiredQuantity = recipeIngredient.getUnit().convertToBaseUnit(recipeIngredient.getQuantity());
+
+    return availableQuantity >= requiredQuantity;
   }
 
   /**
@@ -62,7 +76,7 @@ public class MealPlanner {
    *
    * @return A list of recipes.
    */
-  public List<Recipe> getSuggestedRecipes() {
+  public List<Recipe> findSuggestedRecipes() {
     return cookbook.getRecipes().stream()
         .filter(recipe -> verifyIngredientsForRecipe(recipe.getName()))
         .toList();
@@ -74,7 +88,7 @@ public class MealPlanner {
    * @param recipeName The name of the recipe to retrieve.
    * @return A recipe that matches the specified name.
    */
-  public Optional<Recipe> getRecipeByName(String recipeName) {
+  private Optional<Recipe> findRecipeByName(String recipeName) {
     return cookbook.getRecipes().stream()
         .filter(recipe -> recipe.getName().equalsIgnoreCase(recipeName))
         .findFirst();

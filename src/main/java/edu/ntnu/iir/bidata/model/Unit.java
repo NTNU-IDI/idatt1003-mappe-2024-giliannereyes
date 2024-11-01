@@ -8,20 +8,21 @@ import java.util.Arrays;
  */
 public enum Unit {
   // Volume Units
-  LITRE("L", 1.0),            // Base unit for volume (liters)
-  DECILITRE("dL", 0.1),       // 1 dL = 0.1 L
-  MILLILITRE("mL", 0.001),    // 1 mL = 0.001 L
-  TEASPOON("tsp", 0.00492892), // 1 tsp = 4.92892 mL
-  TABLESPOON("tbsp", 0.0147868), // 1 tbsp = 14.7868 mL
-  CUP("cup", 0.24),           // 1 cup = 240 mL
+  LITRE("L", 1.0, UnitType.VOLUME),            // Base unit for volume (liters)
+  DECILITRE("dL", 0.1, UnitType.VOLUME),       // 1 dL = 0.1 L
+  MILLILITRE("mL", 0.001, UnitType.VOLUME),    // 1 mL = 0.001 L
+  TEASPOON("tsp", 0.00492892, UnitType.VOLUME), // 1 tsp = 4.92892 mL
+  TABLESPOON("tbsp", 0.0147868, UnitType.VOLUME), // 1 tbsp = 14.7868 mL
+  CUP("cup", 0.24, UnitType.VOLUME),           // 1 cup = 240 mL
 
   // Mass Units
-  KILOGRAM("kg", 1.0),        // Base unit for mass (kilograms)
-  GRAM("g", 0.001),           // 1 g = 0.001 kg
-  MILLIGRAM("mg", 0.000001);  // 1 mg = 0.000001 kg
+  KILOGRAM("kg", 1.0, UnitType.MASS),        // Base unit for mass (kilograms)
+  GRAM("g", 0.001, UnitType.MASS),           // 1 g = 0.001 kg
+  MILLIGRAM("mg", 0.000001, UnitType.MASS);  // 1 mg = 0.000001 kg
 
   private final String symbol;
   private final double conversionFactor; // Conversion factor to base unit
+  private final UnitType unitType;           // Type of unit (volume or mass)
 
   /**
    * Constructs a new Unit instance.
@@ -29,9 +30,10 @@ public enum Unit {
    * @param symbol The symbol representing the unit.
    * @param conversionFactor The conversion factor to the base unit.
    */
-  Unit(String symbol, double conversionFactor) {
+  Unit(String symbol, double conversionFactor, UnitType unitType) {
     this.symbol = symbol;
     this.conversionFactor = conversionFactor;
+    this.unitType = unitType;
   }
 
   /**
@@ -41,6 +43,17 @@ public enum Unit {
    */
   public String getSymbol() {
     return symbol;
+  }
+
+  /**
+   * Checks if two units are of the same type. The type is either volume or mass.
+   *
+   * @param otherUnit The other unit to compare with.
+   *
+   * @return {@code true} if the unit types are the same. Else {@code false}.
+   */
+  public boolean isSameType(Unit otherUnit) {
+    return this.unitType == otherUnit.unitType;
   }
 
   /**
@@ -82,4 +95,11 @@ public enum Unit {
             new IllegalArgumentException("Provided unit is not valid. Enter another unit."));
   }
 
+  /**
+   * An enum that for separating units between volume or mass types.
+   */
+  public enum UnitType {
+    VOLUME, // Represents units for volume
+    MASS  // Represents units for mass
+  }
 }

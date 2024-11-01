@@ -141,25 +141,25 @@ public class Ingredient {
    *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
    * </p>
    *
-   * @param quantity The quantity to remove.
-   * @param unit The unit of measurement of the quantity to remove.
+   * @param inputQuantity The quantity to remove.
+   * @param inputUnit The unit of measurement of the quantity to remove.
    *
    * @throws IllegalArgumentException if specified quantity is greater than available quantity.
    */
-  public void decreaseQuantity(double quantity, Unit unit) {
+  public void decreaseQuantity(double inputQuantity, Unit inputUnit) {
+    validateQuantityAndUnit(inputQuantity, inputUnit);
+
     // Convert quantities of ingredients to their base unit values
-    double availableBase = this.unit.convertToBaseUnit(this.quantity);
-    double removeBase = unit.convertToBaseUnit(quantity);
+    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
+    double baseToRemove = inputUnit.convertToBaseUnit(inputQuantity);
 
     // Checks for invalid input
-    if ((availableBase - removeBase) < 0) {
-      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + quantity + " " + unit);
-    } else if (quantity < 0) {
-      throw new IllegalArgumentException("Provided quantity is negative. Cannot remove " + quantity + " " + unit);
+    if ((baseAvailable - baseToRemove) < 0) {
+      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + inputQuantity + " " + inputUnit);
     }
 
     // Decrease the ingredient's available quantity in base unit
-    double newAvailableBase = availableBase - removeBase;
+    double newAvailableBase = baseAvailable - baseToRemove;
     // Update the ingredient's quantity
     this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
   }
@@ -167,26 +167,46 @@ public class Ingredient {
   /**
    * Increases the ingredient's quantity by the specified amount.
    *
-   * @param quantity The quantity to add.
-   * @param unit The unit of measurement of the quantity to add.
+   * @param inputQuantity The quantity to add.
+   * @param inputUnit The unit of measurement of the quantity to add.
    *
    * @throws IllegalArgumentException if the quantity is negative.
    */
-  public void increaseQuantity(double quantity, Unit unit) {
-    if (quantity < 0) {
-      throw new IllegalArgumentException("Provided quantity is negative. Cannot add " + quantity + " " + unit);
-    }
+  public void increaseQuantity(double inputQuantity, Unit inputUnit) {
+    validateQuantityAndUnit(inputQuantity, inputUnit);
 
     // Convert quantities of ingredients to their base unit values
-    double availableBase = this.unit.convertToBaseUnit(this.quantity);
-    double addBase = unit.convertToBaseUnit(quantity);
+    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
+    double baseToAdd = inputUnit.convertToBaseUnit(inputQuantity);
 
     // Increase the ingredient's available quantity in base unit
-    double newAvailableBase = availableBase + addBase;
+    double newAvailableBase = baseAvailable + baseToAdd;
     // Update the ingredient's quantity
     this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
   }
 
+  /**
+   * Validates the quantity and unit for operations.
+   *
+   * @param inputQuantity The quantity to validate.
+   * @param inputUnit The unit to validate.
+   *
+   * @throws IllegalArgumentException if the unit is incompatible or null, or if the quantity is negative.
+   */
+  private void validateQuantityAndUnit(double inputQuantity, Unit inputUnit) {
+    if (inputUnit == null) {
+      throw new IllegalArgumentException("Provided unit cannot be null.");
+    }
+
+    if (!this.unit.isSameType(inputUnit)) {
+      throw new IllegalArgumentException("Unit mismatch: Cannot operate with " +
+          inputUnit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
+    }
+
+    if (inputQuantity < 0) {
+      throw new IllegalArgumentException("Invalid quantity: Quantity cannot be negative.");
+    }
+  }
 
   // Getters for ingredient fields
 
