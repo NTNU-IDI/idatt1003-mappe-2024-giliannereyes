@@ -25,6 +25,7 @@ public class Ingredient {
    * @param pricePerUnit The price per unit of the ingredient.
    * @param unit  The unit of measurement.
    * @param expiryDate  The expiry date of the ingredient.
+   *
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
   public Ingredient(
@@ -35,6 +36,21 @@ public class Ingredient {
     setPricePerUnit(pricePerUnit);
     setUnit(unit);
     setExpiryDate(expiryDate);
+  }
+
+  /**
+   * Constructs a new Ingredient instance.
+   *
+   * @param name The name of the ingredient.
+   * @param quantity The quantity of the ingredient in specified unit.
+   * @param unit  The unit of measurement.
+   *
+   * @throws IllegalArgumentException if any of the parameters are invalid.
+   */
+  public Ingredient(String name, double quantity, Unit unit) {
+    setName(name);
+    setQuantity(quantity);
+    setUnit(unit);
   }
 
   /**
@@ -172,7 +188,7 @@ public class Ingredient {
   }
 
 
-  // Getters for ingredient properties
+  // Getters for ingredient fields
 
   /**
    * Returns the name of the ingredient.
@@ -249,7 +265,7 @@ public class Ingredient {
   @Override
   public String toString() {
     return "Name: " + name + "\n" +
-        "Quantity: " + quantity + " " + unit + "\n" +
+        "Quantity: " + quantity + " " + unit.getSymbol() + "\n" +
         "Price: " + getPrice() + " kr\n" +
         "Price per unit: " + pricePerUnit + " kr/" + unit.getSymbol() + "\n" +
         "Expiry Date: " + expiryDate;
