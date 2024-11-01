@@ -12,12 +12,25 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * The Manager class is responsible for managing operations related to
+ * ingredients, recipes and user interaction in the context of fridge and cookbook
+ * managements.
+ */
 public class Manager {
   private final Fridge fridge;
   private final Cookbook cookbook;
   private final MealPlanner mealPlanner;
   private final InputHandler inputHandler;
 
+  /**
+   * Constructs a new Manager instance.
+   *
+   * @param fridge The fridge that stores ingredients.
+   * @param cookbook The cookbook that contains recipes.
+   * @param mealPlanner The meal planner for suggesting and verifying recipes.
+   * @param inputHandler The input handler to receive user input.
+   */
   public Manager(Fridge fridge, Cookbook cookbook, MealPlanner mealPlanner, InputHandler inputHandler) {
     this.fridge = fridge;
     this.cookbook = cookbook;
@@ -26,39 +39,54 @@ public class Manager {
   }
 
   /**
-   * JavaDocs!
+   * Creates an ingredient for either the fridge or a recipe,
+   * depending on the type provided.
+   *
+   * @param type The type of ingredient to create, either "fridge" or "recipe".
+   *
+   * @return The created Ingredient object.
    */
-  public void createIngredient() {
-    // Reads ingredient details from user
+  private Ingredient createIngredient(String type) {
+    // Reads the common ingredient details from user
     String name = inputHandler.readString("Enter ingredient name: ");
     double quantity = inputHandler.readDouble("Enter ingredient quantity: ");
     Unit unit = inputHandler.readUnit("Enter ingredient unit:");
-    double pricePerUnit = inputHandler.readDouble("Enter ingredient's price per unit: ");
-    LocalDate expiryDate = inputHandler.readDate("Enter ingredient's expiry date: ");
 
-    // Attempts to create a new ingredient
+    // If the ingredient is for the fridge, ask for additional details
+    if ("fridge".equals(type)) {
+      double pricePerUnit = inputHandler.readDouble("Enter ingredient's price per unit: ");
+      LocalDate expiryDate = inputHandler.readDate("Enter ingredient's expiry date: ");
+      return new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
+    }
+
+    // For recipe ingredients, set placeholders for price per unit and expiry date
+    return new Ingredient(name, quantity, 0, unit, LocalDate.now());
+  }
+
+  /**
+   * Adds a new ingredient to the fridge based on ingredient details
+   * from the user.
+   */
+  public void addIngredient() {
+    // Creates an ingredient for the fridge
     try {
-      Ingredient ingredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
+      Ingredient ingredient = createIngredient("fridge");
       fridge.addIngredient(ingredient);
       System.out.println("New ingredient added to fridge!");
-
-      // If the ingredient details are invalid
     } catch (IllegalArgumentException e) {
-      System.out.printf("""
-          Ingredient could not be added due to:
-          %s
-          """, e.getMessage());
+      System.out.println("Ingredient could not be added due to:\n" + e.getMessage());
     }
   }
 
   /**
-   * JavaDocs!
+   * Searches for an ingredient in the fridge by name and displays its details.
    */
   public void searchForIngredient() {
+    // Prompts the user for the ingredient name to search
     String name = inputHandler.readString("Enter ingredient name: ");
     Optional<Ingredient> ingredient = fridge.findIngredientByName(name);
 
-    // Shows ingredient information if ingredient exists
+    // Displays the ingredient details if found, otherwise notify the user
     if (ingredient.isPresent()) {
       System.out.printf("""
           Ingredient found!
@@ -71,91 +99,119 @@ public class Manager {
   }
 
   /**
-   * Javadocs!
+   * Decreases the quantity of a specified ingredient in the fridge.
    */
   public void decreaseIngredientQuantity() {
+    // Reads the details from the user about the ingredient to remove
     String name = inputHandler.readString("Enter ingredient name: ");
     Unit unit = inputHandler.readUnit("Enter the unit of the quantity to remove: ");
     double quantity = inputHandler.readDouble("Enter quantity to remove: ");
 
+    // Attempt to decrease the quantity in the fridge
     try {
       fridge.decreaseIngredientQuantity(name, quantity, unit);
-      System.out.printf("%.2f %s of %s was successfully removed from the fridge!\n", quantity, unit, name);
+      System.out.printf("%.2f %s of %s was successfully removed from the fridge!\n", quantity, unit.getSymbol(), name);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
     }
   }
 
+  /**
+   * Displays ingredients in the fridge that are expiring before a specified date.
+   */
   public void checkExpiringIngredients() {
+    // Prompts the user for an expiry date to check
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
+    List<Ingredient> expiringIngredients = fridge.findIngredientsBeforeDate(expiryDate);
 
-    try {
-      List<Ingredient> ingredients = fridge.findIngredientsBeforeDate(expiryDate);
-      System.out.println("Here are the ingredients that expire before " + expiryDate + ":");
-
-      for (Ingredient ingredient : ingredients) {
-        System.out.println(ingredient);
-      }
-
-    } catch (NoSuchElementException e) {
-      System.out.println(e.getMessage());
+    // Display the ingredients expiring before the date, or notify if none found
+    if (!expiringIngredients.isEmpty()) {
+      System.out.println("Here are the ingredients that expire before " + expiryDate + ":\n");
+      expiringIngredients.forEach(System.out::println);
+    } else {
+      System.out.println("There are no ingredients that expire before " + expiryDate);
     }
   }
 
   /**
-   * JavaDocs!
+   * Displays all the ingredients in the fridge, sorted alphabetically.
    */
   public void showSortedIngredients() {
+    // Retrieve all the ingredients sorted alphabetically
     List<Ingredient> sortedIngredients = fridge.findSortedIngredients();
 
-    try {
+    // Display all the ingredients, or notify if none found
+    if (!sortedIngredients.isEmpty()) {
       System.out.println("Ingredients in the fridge sorted alphabetically: ");
-
-      for (Ingredient ingredient : sortedIngredients) {
-        System.out.println(ingredient);
-      }
-
-    } catch (NoSuchElementException e) {
-      System.out.println(e.getMessage());
+      sortedIngredients.forEach(System.out::println);
+    } else {
+      System.out.println("There are currently no ingredients in the fridge.");
     }
   }
 
   /**
-   * JavaDocs!
+   * Adds a new recipe to the cookbook. Prompts the user for recipe details and ingredients.
    */
-  public void createRecipe() {
+  public void addRecipe() {
+    // Create a new recipe and add to cookbook
+    try {
+      Recipe recipe = createRecipe();
+      addIngredientsToRecipe(recipe);
+      cookbook.addRecipe(recipe);
+      System.out.println("Recipe successfully added to cookbook!");
+    } catch (IllegalArgumentException e) {
+      System.out.println("Recipe could not be added due to:\n" + e.getMessage());
+    }
+  }
+
+  /**
+   * Creates a Recipe object by prompting the user for name, description and instructions.
+   *
+   * @return The created Recipe object.
+   */
+  private Recipe createRecipe() {
+    // Prompt the user for recipe details
     String recipeName = inputHandler.readString("Enter recipe name: ");
     String description = inputHandler.readString("Enter recipe description: ");
     String instruction = inputHandler.readString("Enter recipe instruction: ");
-
-    Recipe recipe = new Recipe(recipeName, description, instruction);
-
-    boolean addingIngredients = true;
-    while (addingIngredients) {
-      String ingredientName = inputHandler.readString("Enter ingredient name: ");
-      double quantity = inputHandler.readDouble("Enter ingredient quantity: ");
-      Unit unit = inputHandler.readUnit("Enter ingredient unit: ");
-      double pricePerUnit = inputHandler.readDouble("Enter ingredient price per unit: ");
-      LocalDate expiryDate = inputHandler.readDate("Enter expiry date: ");
-
-      Ingredient ingredient = new Ingredient(ingredientName, quantity, pricePerUnit, unit, expiryDate);
-      recipe.addIngredient(ingredient);
-
-      int choice = inputHandler.readInt("Would you like to continue adding ingredients?\n [1] Yes [2] No ");
-
-      if (choice == 2) {
-        addingIngredients = false;
-      }
-    }
-
-    cookbook.addRecipe(recipe);
-    System.out.println("Recipe successfully added to cookbook!");
+    return new Recipe(recipeName, description, instruction);
   }
 
+  /**
+   * Adds ingredients to a specific recipe. Prompts the user to add ingredients
+   * and ingredient details.
+   *
+   * @param recipe The Recipe object to which ingredients will be added to.
+   */
+  private void addIngredientsToRecipe(Recipe recipe) {
+      boolean addingIngredients = true;
+
+      while (addingIngredients) {
+        try {
+          // Create a new ingredient to add to the recipe
+          Ingredient newIngredient = createIngredient("recipe");
+          recipe.addIngredient(newIngredient);
+          System.out.println("New ingredient added to the recipe!");
+        } catch (IllegalArgumentException e) {
+          System.out.println("Ingredient could not be added due to:\n" + e.getMessage());
+        }
+
+        // Prompt the user if they want to add more recipes
+        System.out.println("Would you like to continue adding ingredients?");
+        int choice = inputHandler.readInt("[1] Yes\n [2] No\n");
+        addingIngredients = (choice == 1);
+      }
+  }
+
+  /**
+   * Checks if the fridge has all ingredients necessary for a specific recipe.
+   */
   public void checkRecipeIngredients() {
+    // Prompt the user for the name of the recipe to check
     String name = inputHandler.readString("Enter recipe name: ");
 
     try {
+      // Check if the fridge contains all ingredients for the recipe
       boolean recipeAvailable = mealPlanner.verifyIngredientsForRecipe(name);
 
       if (recipeAvailable) {
@@ -168,17 +224,19 @@ public class Manager {
     }
   }
 
+  /**
+   * Suggests dishes that can be made with the available ingredients in the fridge.
+   */
   public void getSuggestedDishes() {
-    try {
-      List<Recipe> recipes = mealPlanner.getSuggestedRecipes();
+    // Find recipes that has sufficient ingredients in the fridge.
+    List<Recipe> recipes = mealPlanner.findSuggestedRecipes();
 
-      for (Recipe recipe : recipes) {
-        System.out.println(recipe);
-      }
-
-    } catch (NoSuchElementException e) {
-      System.out.println(e.getMessage());
+    // Display all the recipes that can be used, or notify if none
+    if (!recipes.isEmpty()) {
+      System.out.println("Ingredients in the fridge sorted alphabetically: ");
+      recipes.forEach(System.out::println);
+    } else {
+      System.out.println("There are not sufficient ingredients for any recipe.");
     }
   }
-
 }
