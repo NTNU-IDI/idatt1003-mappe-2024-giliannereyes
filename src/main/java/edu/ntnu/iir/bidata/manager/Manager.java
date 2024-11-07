@@ -5,11 +5,9 @@ import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
 import edu.ntnu.iir.bidata.storage.Fridge;
 import edu.ntnu.iir.bidata.storage.Cookbook;
-import edu.ntnu.iir.bidata.tui.InputHandler;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -21,7 +19,6 @@ public class Manager {
   private final Fridge fridge;
   private final Cookbook cookbook;
   private final MealPlanner mealPlanner;
-  private final InputHandler inputHandler;
 
   /**
    * Constructs a new Manager instance.
@@ -29,214 +26,189 @@ public class Manager {
    * @param fridge The fridge that stores ingredients.
    * @param cookbook The cookbook that contains recipes.
    * @param mealPlanner The meal planner for suggesting and verifying recipes.
-   * @param inputHandler The input handler to receive user input.
    */
-  public Manager(Fridge fridge, Cookbook cookbook, MealPlanner mealPlanner, InputHandler inputHandler) {
+  public Manager(Fridge fridge, Cookbook cookbook, MealPlanner mealPlanner) {
     this.fridge = fridge;
     this.cookbook = cookbook;
     this.mealPlanner = mealPlanner;
-    this.inputHandler = inputHandler;
   }
 
   /**
-   * Creates an ingredient for either the fridge or a recipe,
-   * depending on the type provided.
+   * Adds a new ingredient to the fridge.
    *
-   * @param type The type of ingredient to create, either "fridge" or "recipe".
+   * @param name The name of the ingredient.
+   * @param quantity The quantity of the ingredient to add.
+   * @param unit The unit of measurement.
+   * @param pricePerUnit The price per unit.
+   * @param expiryDate The ingredient's expiry date.
    *
-   * @return The created Ingredient object.
+   * @return A Result object containing a success message if the ingredient was added,
+   *         or an error message if it failed.
    */
-  private Ingredient createIngredient(String type) {
-    // Reads the common ingredient details from user
-    String name = inputHandler.readString("Enter ingredient name: ");
-    double quantity = inputHandler.readDouble("Enter ingredient quantity: ");
-    Unit unit = inputHandler.readUnit("Enter ingredient unit:");
-
-    // If the ingredient is for the fridge, ask for additional details
-    if ("fridge".equals(type)) {
-      double pricePerUnit = inputHandler.readDouble("Enter ingredient's price per unit: ");
-      LocalDate expiryDate = inputHandler.readDate("Enter ingredient's expiry date: ");
-      return new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
-    }
-
-    // For recipe ingredients, set placeholders for price per unit and expiry date
-    return new Ingredient(name, quantity, 0, unit, LocalDate.now());
-  }
-
-  /**
-   * Adds a new ingredient to the fridge based on ingredient details
-   * from the user.
-   */
-  public void addIngredient() {
-    // Creates an ingredient for the fridge
+  public Result<Void> addIngredientToFridge(String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate) {
     try {
-      Ingredient ingredient = createIngredient("fridge");
-      fridge.addIngredient(ingredient);
-      System.out.println("New ingredient added to fridge!");
+      Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
+      fridge.addIngredient(newIngredient);
+      return new Result<>(true, "The ingredient '" + name + "' was added to the fridge.");
     } catch (IllegalArgumentException e) {
-      System.out.println("Ingredient could not be added due to:\n" + e.getMessage());
+      return new Result<>(false, "The ingredient '" + name + "' could not be added to the fridge:\n" + e.getMessage());
     }
   }
 
   /**
-   * Searches for an ingredient in the fridge by name and displays its details.
+   * Searches for an ingredient in the fridge by its name.
+   *
+   * @param name The name of the ingredient.
+   *
+   * @return A Result object containing the found ingredient if present and a success message,
+   *         or a message if not found.
    */
-  public void searchForIngredient() {
-    // Prompts the user for the ingredient name to search
-    String name = inputHandler.readString("Enter ingredient name: ");
+  public Result<Ingredient> searchForIngredient(String name) {
     Optional<Ingredient> ingredient = fridge.findIngredientByName(name);
-
-    // Displays the ingredient details if found, otherwise notify the user
-    if (ingredient.isPresent()) {
-      System.out.printf("""
-          Ingredient found!
-          Here are the %s's information:
-          %s
-          """, ingredient.get().getName(), ingredient.get());
-    } else {
-      System.out.println("Ingredient not found!");
-    }
+    return ingredient.map(value ->
+        new Result<>(true, value, "The ingredient was found."))
+        .orElseGet(() -> new Result<>(false, "The ingredient '" + name + "' could not be found."));
   }
 
   /**
    * Decreases the quantity of a specified ingredient in the fridge.
+   *
+   * @param name The name of the ingredient.
+   * @param quantity The quantity to decrease the ingredient with.
+   * @param unit The unit of measurement of the quantity to decrease.
+   *
+   * @return A Result object containing a success message if the quantity was decreased,
+   *         or an error message if it failed.
    */
-  public void decreaseIngredientQuantity() {
-    // Reads the details from the user about the ingredient to remove
-    String name = inputHandler.readString("Enter ingredient name: ");
-    Unit unit = inputHandler.readUnit("Enter the unit of the quantity to remove: ");
-    double quantity = inputHandler.readDouble("Enter quantity to remove: ");
-
-    // Attempt to decrease the quantity in the fridge
+  public Result<Void> decreaseIngredientQuantity(String name, Unit unit, double quantity) {
     try {
       fridge.decreaseIngredientQuantity(name, quantity, unit);
-      System.out.printf("%.2f %s of %s was successfully removed from the fridge!\n", quantity, unit.getSymbol(), name);
+      return new Result<>(true, String.format("%.2f %s of %s was successfully removed from the fridge!\n", quantity, unit.getSymbol(), name));
     } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
+      return new Result<>(false, "Ingredient quantity could not be decreased due to:\n" + e.getMessage());
     }
   }
 
   /**
-   * Displays ingredients in the fridge that are expiring before a specified date.
+   * Checks for expiring ingredients before a specified date.
+   *
+   * @param date The latest date the ingredients to retrieve can expire.
+   *
+   * @return A Result object containing a list of ingredients that expire before the specified date,
+   *         or a message if none are expiring before the date.
    */
-  public void checkExpiringIngredients() {
-    // Prompts the user for an expiry date to check
-    LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
-    List<Ingredient> expiringIngredients = fridge.findIngredientsBeforeDate(expiryDate);
-
-    // Display the ingredients expiring before the date, or notify if none found
+  public Result<List<Ingredient>> checkExpiringIngredients(LocalDate date) {
+    List<Ingredient> expiringIngredients = fridge.findIngredientsBeforeDate(date);
     if (!expiringIngredients.isEmpty()) {
-      System.out.println("Here are the ingredients that expire before " + expiryDate + ":\n");
-      expiringIngredients.forEach(System.out::println);
+      return new Result<>(true, expiringIngredients, ("Ingredients that expire before: " + date));
     } else {
-      System.out.println("There are no ingredients that expire before " + expiryDate);
+      return new Result<>(false, ("There are no ingredients expiring before: " + date));
     }
   }
 
   /**
-   * Displays all the ingredients in the fridge, sorted alphabetically.
+   * Retrieves all the ingredients in the fridge, sorted alphabetically.
+   *
+   * @return A Result object containing a list of all ingredients in the fridge,
+   *         sorted alphabetically. Or a message if there are no ingredients.
    */
-  public void showSortedIngredients() {
-    // Retrieve all the ingredients sorted alphabetically
+  public Result<List<Ingredient>> getSortedIngredients() {
     List<Ingredient> sortedIngredients = fridge.findSortedIngredients();
-
-    // Display all the ingredients, or notify if none found
     if (!sortedIngredients.isEmpty()) {
-      System.out.println("Ingredients in the fridge sorted alphabetically: ");
-      sortedIngredients.forEach(System.out::println);
+      return new Result<>(true, sortedIngredients, "Ingredients sorted alphabetically.");
     } else {
-      System.out.println("There are currently no ingredients in the fridge.");
+      return new Result<>(false, "There are no ingredients in the fridge.");
     }
   }
 
   /**
-   * Adds a new recipe to the cookbook. Prompts the user for recipe details and ingredients.
+   * Adds a recipe to the cookbook.
+   *
+   * @param recipe The recipe to add to the cookbook.
+   *
+   * @return A Result object containing a success message if the recipe was added,
+   *         or an error message if it failed.
    */
-  public void addRecipe() {
-    // Create a new recipe and add to cookbook
+  public Result<Void> addRecipeToCookbook(Recipe recipe) {
     try {
-      Recipe recipe = createRecipe();
-      addIngredientsToRecipe(recipe);
       cookbook.addRecipe(recipe);
-      System.out.println("Recipe successfully added to cookbook!");
+      return new Result<>(true, "Recipe successfully added to cookbook!");
     } catch (IllegalArgumentException e) {
-      System.out.println("Recipe could not be added due to:\n" + e.getMessage());
+      return new Result<>(false, "Recipe could not be added due to:\n" + e.getMessage());
     }
   }
 
   /**
-   * Creates a Recipe object by prompting the user for name, description and instructions.
+   * Creates a Recipe object using the provided name, description and instructions.
    *
-   * @return The created Recipe object.
-   */
-  private Recipe createRecipe() {
-    // Prompt the user for recipe details
-    String recipeName = inputHandler.readString("Enter recipe name: ");
-    String description = inputHandler.readString("Enter recipe description: ");
-    String instruction = inputHandler.readString("Enter recipe instruction: ");
-    return new Recipe(recipeName, description, instruction);
-  }
-
-  /**
-   * Adds ingredients to a specific recipe. Prompts the user to add ingredients
-   * and ingredient details.
+   * @param name The name of the recipe.
+   * @param description The description of the recipe.
+   * @param instruction The instructions for following the recipe.
    *
-   * @param recipe The Recipe object to which ingredients will be added to.
+   * @return A Result object containing the created Recipe if successful,
+   *         or an error message if it failed.
    */
-  private void addIngredientsToRecipe(Recipe recipe) {
-      boolean addingIngredients = true;
-
-      while (addingIngredients) {
-        try {
-          // Create a new ingredient to add to the recipe
-          Ingredient newIngredient = createIngredient("recipe");
-          recipe.addIngredient(newIngredient);
-          System.out.println("New ingredient added to the recipe!");
-        } catch (IllegalArgumentException e) {
-          System.out.println("Ingredient could not be added due to:\n" + e.getMessage());
-        }
-
-        // Prompt the user if they want to add more recipes
-        System.out.println("Would you like to continue adding ingredients?");
-        int choice = inputHandler.readInt("[1] Yes\n [2] No\n");
-        addingIngredients = (choice == 1);
-      }
-  }
-
-  /**
-   * Checks if the fridge has all ingredients necessary for a specific recipe.
-   */
-  public void checkRecipeIngredients() {
-    // Prompt the user for the name of the recipe to check
-    String name = inputHandler.readString("Enter recipe name: ");
-
+  public Result<Recipe> createRecipe(String name, String description, String instruction) {
     try {
-      // Check if the fridge contains all ingredients for the recipe
-      boolean recipeAvailable = mealPlanner.verifyIngredientsForRecipe(name);
-
-      if (recipeAvailable) {
-        System.out.println("You have all the ingredients to make " + name + "!");
-      } else {
-        System.out.println("You do not have sufficient ingredients to make " + name + "!");
-      }
-    } catch (NoSuchElementException e) {
-      System.out.println(e.getMessage());
+      Recipe recipe = new Recipe(name, description, instruction);
+      return new Result<>(true, recipe, "Recipe successfully created.");
+    } catch (IllegalArgumentException e) {
+      return new Result<>(false, "Recipe could not be created due to:\n" + e.getMessage());
     }
   }
 
   /**
-   * Suggests dishes that can be made with the available ingredients in the fridge.
+   * Creates an ingredient and adds it to a recipe.
+   *
+   * @param recipe The recipe to which the ingredient will be added.
+   * @param name The name of the ingredient.
+   * @param quantity The quantity of the ingredient the recipe requires.
+   * @param unit The unit of measurement of the ingredient.
+   *
+   * @return A Result object containing a success message if the ingredient was added,
+   *         or an error message if it failed.
    */
-  public void getSuggestedDishes() {
-    // Find recipes that has sufficient ingredients in the fridge.
+  public Result<Void> addIngredientToRecipe(Recipe recipe, String name, double quantity, Unit unit) {
+    try {
+      Ingredient ingredient = new Ingredient(name, quantity, unit);
+      recipe.addIngredient(ingredient);
+      return new Result<>(true, "Ingredient was added to recipe.");
+    } catch (IllegalArgumentException e) {
+      return new Result<>(false, "Ingredient could not be added due to:\n" + e.getMessage());
+    }
+  }
+
+  /**
+   * Checks if the fridge has all ingredients necessary for a recipe.
+   *
+   * @param recipeName The name of the recipe to check.
+   *
+   * @return A Result object containing a message that all ingredients required
+   *         are available, or a message that there are insufficient ingredients.
+   */
+  public Result<Void> checkRecipeIngredients(String recipeName) {
+    boolean recipeAvailable = mealPlanner.verifyIngredientsForRecipe(recipeName);
+
+    if (recipeAvailable) {
+      return new Result<>(true, "You have all the ingredients for the recipe '" + recipeName + "'.");
+    } else {
+      return new Result<>(false, "You do not have all the ingredients for the recipe + '" + recipeName + "'.");
+    }
+  }
+
+  /**
+   * Retrieves all recipes that has all required ingredients available in the fridge.
+   *
+   * @return A Result object containing a list of recipes that can be followed,
+   *         or a message if there are none.
+   */
+  public Result<List<Recipe>> getSuggestedRecipes() {
     List<Recipe> recipes = mealPlanner.findSuggestedRecipes();
 
-    // Display all the recipes that can be used, or notify if none
     if (!recipes.isEmpty()) {
-      System.out.println("Ingredients in the fridge sorted alphabetically: ");
-      recipes.forEach(System.out::println);
+      return new Result<>(true, recipes, "You have all the ingredients to make these recipes.");
     } else {
-      System.out.println("There are not sufficient ingredients for any recipe.");
+      return new Result<>(false, "You do not have sufficient ingredients for any recipe in the cookbook.");
     }
   }
 }

@@ -5,36 +5,50 @@ import edu.ntnu.iir.bidata.manager.MealPlanner;
 import edu.ntnu.iir.bidata.storage.Cookbook;
 import edu.ntnu.iir.bidata.storage.Fridge;
 
-import java.util.Scanner;
-
-public class Ui {
+/**
+ * The MainUi class is responsible for managing the main user interaction
+ * of the application. It serves as an entry point, and delegates further user interaction
+ * handling to {@link IngredientUi} and {@link RecipeUi}.
+ * It provides various menus for managing ingredients and recipes.
+ */
+public class MainUi {
   private InputHandler inputHandler;
-  private Manager manager;
-  private Scanner scanner;
+  private IngredientUi ingredientUi;
+  private RecipeUi recipeUi;
 
   /**
    * Constructs a new instance of the Ui class.
+   * Initializes the required dependencies for managing the user interaction.
    */
-  public Ui() {
+  public MainUi() {
     init();
   }
 
   /**
-   * Initializes new Fridge, Cookbook, MealPlanner, Manager instances.
+   * Initializes new Fridge, Cookbook, MealPlanner, Manager, InputHandler, IngredientUi,
+   * RecipeUi instances that are required for the application to function.
    */
   private void init() {
     Fridge fridge = new Fridge();
     Cookbook cookbook = new Cookbook();
     MealPlanner mealPlanner = new MealPlanner(fridge, cookbook);
+    Manager manager = new Manager(fridge, cookbook, mealPlanner);
     this.inputHandler = new InputHandler();
-    this.manager = new Manager(fridge, cookbook, mealPlanner,inputHandler);
-    this.scanner = new Scanner(System.in);
+    this.ingredientUi = new IngredientUi(manager, inputHandler);
+    this.recipeUi = new RecipeUi(manager, inputHandler);
   }
 
+  /**
+   * Starts the main application by displaying the main menu.
+   */
   public void start() {
       mainMenu();
   }
 
+  /**
+   * Displays the main menu and prompts the user to choose an option.
+   * Leads the user to another menu or exits the application, depending on the choice.
+   */
   private void mainMenu() {
     boolean exitMainMenu = false;
     while (!exitMainMenu) {
@@ -61,6 +75,11 @@ public class Ui {
     }
   }
 
+  /**
+   * Displays a menu for managing ingredients and prompts the user to choose
+   * an option. Calls on the appropriate methods in the IngredientUi class
+   * for further user interaction, depending on the choice.
+   */
   private void manageIngredientsMenu() {
     while (true) {
       System.out.print("""
@@ -78,17 +97,21 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> manager.addIngredient();
-        case 2 -> manager.searchForIngredient();
-        case 3 -> manager.decreaseIngredientQuantity();
+        case 1 -> ingredientUi.promptAddIngredient();
+        case 2 -> ingredientUi.promptSearchIngredient();
+        case 3 -> ingredientUi.promptDecreaseIngredientQuantity();
         default -> System.out.println("Invalid input. Try again.");
       }
 
-      System.out.println("\nPress enter to go back to menu 'Manage Ingredients'.");
-      scanner.nextLine();
+      inputHandler.waitForKeyPress();
     }
   }
 
+  /**
+   * Displays a menu for viewing ingredients and prompts the user to choose
+   * an option. Calls on the appropriate methods in the IngredientUi class
+   * for further user interaction, depending on the choice.
+   */
   private void viewIngredientsMenu() {
     while (true) {
       System.out.print("""
@@ -105,16 +128,20 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> manager.checkExpiringIngredients();
-        case 2 -> manager.showSortedIngredients();
+        case 1 -> ingredientUi.promptCheckExpiringIngredients();
+        case 2 -> ingredientUi.displaySortedIngredients();
         default -> System.out.println("Invalid input. Try again.");
       }
 
-      System.out.println("\nPress enter to go back to menu 'View Ingredients'.");
-      scanner.nextLine();
+      inputHandler.waitForKeyPress();
     }
   }
 
+  /**
+   * Displays a menu for managing and viewing recipes, and prompts the user to choose
+   * an option. Calls on the appropriate methods in the RecipeUi class
+   * for further user interaction, depending on the choice.
+   */
   private void recipeMenu() {
     while (true) {
       System.out.print("""
@@ -132,15 +159,14 @@ public class Ui {
       }
 
       switch (choice) {
-        case 1 -> manager.addRecipe();
-        case 2 -> manager.checkRecipeIngredients();
-        case 3 -> manager.getSuggestedDishes();
+        case 1 -> recipeUi.promptAddRecipe();
+        case 2 -> recipeUi.promptRecipeIngredientsCheck();
+        case 3 -> recipeUi.displaySuggestedRecipes();
         default -> System.out.println("Invalid input. Try again.");
       }
-    }
 
-    System.out.println("\nPress enter to go back to menu 'Recipe'.");
-    scanner.nextLine();
+      inputHandler.waitForKeyPress();
+    }
   }
 
 }

@@ -154,6 +154,15 @@ public class InputHandler {
   }
 
   /**
+   * Reads any key pressed by the user. 'Pauses' the console output,
+   * allowing the user to read content before proceeding to the next.
+   */
+  public void waitForKeyPress() {
+    System.out.println("Press any button to continue...");
+    scanner.nextLine();
+  }
+
+  /**
    * Closes the scanner.
    */
   public void close() {

@@ -6,7 +6,6 @@ import edu.ntnu.iir.bidata.storage.Cookbook;
 import edu.ntnu.iir.bidata.storage.Fridge;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class MealPlanner {
@@ -33,13 +32,12 @@ public class MealPlanner {
    * @return {@code true} if all ingredients required are available. Otherwise, {@code false}.
    */
   public boolean verifyIngredientsForRecipe(String recipeName) {
-    // Find the recipe with the specified name
-    Recipe recipe = findRecipeByName(recipeName)
-        .orElseThrow(() -> new NoSuchElementException("No recipe found with name " + recipeName));
+    Optional<Recipe> recipeOpt = findRecipeByName(recipeName);
 
-    // If the recipe exists, check if its ingredients are available
-    return recipe.getIngredients().stream()
-        .allMatch(this::isIngredientAvailable);
+    return recipeOpt.map(recipe ->
+        recipe.getIngredients().stream()
+        .allMatch(this::isIngredientAvailable))
+        .orElse(false);
   }
 
   /**
