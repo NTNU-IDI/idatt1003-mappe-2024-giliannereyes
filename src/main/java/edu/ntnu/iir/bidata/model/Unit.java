@@ -11,9 +11,6 @@ public enum Unit {
   LITRE("L", 1.0, UnitType.VOLUME),            // Base unit for volume (liters)
   DECILITRE("dL", 0.1, UnitType.VOLUME),       // 1 dL = 0.1 L
   MILLILITRE("mL", 0.001, UnitType.VOLUME),    // 1 mL = 0.001 L
-  TEASPOON("tsp", 0.00492892, UnitType.VOLUME), // 1 tsp = 4.92892 mL
-  TABLESPOON("tbsp", 0.0147868, UnitType.VOLUME), // 1 tbsp = 14.7868 mL
-  CUP("cup", 0.24, UnitType.VOLUME),           // 1 cup = 240 mL
 
   // Mass Units
   KILOGRAM("kg", 1.0, UnitType.MASS),        // Base unit for mass (kilograms)
@@ -46,14 +43,14 @@ public enum Unit {
   }
 
   /**
-   * Checks if two units are of the same type. The type is either volume or mass.
+   * Checks if two units are of different types. The type is either volume or mass.
    *
    * @param otherUnit The other unit to compare with.
    *
-   * @return {@code true} if the unit types are the same. Else {@code false}.
+   * @return {@code true} if the unit types are not the same. Else {@code false}.
    */
-  public boolean isSameType(Unit otherUnit) {
-    return this.unitType == otherUnit.unitType;
+  public boolean notSameType(Unit otherUnit) {
+    return this.unitType != otherUnit.unitType;
   }
 
   /**

@@ -8,6 +8,10 @@ import edu.ntnu.iir.bidata.storage.Fridge;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The MealPlanner class is responsible for managing recipes in the cookbook
+ * and checking if there are enough ingredients in the fridge to follow them.
+ */
 public class MealPlanner {
   private final Fridge fridge;
   private final Cookbook cookbook;
@@ -41,6 +45,18 @@ public class MealPlanner {
   }
 
   /**
+   * Retrieves a list of recipes that has all required ingredients
+   * available in the fridge.
+   *
+   * @return A list of recipes.
+   */
+  public List<Recipe> findSuggestedRecipes() {
+    return cookbook.getRecipes().stream()
+        .filter(recipe -> verifyIngredientsForRecipe(recipe.getName()))
+        .toList();
+  }
+
+  /**
    * Checks if an ingredient required for a recipe is available, meaning there
    * is a sufficient quantity in the fridge, and that the ingredient is not expired.
    *
@@ -57,7 +73,7 @@ public class MealPlanner {
 
     Ingredient fridgeIngredient = fridgeIngredientOpt.get();
 
-    if (fridgeIngredient.isExpired() || !fridgeIngredient.getUnit().isSameType(recipeIngredient.getUnit())) {
+    if (fridgeIngredient.isExpired() || fridgeIngredient.getUnit().notSameType(recipeIngredient.getUnit())) {
       return false;
     }
 
@@ -66,18 +82,6 @@ public class MealPlanner {
     double requiredQuantity = recipeIngredient.getUnit().convertToBaseUnit(recipeIngredient.getQuantity());
 
     return availableQuantity >= requiredQuantity;
-  }
-
-  /**
-   * Retrieves a list of recipes that has all required ingredients
-   * available in the fridge.
-   *
-   * @return A list of recipes.
-   */
-  public List<Recipe> findSuggestedRecipes() {
-    return cookbook.getRecipes().stream()
-        .filter(recipe -> verifyIngredientsForRecipe(recipe.getName()))
-        .toList();
   }
 
   /**
