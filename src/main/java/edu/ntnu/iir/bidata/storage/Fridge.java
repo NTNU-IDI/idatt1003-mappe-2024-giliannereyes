@@ -25,7 +25,7 @@ public class Fridge {
    * Constructs a new Fridge instance that initializes the ingredients list.
    */
   public Fridge() {
-    ingredients = new ArrayList<>();  // Initialize the ingredients as an empty ArrayList
+    ingredients = new ArrayList<>();
   }
 
   /**
@@ -34,23 +34,25 @@ public class Fridge {
    * <p>If an ingredient of the same type already exists, the quantity of
    * the existing ingredient is increased with the new ingredient's quantity instead.</p>
    *
-   * Note: It is assumed that ingredients with the same name have the same
-   * price and expiry date.
-   *
    * @param newIngredient The ingredient to add.
    *
-   * @throws IllegalArgumentException if the ingredient is {@code null}.
+   * @throws IllegalArgumentException if the ingredient is {@code null} or if it
+   *                                  has the same name as a different ingredient in the fridge.
    */
   public void addIngredient(Ingredient newIngredient) {
-    if (newIngredient == null) {
-      throw new IllegalArgumentException("Ingredient cannot be null");
-    }
+    validateIngredient(newIngredient);
 
     Optional<Ingredient> optIngredient = findIngredientByName(newIngredient.getName());
 
     if (optIngredient.isPresent()) {
       Ingredient existingIngredient = optIngredient.get();
-      existingIngredient.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit());
+
+      if (existingIngredient.isSameAs(newIngredient)) {
+        existingIngredient.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit());
+      } else {
+        throw new IllegalArgumentException("A different ingredient with the same name is already in the fridge.");
+      }
+
     } else {
       ingredients.add(newIngredient);
     }
@@ -67,14 +69,13 @@ public class Fridge {
    *                                  or if removing the quantity results in a negative quantity.
    */
   public void decreaseIngredientQuantity(String ingredientName, double quantity, Unit unit) {
-    if (quantity < 0 || unit == null) {
-      throw new IllegalArgumentException("Quantity cannot be negative");
-    }
+    validateQuantity(quantity, unit);
+    validateName(ingredientName);
 
-    Optional <Ingredient> optIngredient = findIngredientByName(ingredientName);
+    Optional <Ingredient> ingredientOpt = findIngredientByName(ingredientName);
 
-    if (optIngredient.isPresent()) {
-      Ingredient ingredient = optIngredient.get();
+    if (ingredientOpt.isPresent()) {
+      Ingredient ingredient = ingredientOpt.get();
       ingredient.decreaseQuantity(quantity, unit);
 
       if (ingredient.getQuantity() == 0) {
@@ -96,9 +97,7 @@ public class Fridge {
    */
   public Optional<Ingredient> findIngredientByName(String ingredientName) {
     return ingredients.stream()
-        // Filters by ingredient name
         .filter(ingredient -> ingredient.getName().equalsIgnoreCase(ingredientName.trim()))
-        // Returns first instance of specified ingredient
         .findFirst();
   }
 
@@ -133,8 +132,8 @@ public class Fridge {
    */
   public double calculateTotalPrice() {
     return ingredients.stream()
-        .mapToDouble(Ingredient::getPrice) // Maps each ingredient instance to its price
-        .sum(); // Calculates the sum of the prices
+        .mapToDouble(Ingredient::getPrice)
+        .sum();
   }
 
   /**
@@ -147,4 +146,29 @@ public class Fridge {
     return ingredients;
   }
 
+  private void validateIngredient(Ingredient ingredient) {
+    if (ingredient == null) {
+      throw new IllegalArgumentException("Ingredient cannot be null");
+    }
+  }
+
+  private void validateQuantity(double quantity, Unit unit) {
+    if (quantity < 0) {
+      throw new IllegalArgumentException("Quantity cannot be negative.");
+    }
+
+    if (unit == null) {
+      throw new IllegalArgumentException("Unit cannot be null.");
+    }
+  }
+
+  private void validateName(String name) {
+    if (name == null) {
+      throw new IllegalArgumentException("Ingredient name cannot be null.");
+    }
+
+    if (name.isBlank()) {
+      throw new IllegalArgumentException("Ingredient name cannot be blank.");
+    }
+  }
 }

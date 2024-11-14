@@ -85,6 +85,8 @@ public class Recipe {
    * Adds an ingredient to the list of ingredients.
    *
    * @param ingredient The ingredient to add.
+   *
+   * @throws IllegalArgumentException if the ingredient is {@code null}.
    */
   public void addIngredient(Ingredient ingredient) {
     if (ingredient == null) {
@@ -130,11 +132,36 @@ public class Recipe {
     return this.ingredients;
   }
 
+  /**
+   * <p>Returns a string representation of the recipe, including its name,
+   * description, instruction and ingredients..</p>
+   *
+   * @return A string formatted to display the recipe's details.
+   */
   @Override
   public String toString() {
     return "Recipe: " + this.name
         + "\nDescription: " + this.description
         + "\nInstruction: " + this.instruction
-        + "\nIngredients: " + this.ingredients;
+        + "\nIngredients:\n" + this.getFormattedIngredientList();
   }
+
+  /**
+   * Generates a formatted string representation of all ingredients
+   * in the recipe.
+   *
+   * @return A string representation containing each ingredient's name,
+   * quantity and unit of measurement.
+   */
+  private String getFormattedIngredientList() {
+    StringBuilder ingredientListBuilder = new StringBuilder();
+
+    for (Ingredient ingredient : ingredients) {
+      String ingredientString = String.format("%s - %.2f %s \n", ingredient.getName(), ingredient.getQuantity(), ingredient.getUnit());
+      ingredientListBuilder.append(ingredientString);
+    }
+
+    return ingredientListBuilder.toString();
+  }
+
 }

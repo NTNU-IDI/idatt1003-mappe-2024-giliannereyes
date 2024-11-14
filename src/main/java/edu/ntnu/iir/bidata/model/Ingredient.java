@@ -54,6 +54,178 @@ public class Ingredient {
   }
 
   /**
+   * Removes a specified quantity from the ingredient.
+   * <p>
+   *   Decreases the quantity of the ingredient by the specified amount.
+   *   If specified amount is negative or greater than the available quantity,
+   *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
+   * </p>
+   *
+   * @param inputQuantity The quantity to remove.
+   * @param inputUnit The unit of measurement of the quantity to remove.
+   *
+   * @throws IllegalArgumentException if specified quantity is greater than available quantity.
+   */
+  public void decreaseQuantity(double inputQuantity, Unit inputUnit) {
+    validateQuantityAndUnit(inputQuantity, inputUnit);
+
+    // Convert quantities of ingredients to their base unit values
+    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
+    double baseToRemove = inputUnit.convertToBaseUnit(inputQuantity);
+
+    // Checks for invalid input
+    if ((baseAvailable - baseToRemove) < 0) {
+      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + inputQuantity + " " + inputUnit);
+    }
+
+    // Decrease the ingredient's available quantity in base unit
+    double newAvailableBase = baseAvailable - baseToRemove;
+    // Update the ingredient's quantity
+    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
+  }
+
+  /**
+   * Increases the ingredient's quantity by the specified amount.
+   *
+   * @param inputQuantity The quantity to add.
+   * @param inputUnit The unit of measurement of the quantity to add.
+   *
+   * @throws IllegalArgumentException if the quantity is negative.
+   */
+  public void increaseQuantity(double inputQuantity, Unit inputUnit) {
+    validateQuantityAndUnit(inputQuantity, inputUnit);
+
+    // Convert quantities of ingredients to their base unit values
+    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
+    double baseToAdd = inputUnit.convertToBaseUnit(inputQuantity);
+
+    // Increase the ingredient's available quantity in base unit
+    double newAvailableBase = baseAvailable + baseToAdd;
+    // Update the ingredient's quantity
+    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
+  }
+
+  // Getters for ingredient fields
+
+  /**
+   * Returns the name of the ingredient.
+   *
+   * @return name of the ingredient.
+   */
+  public String getName() {
+    return this.name;
+  }
+
+  /**
+   * Returns the quantity of the ingredient.
+   *
+   * @return the quantity of the ingredient.
+   */
+  public double getQuantity() {
+    return this.quantity;
+  }
+
+  /**
+   * Returns the total price of the ingredient.
+   * Price is calculated based on the ingredient's current quantity and price per unit.
+   *
+   * @return the total price of the ingredient.
+   */
+  public double getPrice() {
+    return this.quantity * this.pricePerUnit;
+  }
+
+  /**
+   * Returns the price per unit of the ingredient.
+   *
+   * @return the price per unit of the ingredient.
+   */
+  public double getPricePerUnit() {
+    return this.pricePerUnit;
+  }
+
+  /**
+   * Returns the unit of measurement for the ingredient.
+   *
+   * @return the unit of measurement.
+   */
+  public Unit getUnit() {
+    return this.unit;
+  }
+
+  /**
+   * Returns the expiry date of the ingredient.
+   *
+   * @return the expiry date.
+   */
+  public LocalDate getExpiryDate() {
+    return this.expiryDate;
+  }
+
+  /**
+   * Checks if the ingredient is expired.
+   *
+   * @return {@code true} if the ingredient is expired.
+   *         {@code false} if the ingredient is not expired.
+   */
+  public boolean isExpired() {
+    return this.expiryDate.isBefore(LocalDate.now());
+  }
+
+  /**
+   * Checks if another ingredient is of the same type by checking if the
+   * expiry date, price per unit and name are the same.
+   *
+   * @param otherIngredient The ingredient to compare with.
+   *
+   * @return {@code true} if this and the other ingredient are of the same type.
+   *         Otherwise, {@code false}.
+   */
+  public boolean isSameAs(Ingredient otherIngredient) {
+    return otherIngredient.getExpiryDate().equals(expiryDate)
+        && otherIngredient.getPricePerUnit() == (pricePerUnit)
+        && otherIngredient.getName().equals(name);
+  }
+  /**
+   * <p>Returns a string representation of the ingredient, including its name,
+   * quantity, unit of measurement, total price, price per unit, and
+   * expiry date.</p>
+   *
+   * @return A string representation of the ingredient containing its details.
+   */
+  @Override
+  public String toString() {
+    return "Name: " + name + "\n" +
+        "Quantity: " + quantity + " " + unit.getSymbol() + "\n" +
+        "Price: " + getPrice() + " kr\n" +
+        "Price per unit: " + pricePerUnit + " kr/" + unit.getSymbol() + "\n" +
+        "Expiry Date: " + expiryDate;
+  }
+
+  /**
+   * Validates the quantity and unit for operations.
+   *
+   * @param inputQuantity The quantity to validate.
+   * @param inputUnit The unit to validate.
+   *
+   * @throws IllegalArgumentException if the unit is incompatible or null, or if the quantity is negative.
+   */
+  private void validateQuantityAndUnit(double inputQuantity, Unit inputUnit) {
+    if (inputUnit == null) {
+      throw new IllegalArgumentException("Provided unit cannot be null.");
+    }
+
+    if (this.unit.notSameType(inputUnit)) {
+      throw new IllegalArgumentException("Unit mismatch: Cannot operate with " +
+          inputUnit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
+    }
+
+    if (inputQuantity < 0) {
+      throw new IllegalArgumentException("Invalid quantity: Quantity cannot be negative.");
+    }
+  }
+
+  /**
    * Sets the name of the ingredient.
    *
    * @param name The name of the ingredient. A name that is empty, blank or
@@ -132,163 +304,4 @@ public class Ingredient {
 
     this.expiryDate = expiryDate;
   }
-
-  /**
-   * Removes a specified quantity from the ingredient.
-   * <p>
-   *   Decreases the quantity of the ingredient by the specified amount.
-   *   If specified amount is negative or greater than the available quantity,
-   *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
-   * </p>
-   *
-   * @param inputQuantity The quantity to remove.
-   * @param inputUnit The unit of measurement of the quantity to remove.
-   *
-   * @throws IllegalArgumentException if specified quantity is greater than available quantity.
-   */
-  public void decreaseQuantity(double inputQuantity, Unit inputUnit) {
-    validateQuantityAndUnit(inputQuantity, inputUnit);
-
-    // Convert quantities of ingredients to their base unit values
-    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
-    double baseToRemove = inputUnit.convertToBaseUnit(inputQuantity);
-
-    // Checks for invalid input
-    if ((baseAvailable - baseToRemove) < 0) {
-      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + inputQuantity + " " + inputUnit);
-    }
-
-    // Decrease the ingredient's available quantity in base unit
-    double newAvailableBase = baseAvailable - baseToRemove;
-    // Update the ingredient's quantity
-    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
-  }
-
-  /**
-   * Increases the ingredient's quantity by the specified amount.
-   *
-   * @param inputQuantity The quantity to add.
-   * @param inputUnit The unit of measurement of the quantity to add.
-   *
-   * @throws IllegalArgumentException if the quantity is negative.
-   */
-  public void increaseQuantity(double inputQuantity, Unit inputUnit) {
-    validateQuantityAndUnit(inputQuantity, inputUnit);
-
-    // Convert quantities of ingredients to their base unit values
-    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
-    double baseToAdd = inputUnit.convertToBaseUnit(inputQuantity);
-
-    // Increase the ingredient's available quantity in base unit
-    double newAvailableBase = baseAvailable + baseToAdd;
-    // Update the ingredient's quantity
-    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
-  }
-
-  /**
-   * Validates the quantity and unit for operations.
-   *
-   * @param inputQuantity The quantity to validate.
-   * @param inputUnit The unit to validate.
-   *
-   * @throws IllegalArgumentException if the unit is incompatible or null, or if the quantity is negative.
-   */
-  private void validateQuantityAndUnit(double inputQuantity, Unit inputUnit) {
-    if (inputUnit == null) {
-      throw new IllegalArgumentException("Provided unit cannot be null.");
-    }
-
-    if (!this.unit.isSameType(inputUnit)) {
-      throw new IllegalArgumentException("Unit mismatch: Cannot operate with " +
-          inputUnit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
-    }
-
-    if (inputQuantity < 0) {
-      throw new IllegalArgumentException("Invalid quantity: Quantity cannot be negative.");
-    }
-  }
-
-  // Getters for ingredient fields
-
-  /**
-   * Returns the name of the ingredient.
-   *
-   * @return name of the ingredient.
-   */
-  public String getName() {
-    return this.name;
-  }
-
-  /**
-   * Returns the quantity of the ingredient.
-   *
-   * @return the quantity of the ingredient.
-   */
-  public double getQuantity() {
-    return this.quantity;
-  }
-
-  /**
-   * Returns the total price of the ingredient.
-   * Price is calculated based on the ingredient's current quantity and price per unit.
-   *
-   * @return the total price of the ingredient.
-   */
-  public double getPrice() {
-    return this.quantity * this.pricePerUnit;
-  }
-
-  /**
-   * Returns the price per unit of the ingredient.
-   *
-   * @return the price per unit of the ingredient.
-   */
-  public double getPricePerUnit() {
-    return this.pricePerUnit;
-  }
-
-  /**
-   * Returns the unit of measurement for the ingredient.
-   *
-   * @return the unit of measurement.
-   */
-  public Unit getUnit() {
-    return this.unit;
-  }
-
-  /**
-   * Returns the expiry date of the ingredient.
-   *
-   * @return the expiry date.
-   */
-  public LocalDate getExpiryDate() {
-    return this.expiryDate;
-  }
-
-  /**
-   * Checks if the ingredient is expired.
-   *
-   * @return {@code true} if the ingredient is expired.
-   *         {@code false} if the ingredient is not expired.
-   */
-  public boolean isExpired() {
-    return this.expiryDate.isBefore(LocalDate.now());
-  }
-
-  /**
-   * <p>Returns a string representation of the ingredient, including its name,
-   * quantity, unit of measurement, total price, price per unit, and
-   * expiry date.</p>
-   *
-   * @return A string formatted to display the ingredient's details.
-   */
-  @Override
-  public String toString() {
-    return "Name: " + name + "\n" +
-        "Quantity: " + quantity + " " + unit.getSymbol() + "\n" +
-        "Price: " + getPrice() + " kr\n" +
-        "Price per unit: " + pricePerUnit + " kr/" + unit.getSymbol() + "\n" +
-        "Expiry Date: " + expiryDate;
-  }
-
 }

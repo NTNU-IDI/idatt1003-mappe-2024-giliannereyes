@@ -49,9 +49,9 @@ public class Manager {
     try {
       Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
       fridge.addIngredient(newIngredient);
-      return new Result<>(true, "The ingredient '" + name + "' was added to the fridge.");
+      return new Result<>(true, String.format("Ingredient '%s' was added to the fridge.", name));
     } catch (IllegalArgumentException e) {
-      return new Result<>(false, "The ingredient '" + name + "' could not be added to the fridge:\n" + e.getMessage());
+      return new Result<>(false, String.format("Failed to add ingredient '%s' to the fridge: %s", name, e.getMessage()));
     }
   }
 
@@ -66,8 +66,8 @@ public class Manager {
   public Result<Ingredient> searchForIngredient(String name) {
     Optional<Ingredient> ingredient = fridge.findIngredientByName(name);
     return ingredient.map(value ->
-        new Result<>(true, value, "The ingredient was found."))
-        .orElseGet(() -> new Result<>(false, "The ingredient '" + name + "' could not be found."));
+        new Result<>(true, value, String.format("The ingredient %s was found.", name)))
+        .orElseGet(() -> new Result<>(false, String.format("The ingredient '%s' was not found.", name)));
   }
 
   /**
@@ -85,7 +85,7 @@ public class Manager {
       fridge.decreaseIngredientQuantity(name, quantity, unit);
       return new Result<>(true, String.format("%.2f %s of %s was successfully removed from the fridge!\n", quantity, unit.getSymbol(), name));
     } catch (IllegalArgumentException e) {
-      return new Result<>(false, "Ingredient quantity could not be decreased due to:\n" + e.getMessage());
+      return new Result<>(false, String.format("Failed to remove %.2f %s of %s due to: %s", quantity, unit.getSymbol(), name, e.getMessage()));
     }
   }
 
@@ -132,9 +132,9 @@ public class Manager {
   public Result<Void> addRecipeToCookbook(Recipe recipe) {
     try {
       cookbook.addRecipe(recipe);
-      return new Result<>(true, "Recipe successfully added to cookbook!");
+      return new Result<>(true, String.format("Recipe '%s' added to the cookbook!", recipe.getName()));
     } catch (IllegalArgumentException e) {
-      return new Result<>(false, "Recipe could not be added due to:\n" + e.getMessage());
+      return new Result<>(false, String.format("Failed to add recipe '%s' to cookbook: %s", recipe.getName(), e.getMessage()));
     }
   }
 
@@ -151,9 +151,9 @@ public class Manager {
   public Result<Recipe> createRecipe(String name, String description, String instruction) {
     try {
       Recipe recipe = new Recipe(name, description, instruction);
-      return new Result<>(true, recipe, "Recipe successfully created.");
+      return new Result<>(true, recipe, String.format("Recipe '%s' was successfully created.", recipe.getName()));
     } catch (IllegalArgumentException e) {
-      return new Result<>(false, "Recipe could not be created due to:\n" + e.getMessage());
+      return new Result<>(false, String.format("Failed to create recipe '%s' due to: %s", name, e.getMessage()));
     }
   }
 
@@ -172,9 +172,9 @@ public class Manager {
     try {
       Ingredient ingredient = new Ingredient(name, quantity, unit);
       recipe.addIngredient(ingredient);
-      return new Result<>(true, "Ingredient was added to recipe.");
+      return new Result<>(true, String.format("Ingredient '%s' was added to the recipe.", ingredient.getName()));
     } catch (IllegalArgumentException e) {
-      return new Result<>(false, "Ingredient could not be added due to:\n" + e.getMessage());
+      return new Result<>(false, String.format("Failed to add ingredient '%s' to the recipe.", name));
     }
   }
 
@@ -190,9 +190,9 @@ public class Manager {
     boolean recipeAvailable = mealPlanner.verifyIngredientsForRecipe(recipeName);
 
     if (recipeAvailable) {
-      return new Result<>(true, "You have all the ingredients for the recipe '" + recipeName + "'.");
+      return new Result<>(true, String.format("You have all the ingredients to make '%s'!", recipeName));
     } else {
-      return new Result<>(false, "You do not have all the ingredients for the recipe + '" + recipeName + "'.");
+      return new Result<>(false, String.format("You are missing ingredients to make %s.", recipeName));
     }
   }
 
