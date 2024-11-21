@@ -1,9 +1,9 @@
 package edu.ntnu.iir.bidata.ui;
 
-import edu.ntnu.iir.bidata.utils.Manager;
-import edu.ntnu.iir.bidata.utils.Result;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.utils.Manager;
+import edu.ntnu.iir.bidata.utils.Result;
 import java.time.LocalDate;
 
 /**
@@ -19,19 +19,62 @@ public class Ui {
    * Creates a new Ui instance.
    *
    * @param inputHandler The input handler for reading user input.
-   * @param manager The manager to handle business logic.
+   * @param manager      The manager to handle business logic.
    */
   public Ui(InputHandler inputHandler, Manager manager) {
     this.inputHandler = inputHandler;
     this.manager = manager;
   }
 
+  /**
+   * Initializes the application by adding some ingredients and recipes to the fridge and cookbook.
+   */
+  private void init() {
+    try {
+      preAddIngredientsToFridge();
+      preAddRecipesToCookbook();
+    } catch (Exception e) {
+      System.out.println("Failed to initialize the application: " + e.getMessage());
+    }
+  }
 
+  /**
+   * Pre-adds ingredients to fridge when application is initialized.
+   */
+  private void preAddIngredientsToFridge() {
+    manager.addIngredientToFridge(
+        "Milk", 1.0, 1.0, Unit.LITRE, LocalDate.now().plusDays(5));
+    manager.addIngredientToFridge(
+        "Egg", 6.0, 1.0, Unit.PIECE, LocalDate.now().plusDays(10));
+    manager.addIngredientToFridge(
+        "Flour", 2.0, 1.0, Unit.KILOGRAM, LocalDate.now().minusDays(30));
+    manager.addIngredientToFridge(
+        "Sugar", 1.0, 1.0, Unit.KILOGRAM, LocalDate.now().plusDays(60));
+  }
+
+  /**
+   * Pre-adds recipes to cookbook when application is initialized.
+   */
+  private void preAddRecipesToCookbook() {
+    manager.addRecipeToCookbook(
+        new Recipe("Pancakes", "Delicious pancakes", "Mix ingredients and fry"));
+    manager.addRecipeToCookbook(
+        new Recipe("Omelette", "Simple omelette", "Whisk eggs and fry"));
+    manager.addIngredientToRecipe(
+        manager.getRecipeByName("Pancakes"), "Milk", 0.5, Unit.LITRE);
+    manager.addIngredientToRecipe(
+        manager.getRecipeByName("Pancakes"), "Egg", 2.0, Unit.PIECE);
+    manager.addIngredientToRecipe(
+        manager.getRecipeByName("Pancakes"), "Flour", 0.5, Unit.KILOGRAM);
+    manager.addIngredientToRecipe(
+        manager.getRecipeByName("Omelette"), "Egg", 2.0, Unit.PIECE);
+  }
 
   /**
    * Starts the main menu loop, allowing the user to choose options until they choose to exit.
    */
   public void start() {
+    init();
     boolean exit = false;
     while (!exit) {
       displayMenu();
@@ -50,11 +93,11 @@ public class Ui {
    */
   private void displayMenu() {
     System.out.printf("""
-    ------------------------------- MENU ---------------------------------
-    ______________________________________________________________________
-    %-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s
-    ______________________________________________________________________
-    """,
+            ------------------------------- MENU ---------------------------------
+            ______________________________________________________________________
+            %-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s
+            ______________________________________________________________________
+            """,
         "[1] Add Ingredient", "[2] Search Ingredient",
         "[3] Remove Ingredient", "[4] View Expiring Ingredients",
         "[5] View Sorted Ingredients", "[6] Add Recipe",
@@ -65,6 +108,7 @@ public class Ui {
 
   /**
    * Handles the user's menu choice by executing the corresponding action.
+   *
    * @param choice The user's choice.
    */
   private void handleMenuChoice(int choice) {
@@ -98,7 +142,7 @@ public class Ui {
   }
 
   /**
-   * Prompts the user to search for an ingredient
+   * Prompts the user to search for an ingredient.
    */
   private void promptSearchIngredient() {
     String name = inputHandler.readString("Enter ingredient name: ");
@@ -153,6 +197,7 @@ public class Ui {
 
   /**
    * Loop that prompts user to add ingredients until they exit.
+   *
    * @param recipe The recipe to add ingredients to.
    */
   private void addIngredientsToRecipe(Recipe recipe) {
@@ -167,6 +212,7 @@ public class Ui {
 
   /**
    * Prompts the user for an ingredient to add to recipe.
+   *
    * @param recipe The recipe to add the ingredient to.
    */
   private void promptAddIngredient(Recipe recipe) {
@@ -194,6 +240,7 @@ public class Ui {
 
   /**
    * Formats a header containing labels for an ingredient's details.
+   *
    * @return The formatted header.
    */
   private String getIngredientHeader() {
@@ -207,7 +254,7 @@ public class Ui {
    * Displays the result in the console in a string representation.
    *
    * @param result The result object that contains the operation's result.
-   * @param <T> A generic datatype.
+   * @param <T>    A generic datatype.
    */
   private <T> void displayResult(Result<T> result) {
     displayResult(result, "");
@@ -218,7 +265,7 @@ public class Ui {
    *
    * @param result The result object that contains the operation's result.
    * @param header The header required for the result.
-   * @param <T> A generic datatype.
+   * @param <T>    A generic datatype.
    */
   private <T> void displayResult(Result<T> result, String header) {
     if (result.isSuccess() && !header.isBlank()) {

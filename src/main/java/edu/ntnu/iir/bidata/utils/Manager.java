@@ -212,4 +212,14 @@ public class Manager {
       return new Result<>(false, "You do not have sufficient ingredients for any recipe in the cookbook.");
     }
   }
+
+  /**
+   * Retrieves a recipe by its name from the cookbook.
+   *
+   * @param name The name of the recipe to retrieve.
+   * @return The recipe if found, or null if not found.
+   */
+  public Recipe getRecipeByName(String name) {
+    return cookbook.findRecipeByName(name).orElse(null);
+  }
 }
