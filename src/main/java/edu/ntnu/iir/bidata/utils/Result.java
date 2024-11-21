@@ -67,9 +67,14 @@ public class Result<T> {
     return Optional.ofNullable(this.data);
   }
 
-  public String formatResult() {
+  /**
+   * Retrieves the formatted result, a string representation of the result
+   * formatted based on the type of data.
+   *
+   * @return The formatted result.
+   */
+  public String getFormattedResult() {
       StringBuilder builder = new StringBuilder();
-      builder.append(message).append("\n");
 
       if (data != null) {
         if (data instanceof Collection<?> collection) {
@@ -80,11 +85,6 @@ public class Result<T> {
       }
 
       return builder.toString();
-  }
-
-  @Override
-  public String toString() {
-    return formatResult();
   }
 
 }

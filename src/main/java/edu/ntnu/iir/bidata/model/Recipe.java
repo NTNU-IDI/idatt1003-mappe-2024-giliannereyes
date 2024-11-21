@@ -96,10 +96,9 @@ public class Recipe {
    */
   @Override
   public String toString() {
-    return "Recipe: " + this.name
-        + "\nDescription: " + this.description
-        + "\nInstruction: " + this.instruction
-        + "\nIngredients:\n" + this.getFormattedIngredientList();
+    return String.format(
+        "Name: %s\nDescription: %s\nInstruction: %s\nIngredients:\n%s",
+        name, description, instruction, getFormattedIngredientList());
   }
 
   /**
@@ -125,15 +124,20 @@ public class Recipe {
    *         quantity and unit of measurement.
    */
   private String getFormattedIngredientList() {
-    StringBuilder ingredientListBuilder = new StringBuilder();
+    StringBuilder builder = new StringBuilder();
 
-    for (Ingredient ingredient : ingredients) {
-      String ingredientString = String.format(
-          "%s - %.2f %s \n", ingredient.getName(), ingredient.getQuantity(), ingredient.getUnit());
-      ingredientListBuilder.append(ingredientString);
-    }
+    ingredients.forEach(ingredient ->
+        builder.append(
+            String.format(
+                "%s - %.2f %s%n",
+                ingredient.getName(),
+                ingredient.getQuantity(),
+                ingredient.getUnit().getSymbol()
+            )
+        )
+    );
 
-    return ingredientListBuilder.toString();
+    return builder.toString();
   }
 
 }

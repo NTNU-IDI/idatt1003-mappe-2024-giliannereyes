@@ -15,6 +15,11 @@ public class Ui {
   private final InputHandler inputHandler;
   private final Manager manager;
 
+  private final String INGREDIENT_HEADER = String.format(
+      "%-15s %-10s %-10s %-15s %-15s %-10s%n%n",
+      "Name", "Quantity", "Unit", "Expiry Date", "Price/Unit", "Total Price"
+  );
+
   /**
    * Creates a new Ui instance.
    *
@@ -43,13 +48,13 @@ public class Ui {
    */
   private void preAddIngredientsToFridge() {
     manager.addIngredientToFridge(
-        "Milk", 1.0, 1.0, Unit.LITRE, LocalDate.now().plusDays(5));
+        "Milk", 1, 30, Unit.LITRE, LocalDate.now().plusDays(5));
     manager.addIngredientToFridge(
-        "Egg", 6.0, 1.0, Unit.PIECE, LocalDate.now().plusDays(10));
+        "Egg", 6, 3, Unit.PIECE, LocalDate.now().plusDays(10));
     manager.addIngredientToFridge(
-        "Flour", 2.0, 1.0, Unit.KILOGRAM, LocalDate.now().minusDays(30));
+        "Flour", 2, 15.5, Unit.KILOGRAM, LocalDate.now().minusDays(30));
     manager.addIngredientToFridge(
-        "Sugar", 1.0, 1.0, Unit.KILOGRAM, LocalDate.now().plusDays(60));
+        "Sugar", 1, 50, Unit.KILOGRAM, LocalDate.now().plusDays(60));
   }
 
   /**
@@ -68,6 +73,8 @@ public class Ui {
         manager.getRecipeByName("Pancakes"), "Flour", 0.5, Unit.KILOGRAM);
     manager.addIngredientToRecipe(
         manager.getRecipeByName("Omelette"), "Egg", 2.0, Unit.PIECE);
+    manager.addIngredientToRecipe(
+        manager.getRecipeByName("Omelette"), "Milk", 0.5, Unit.LITRE);
   }
 
   /**
@@ -79,11 +86,7 @@ public class Ui {
     while (!exit) {
       displayMenu();
       int choice = inputHandler.readInt("\nPlease choose an option: \n");
-
-      if (choice == 9) {
-        exit = true;
-      }
-
+      exit = choice == 9;
       handleMenuChoice(choice);
     }
   }
@@ -121,6 +124,7 @@ public class Ui {
       case 6 -> promptAddRecipe();
       case 7 -> promptRecipeIngredientsCheck();
       case 8 -> displaySuggestedRecipes();
+      case 9 -> System.out.println("Closing the application...");
       default -> System.out.println("Invalid option! Enter a valid number from 1-9.");
     }
 
@@ -137,7 +141,7 @@ public class Ui {
     double pricePerUnit = inputHandler.readDouble("Enter ingredient's price per unit: ");
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
 
-    displayResult(manager.addIngredientToFridge(name, quantity, pricePerUnit, unit, expiryDate), "");
+    displayResult(manager.addIngredientToFridge(name, quantity, pricePerUnit, unit, expiryDate));
     // promptRetryOperationIfFailed(this::promptAddIngredient, result.isSuccess());
   }
 
@@ -146,7 +150,7 @@ public class Ui {
    */
   private void promptSearchIngredient() {
     String name = inputHandler.readString("Enter ingredient name: ");
-    displayResult(manager.searchForIngredient(name), getIngredientHeader());
+    displayResult(manager.searchForIngredient(name), INGREDIENT_HEADER);
     // promptRetryOperationIfFailed(this::promptSearchIngredient, result.isSuccess());
   }
 
@@ -158,7 +162,7 @@ public class Ui {
     Unit unit = inputHandler.readUnit("Enter the unit of the quantity to remove: ");
     double quantity = inputHandler.readDouble("Enter quantity to remove: ");
 
-    displayResult(manager.decreaseIngredientQuantity(name, unit, quantity), "");
+    displayResult(manager.decreaseIngredientQuantity(name, unit, quantity));
   }
 
   /**
@@ -166,14 +170,14 @@ public class Ui {
    */
   private void promptCheckExpiringIngredients() {
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
-    displayResult(manager.checkExpiringIngredients(expiryDate), "");
+    displayResult(manager.checkExpiringIngredients(expiryDate), INGREDIENT_HEADER);
   }
 
   /**
    * Displays all ingredients in fridge, sorted alphabetically.
    */
   private void displaySortedIngredients() {
-    displayResult(manager.getSortedIngredients(), getIngredientHeader());
+    displayResult(manager.getSortedIngredients(), INGREDIENT_HEADER);
   }
 
   /**
@@ -185,7 +189,7 @@ public class Ui {
     String instruction = inputHandler.readString("Enter recipe instruction: ");
 
     Result<Recipe> result = manager.createRecipe(name, description, instruction);
-    displayResult(result, "");
+    displayResult(result);
 
     if (result.isSuccess()) {
       result.getData().ifPresent(recipe -> {
@@ -239,18 +243,6 @@ public class Ui {
   }
 
   /**
-   * Formats a header containing labels for an ingredient's details.
-   *
-   * @return The formatted header.
-   */
-  private String getIngredientHeader() {
-    return String.format(
-        "%-15s %-10s %-10s %-15s %-15s %-10s%n%n",
-        "Name", "Quantity", "Unit", "Expiry Date", "Price/Unit", "Total Price"
-    );
-  }
-
-  /**
    * Displays the result in the console in a string representation.
    *
    * @param result The result object that contains the operation's result.
@@ -268,11 +260,13 @@ public class Ui {
    * @param <T>    A generic datatype.
    */
   private <T> void displayResult(Result<T> result, String header) {
+    System.out.println("\n" + result.getMessage());
+
     if (result.isSuccess() && !header.isBlank()) {
       System.out.print(header);
     }
 
-    System.out.println(result.formatResult());
+    System.out.println(result.getFormattedResult());
   }
 }
 
