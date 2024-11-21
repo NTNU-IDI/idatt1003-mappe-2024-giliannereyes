@@ -1,3 +1,5 @@
+package edu.ntnu.iir.bidata;
+
 import edu.ntnu.iir.bidata.model.Unit;
 import org.junit.jupiter.api.Test;
 
@@ -13,37 +15,37 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UnitTest {
   // --------------------------- POSITIVE TESTS ----------------------------------
   /**
-   * Tests the {@link Unit#convertToBaseUnit(double)} method.
+   * Tests the {@link Unit#convertToBaseUnitValue(double)} method.
    *
    * Expected outcome: The method should correctly convert values to the base unit.
    */
   @Test
-  public void testConvertToBaseUnit() {
+  public void testConvertToBaseUnitValue() {
     // Volume Units
-    assertEquals(1.0, Unit.LITRE.convertToBaseUnit(1.0), 0.00001); // 1 L = 1 L
-    assertEquals(0.1, Unit.DECILITRE.convertToBaseUnit(1.0), 0.00001); // 1 dL = 0.1 L
-    assertEquals(0.001, Unit.MILLILITRE.convertToBaseUnit(1.0), 0.00001); // 1 mL = 0.001 L
+    assertEquals(1.0, Unit.LITRE.convertToBaseUnitValue(1.0), 0.00001); // 1 L = 1 L
+    assertEquals(0.1, Unit.DECILITRE.convertToBaseUnitValue(1.0), 0.00001); // 1 dL = 0.1 L
+    assertEquals(0.001, Unit.MILLILITRE.convertToBaseUnitValue(1.0), 0.00001); // 1 mL = 0.001 L
 
     // Mass Units
-    assertEquals(1.0, Unit.KILOGRAM.convertToBaseUnit(1.0), 0.00001); // 1 kg = 1 kg
-    assertEquals(0.001, Unit.GRAM.convertToBaseUnit(1.0), 0.00001); // 1 g = 0.001 kg
-    assertEquals(0.000001, Unit.MILLIGRAM.convertToBaseUnit(1.0), 0.00001); // 1 mg = 0.000001 kg
+    assertEquals(1.0, Unit.KILOGRAM.convertToBaseUnitValue(1.0), 0.00001); // 1 kg = 1 kg
+    assertEquals(0.001, Unit.GRAM.convertToBaseUnitValue(1.0), 0.00001); // 1 g = 0.001 kg
+    assertEquals(0.000001, Unit.MILLIGRAM.convertToBaseUnitValue(1.0), 0.00001); // 1 mg = 0.000001 kg
   }
 
   /**
-   * Tests the {@link Unit#convertFromBaseUnit(double)} method.
+   * Tests the {@link Unit#convertFromBaseUnitValue(double)} method.
    *
    * Expected outcome: The method should correctly convert values from the base unit.
    */
   @Test
-  public void testConvertFromBaseUnit() {
+  public void testConvertFromBaseUnitValue() {
     // Volume Units
-    assertEquals(10.0, Unit.DECILITRE.convertFromBaseUnit(1.0), 0.00001); // 1 L = 10 dL
-    assertEquals(1000.0, Unit.MILLILITRE.convertFromBaseUnit(1.0), 0.00001); // 1 L = 1000 mL
+    assertEquals(10.0, Unit.DECILITRE.convertFromBaseUnitValue(1.0), 0.00001); // 1 L = 10 dL
+    assertEquals(1000.0, Unit.MILLILITRE.convertFromBaseUnitValue(1.0), 0.00001); // 1 L = 1000 mL
 
     // Mass Units
-    assertEquals(1000.0, Unit.GRAM.convertFromBaseUnit(1.0), 0.00001); // 1 kg = 1000 g
-    assertEquals(1000000.0, Unit.MILLIGRAM.convertFromBaseUnit(1.0), 0.00001); // 1 kg = 1,000,000 mg
+    assertEquals(1000.0, Unit.GRAM.convertFromBaseUnitValue(1.0), 0.00001); // 1 kg = 1000 g
+    assertEquals(1000000.0, Unit.MILLIGRAM.convertFromBaseUnitValue(1.0), 0.00001); // 1 kg = 1,000,000 mg
   }
 
   /**
@@ -98,25 +100,25 @@ public class UnitTest {
   }
 
   /**
-   * Tests the {@link Unit#convertToBaseUnit(double)} method with invalid expectations.
+   * Tests the {@link Unit#convertToBaseUnitValue(double)} method with invalid expectations.
    *
    * Expected outcome: The returned values should not match incorrect expectations.
    */
   @Test
-  public void testConvertToBaseUnitInvalid() {
-    assertNotEquals(2.0, Unit.LITRE.convertToBaseUnit(1.0)); // Incorrect expectation
-    assertNotEquals(0.5, Unit.DECILITRE.convertToBaseUnit(1.0)); // Incorrect expectation
-    assertNotEquals(0.01, Unit.MILLILITRE.convertToBaseUnit(1.0)); // Incorrect expectation
+  public void testConvertToBaseUnitValueInvalid() {
+    assertNotEquals(2.0, Unit.LITRE.convertToBaseUnitValue(1.0)); // Incorrect expectation
+    assertNotEquals(0.5, Unit.DECILITRE.convertToBaseUnitValue(1.0)); // Incorrect expectation
+    assertNotEquals(0.01, Unit.MILLILITRE.convertToBaseUnitValue(1.0)); // Incorrect expectation
   }
 
   /**
-   * Tests the {@link Unit#convertFromBaseUnit(double)} method with invalid expectations.
+   * Tests the {@link Unit#convertFromBaseUnitValue(double)} method with invalid expectations.
    *
    * Expected outcome: The returned values should not match incorrect expectations.
    */
   @Test
-  public void testConvertFromBaseUnitInvalid() {
-    assertNotEquals(20.0, Unit.DECILITRE.convertFromBaseUnit(1.0)); // Incorrect expectation
-    assertNotEquals(2000.0, Unit.MILLILITRE.convertFromBaseUnit(1.0)); // Incorrect expectation
+  public void testConvertFromBaseUnitValueInvalid() {
+    assertNotEquals(20.0, Unit.DECILITRE.convertFromBaseUnitValue(1.0)); // Incorrect expectation
+    assertNotEquals(2000.0, Unit.MILLILITRE.convertFromBaseUnitValue(1.0)); // Incorrect expectation
   }
 }

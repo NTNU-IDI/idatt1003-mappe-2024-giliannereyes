@@ -1,3 +1,5 @@
+package edu.ntnu.iir.bidata;
+
 import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
