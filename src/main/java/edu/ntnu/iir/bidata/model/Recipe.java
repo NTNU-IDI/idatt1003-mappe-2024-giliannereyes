@@ -14,9 +14,9 @@ import java.util.List;
  * </ul>
  */
 public class Recipe {
-  private String name;
-  private String description;
-  private String instruction;
+  private final String name;
+  private final String description;
+  private final String instruction;
   private final List<Ingredient> ingredients;
 
   /**
@@ -27,58 +27,14 @@ public class Recipe {
    * @param instruction The instruction for the recipe.
    */
   public Recipe(String name, String description, String instruction) {
-    setName(name);
-    setDescription(description);
-    setInstruction(instruction);
-    this.ingredients = new ArrayList<>();
-  }
-
-  /**
-   * Sets the name of the recipe.
-   *
-   * @param name The name of the recipe. A name that is empty, blank or
-   *             {@code null} is not accepted.
-   *
-   * @throws IllegalArgumentException if the name is empty, blank or {@code null}.
-   */
-  private void setName(String name) {
-    if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException("Recipe name cannot be null, empty or blank.");
-    }
-
     this.name = name;
-  }
-
-  /**
-   * Sets the description of the recipe.
-   *
-   * @param description The description of the recipe. A description that is empty, blank or
-   *             {@code null} is not accepted.
-   *
-   * @throws IllegalArgumentException if the description is empty, blank or {@code null}.
-   */
-  private void setDescription(String description) {
-    if (description == null || description.isBlank()) {
-      throw new IllegalArgumentException("Recipe description cannot be null, empty or blank.");
-    }
-
     this.description = description;
-  }
-
-  /**
-   * Sets the instruction of the recipe.
-   *
-   * @param instruction The instruction of the recipe. An instruction that is empty, blank or
-   *             {@code null} is not accepted.
-   *
-   * @throws IllegalArgumentException if the instruction is empty, blank or {@code null}.
-   */
-  private void setInstruction(String instruction) {
-    if (instruction == null || instruction.isBlank()) {
-      throw new IllegalArgumentException("Recipe instruction cannot be null, empty or blank.");
-    }
-
     this.instruction = instruction;
+    this.ingredients = new ArrayList<>();
+
+    validateNonEmptyString(name, "name");
+    validateNonEmptyString(description, "description");
+    validateNonEmptyString(instruction, "instruction");
   }
 
   /**
@@ -86,7 +42,7 @@ public class Recipe {
    *
    * @param ingredient The ingredient to add.
    *
-   * @throws IllegalArgumentException if the ingredient is {@code null}.
+   * @throws IllegalArgumentException if the ingredient is null.
    */
   public void addIngredient(Ingredient ingredient) {
     if (ingredient == null) {
@@ -133,8 +89,8 @@ public class Recipe {
   }
 
   /**
-   * <p>Returns a string representation of the recipe, including its name,
-   * description, instruction and ingredients..</p>
+   * Returns a string representation of the recipe, including its name,
+   * description, instruction and ingredients.
    *
    * @return A string formatted to display the recipe's details.
    */
@@ -147,17 +103,33 @@ public class Recipe {
   }
 
   /**
+   * Validates that a string is not null, empty or blank.
+   *
+   * @param value The string to validate.
+   * @param fieldName The name of the field being validated.
+   *
+   * @throws IllegalArgumentException if the value is null, empty or blank.
+   */
+  private void validateNonEmptyString(String value, String fieldName) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalArgumentException(
+          String.format("The %s cannot be null, empty or blank.", fieldName));
+    }
+  }
+
+  /**
    * Generates a formatted string representation of all ingredients
    * in the recipe.
    *
    * @return A string representation containing each ingredient's name,
-   * quantity and unit of measurement.
+   *         quantity and unit of measurement.
    */
   private String getFormattedIngredientList() {
     StringBuilder ingredientListBuilder = new StringBuilder();
 
     for (Ingredient ingredient : ingredients) {
-      String ingredientString = String.format("%s - %.2f %s \n", ingredient.getName(), ingredient.getQuantity(), ingredient.getUnit());
+      String ingredientString = String.format(
+          "%s - %.2f %s \n", ingredient.getName(), ingredient.getQuantity(), ingredient.getUnit());
       ingredientListBuilder.append(ingredientString);
     }
 

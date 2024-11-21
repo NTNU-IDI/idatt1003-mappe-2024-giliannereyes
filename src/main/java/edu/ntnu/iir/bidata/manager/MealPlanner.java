@@ -4,7 +4,6 @@ import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.storage.Cookbook;
 import edu.ntnu.iir.bidata.storage.Fridge;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -65,22 +64,16 @@ public class MealPlanner {
    * @return {@code true} if the ingredient is available. Otherwise, {@code false}.
    */
   private boolean isIngredientAvailable(Ingredient recipeIngredient) {
-    Optional<Ingredient> fridgeIngredientOpt = fridge.findIngredientByName(recipeIngredient.getName());
+    return fridge.findIngredientByName(recipeIngredient.getName())
+        .filter(fridgeIngredient -> !fridgeIngredient.isExpired())
+        .filter(fridgeIngredient -> !fridgeIngredient.getUnit().notSameType(recipeIngredient.getUnit()))
+        .map(fridgeIngredient -> isIngredientSufficient(fridgeIngredient, recipeIngredient))
+        .orElse(false);
+  }
 
-    if (fridgeIngredientOpt.isEmpty()) {
-      return false;
-    }
-
-    Ingredient fridgeIngredient = fridgeIngredientOpt.get();
-
-    if (fridgeIngredient.isExpired() || fridgeIngredient.getUnit().notSameType(recipeIngredient.getUnit())) {
-      return false;
-    }
-
-    // Compare quantities in base units
-    double availableQuantity = fridgeIngredient.getUnit().convertToBaseUnit(fridgeIngredient.getQuantity());
-    double requiredQuantity = recipeIngredient.getUnit().convertToBaseUnit(recipeIngredient.getQuantity());
-
+  private boolean isIngredientSufficient(Ingredient availableIngredient, Ingredient requiredIngredient) {
+    double availableQuantity = availableIngredient.getUnit().convertToBaseUnitValue(availableIngredient.getQuantity());
+    double requiredQuantity = requiredIngredient.getUnit().convertToBaseUnitValue(requiredIngredient.getQuantity());
     return availableQuantity >= requiredQuantity;
   }
 

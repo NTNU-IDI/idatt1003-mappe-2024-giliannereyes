@@ -3,18 +3,17 @@ package edu.ntnu.iir.bidata.model;
 import java.time.LocalDate;
 
 /**
- * Represents an ingredient by name, quantity, price,
- * price per unit, unit of measurement and expiry date.
- *<p>
- *   This class provides methods to validate the properties of the ingredient,
- *   and to manipulate and retrieve its details.
- *</p>
+ * Represents an ingredient by name, quantity, price, price per unit,
+ * unit of measurement and expiry date.
+ *
+ *<p>This class provides methods to validate the properties of the ingredient,
+ *   and to manipulate and retrieve its details.</p>
  */
 public class Ingredient {
-  private String name;  // Name of the ingredient
+  private final String name;  // Name of the ingredient
   private double quantity;  // Quantity of the ingredient in specified unit
   private double pricePerUnit;  // Price per unit of the ingredient
-  private Unit unit;  // Unit of measurement for the ingredient
+  private final Unit unit;  // Unit of measurement for the ingredient
   private LocalDate expiryDate; // Expiry date of the ingredient
 
   /**
@@ -30,12 +29,17 @@ public class Ingredient {
    */
   public Ingredient(
       String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate) {
+    validateName(name);
+    validateQuantity(quantity);
+    validatePricePerUnit(pricePerUnit);
+    validateUnit(unit);
+    validateExpiryDate(expiryDate);
 
-    setName(name);
-    setQuantity(quantity);
-    setPricePerUnit(pricePerUnit);
-    setUnit(unit);
-    setExpiryDate(expiryDate);
+    this.name = name;
+    this.quantity = quantity;
+    this.pricePerUnit = pricePerUnit;
+    this.unit = unit;
+    this.expiryDate = expiryDate;
   }
 
   /**
@@ -48,64 +52,59 @@ public class Ingredient {
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
   public Ingredient(String name, double quantity, Unit unit) {
-    setName(name);
-    setQuantity(quantity);
-    setUnit(unit);
+    validateName(name);
+    validateQuantity(quantity);
+    validateUnit(unit);
+
+    this.name = name;
+    this.quantity = quantity;
+    this.unit = unit;
   }
 
   /**
    * Removes a specified quantity from the ingredient.
-   * <p>
-   *   Decreases the quantity of the ingredient by the specified amount.
-   *   If specified amount is negative or greater than the available quantity,
-   *   an IllegalArgumentException is thrown to prevent the quantity from becoming larger or negative.
-   * </p>
    *
-   * @param inputQuantity The quantity to remove.
-   * @param inputUnit The unit of measurement of the quantity to remove.
+   * @param quantityToRemove The quantity to remove.
+   * @param unitToRemove The unit of measurement of the quantity to remove.
    *
-   * @throws IllegalArgumentException if specified quantity is greater than available quantity.
+   * @throws IllegalArgumentException if the provided quantity or unit is invalid,
+   *         or if specified quantity is greater than available quantity.
    */
-  public void decreaseQuantity(double inputQuantity, Unit inputUnit) {
-    validateQuantityAndUnit(inputQuantity, inputUnit);
+  public void decreaseQuantity(double quantityToRemove, Unit unitToRemove) {
+    validateQuantity(quantityToRemove);
+    validateUnit(unitToRemove);
+    verifyUnitMatch(unitToRemove);
 
-    // Convert quantities of ingredients to their base unit values
-    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
-    double baseToRemove = inputUnit.convertToBaseUnit(inputQuantity);
+    // Calculates the new quantity
+    double baseAvailable = this.unit.convertToBaseUnitValue(this.quantity);
+    double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
+    double updatedBaseQuantity = baseAvailable - baseToRemove;
 
-    // Checks for invalid input
-    if ((baseAvailable - baseToRemove) < 0) {
-      throw new IllegalArgumentException("Insufficient amount of ingredients. Cannot remove " + inputQuantity + " " + inputUnit);
-    }
-
-    // Decrease the ingredient's available quantity in base unit
-    double newAvailableBase = baseAvailable - baseToRemove;
-    // Update the ingredient's quantity
-    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
+    validateQuantity(updatedBaseQuantity);
+    this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
 
   /**
    * Increases the ingredient's quantity by the specified amount.
    *
-   * @param inputQuantity The quantity to add.
-   * @param inputUnit The unit of measurement of the quantity to add.
+   * @param quantityToAdd The quantity to add.
+   * @param unitToAdd The unit of measurement of the quantity to add.
    *
    * @throws IllegalArgumentException if the quantity is negative.
    */
-  public void increaseQuantity(double inputQuantity, Unit inputUnit) {
-    validateQuantityAndUnit(inputQuantity, inputUnit);
+  public void increaseQuantity(double quantityToAdd, Unit unitToAdd) {
+    validateQuantity(quantityToAdd);
+    validateUnit(unitToAdd);
+    verifyUnitMatch(unitToAdd);
 
-    // Convert quantities of ingredients to their base unit values
-    double baseAvailable = this.unit.convertToBaseUnit(this.quantity);
-    double baseToAdd = inputUnit.convertToBaseUnit(inputQuantity);
+    // Calculate the new quantity
+    double baseAvailable = this.unit.convertToBaseUnitValue(this.quantity);
+    double baseToAdd = unitToAdd.convertToBaseUnitValue(quantityToAdd);
+    double updatedBaseQuantity = baseAvailable + baseToAdd;
 
-    // Increase the ingredient's available quantity in base unit
-    double newAvailableBase = baseAvailable + baseToAdd;
     // Update the ingredient's quantity
-    this.quantity = this.unit.convertFromBaseUnit(newAvailableBase);
+    this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
-
-  // Getters for ingredient fields
 
   /**
    * Returns the name of the ingredient.
@@ -173,8 +172,9 @@ public class Ingredient {
   }
 
   /**
-   * Checks if another ingredient is of the same type by checking if the
-   * expiry date, price per unit and name are the same.
+   * Checks if another ingredient is the same as this one by checking if the
+   * expiry date, price per unit and name are the same. Checks if the ingredient's
+   * unit of measurement is compatible too.
    *
    * @param otherIngredient The ingredient to compare with.
    *
@@ -182,126 +182,110 @@ public class Ingredient {
    *         Otherwise, {@code false}.
    */
   public boolean isSameAs(Ingredient otherIngredient) {
-    return otherIngredient.getExpiryDate().equals(expiryDate)
+    return otherIngredient.getName().equals(name)
+        && otherIngredient.getExpiryDate().equals(expiryDate)
         && otherIngredient.getPricePerUnit() == (pricePerUnit)
-        && otherIngredient.getName().equals(name);
+        && !otherIngredient.getUnit().notSameType(unit);
   }
+
   /**
-   * <p>Returns a string representation of the ingredient, including its name,
+   * Returns a string representation of the ingredient, including its name,
    * quantity, unit of measurement, total price, price per unit, and
-   * expiry date.</p>
+   * expiry date.
    *
    * @return A string representation of the ingredient containing its details.
    */
   @Override
   public String toString() {
-    return "Name: " + name + "\n" +
-        "Quantity: " + quantity + " " + unit.getSymbol() + "\n" +
-        "Price: " + getPrice() + " kr\n" +
-        "Price per unit: " + pricePerUnit + " kr/" + unit.getSymbol() + "\n" +
-        "Expiry Date: " + expiryDate;
+    return String.format(
+        "%-15s %-10.2f %-10s %-15s %-15s %-10s",
+        name,
+        quantity,
+        unit.getSymbol(),
+        expiryDate.toString(),
+        String.format("%.2f/%s kr", pricePerUnit, unit.getSymbol()),
+        String.format("%.2f kr", getPrice())
+    );
   }
 
   /**
-   * Validates the quantity and unit for operations.
+   * Verifies whether another unit type matches the ingredient's unit
+   * type, in which a type is either volume or mass.
    *
-   * @param inputQuantity The quantity to validate.
-   * @param inputUnit The unit to validate.
+   * @param unit The unit of measurement to compare with.
    *
-   * @throws IllegalArgumentException if the unit is incompatible or null, or if the quantity is negative.
+   * @throws IllegalArgumentException if the unit types do not match.
    */
-  private void validateQuantityAndUnit(double inputQuantity, Unit inputUnit) {
-    if (inputUnit == null) {
-      throw new IllegalArgumentException("Provided unit cannot be null.");
-    }
-
-    if (this.unit.notSameType(inputUnit)) {
-      throw new IllegalArgumentException("Unit mismatch: Cannot operate with " +
-          inputUnit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
-    }
-
-    if (inputQuantity < 0) {
-      throw new IllegalArgumentException("Invalid quantity: Quantity cannot be negative.");
+  private void verifyUnitMatch(Unit unit) {
+    if (this.unit.notSameType(unit)) {
+      throw new IllegalArgumentException("Unit mismatch: Cannot operate with "
+          + unit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
     }
   }
 
   /**
-   * Sets the name of the ingredient.
+   * Validates a name.
    *
-   * @param name The name of the ingredient. A name that is empty, blank or
-   *             {@code null} is not accepted.
+   * @param name The name to validate.
    *
-   * @throws IllegalArgumentException if the name is empty, blank or {@code null}.
+   * @throws IllegalArgumentException if the name is null, blank or empty.
    */
-  private void setName(String name) {
+  private void validateName(String name) {
     if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException("Ingredient name cannot be null, empty or blank.");
+      throw new IllegalArgumentException("Name cannot be null, empty or blank.");
     }
-
-    this.name = name;
   }
 
   /**
-   * Sets the quantity of the ingredient.
+   * Validates a quantity.
    *
-   * @param quantity The quantity of the ingredient. A quantity that is negative is
-   *                 not accepted.
+   * @param quantity The quantity to validate.
    *
    * @throws IllegalArgumentException if the quantity is negative.
    */
-  private void setQuantity(double quantity) {
+  private void validateQuantity(double quantity) {
     if (quantity < 0) {
-      throw new IllegalArgumentException("Ingredient quantity cannot be negative.");
+      throw new IllegalArgumentException("Quantity cannot be negative.");
     }
-
-    this.quantity = quantity;
   }
 
   /**
-   * Sets the price per unit of the ingredient.
+   * Validates a unit of measurement.
    *
-   * @param pricePerUnit The ingredient's price per unit. A price per unit that is
-   *                     negative or zero is not accepted.
+   * @param unit The unit of measurement to validate.
    *
-   * @throws IllegalArgumentException if the price per unit is negative or zero.
+   * @throws IllegalArgumentException if the unit of measurement is null.
    */
-  private void setPricePerUnit(double pricePerUnit) {
-    if (pricePerUnit <= 0) {
-      throw new IllegalArgumentException("Ingredient price cannot be negative or zero.");
-    }
-
-    this.pricePerUnit = pricePerUnit;
-  }
-
-  /**
-   * Sets the unit of measurement of the ingredient.
-   *
-   * @param unit The ingredient's unit of measurement. The unit of measurement
-   *             cannot be {@code null}.
-   *
-   * @throws IllegalArgumentException if the unit of measurement is {@code null}.
-   */
-  private void setUnit(Unit unit)  {
+  private void validateUnit(Unit unit) {
     if (unit == null) {
-      throw new IllegalArgumentException("Ingredient unit cannot be null.");
+      throw new IllegalArgumentException("Unit cannot be null.");
     }
-
-    this.unit = unit;
   }
 
   /**
-   * Sets the expiry date of the ingredient.
+   * Validates the price per unit.
    *
-   * @param expiryDate The ingredient's expiry date. Expiry date cannot be {@code null}.
-   *                   Expiry date can be a date in the past as an ingredient can be already expired.
+   * @param pricePerUnit The price per unit to validate.
    *
-   * @throws IllegalArgumentException if the expiry date is {@code null}.
+   * @throws IllegalArgumentException if the price per unit is zero or null.
    */
-  private void setExpiryDate(LocalDate expiryDate) {
-    if (expiryDate == null) {
-      throw new IllegalArgumentException("Ingredient expiry date cannot be null.");
+  private void validatePricePerUnit(double pricePerUnit) {
+    if (pricePerUnit <= 0) {
+      throw new IllegalArgumentException("Price per unit cannot be negative or zero.");
     }
-
-    this.expiryDate = expiryDate;
   }
+
+  /**
+   * Validates the expiry date.
+   *
+   * @param expiryDate The expiry date to validate.
+   *
+   * @throws IllegalArgumentException if the expiry date is null.
+   */
+  private void validateExpiryDate(LocalDate expiryDate) {
+    if (expiryDate == null) {
+      throw new IllegalArgumentException("Expiry date cannot be null.");
+    }
+  }
+
 }

@@ -1,8 +1,8 @@
 package edu.ntnu.iir.bidata.storage;
 
 import edu.ntnu.iir.bidata.model.Recipe;
-
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Represents a cookbook with a collection of recipes.
@@ -29,14 +29,19 @@ public class Cookbook {
    *
    * @param recipe The recipe to be added.
    *
-   * @throws IllegalArgumentException if the recipe is {@code null}.
+   * @throws IllegalArgumentException if the recipe is {@code null},
+   *                                  or if the recipe is already in the cookbook.
    */
   public void addRecipe(Recipe recipe) {
-    if (recipe == null) {
-      throw new IllegalArgumentException("Recipe is null");
-    }
+    validateRecipe(recipe);
 
-    recipes.add(recipe);
+    findRecipeByName(recipe.getName())
+        .ifPresentOrElse(
+            r -> {
+              throw new IllegalArgumentException("Recipe is already in the cookbook: " + r);
+            },
+            () -> recipes.add(recipe)
+        );
   }
 
   /**
@@ -47,4 +52,25 @@ public class Cookbook {
   public ArrayList<Recipe> getRecipes() {
     return this.recipes;
   }
+
+  /**
+   * Searches for and retrieves a recipe by the recipe's name.
+   *
+   * @param name The name of the recipe to search for.
+   *
+   * @return An Optional containing the recipe if a recipe with the same name is found.
+   *         Otherwise, an empty Optional.
+   */
+  public Optional<Recipe> findRecipeByName(String name) {
+    return recipes.stream()
+        .filter(recipe -> recipe.getName().equalsIgnoreCase(name.trim()))
+        .findFirst();
+  }
+
+  private void validateRecipe(Recipe recipe) {
+    if (recipe == null) {
+      throw new IllegalArgumentException("Recipe is null");
+    }
+  }
+
 }
