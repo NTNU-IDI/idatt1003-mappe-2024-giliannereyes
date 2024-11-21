@@ -1,7 +1,7 @@
-package edu.ntnu.iir.bidata.tui;
+package edu.ntnu.iir.bidata.ui;
 
-import edu.ntnu.iir.bidata.manager.Manager;
-import edu.ntnu.iir.bidata.manager.Result;
+import edu.ntnu.iir.bidata.utils.Manager;
+import edu.ntnu.iir.bidata.utils.Result;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
 

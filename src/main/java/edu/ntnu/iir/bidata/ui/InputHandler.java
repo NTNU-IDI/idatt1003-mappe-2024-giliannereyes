@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.tui;
+package edu.ntnu.iir.bidata.ui;
 
 import edu.ntnu.iir.bidata.model.Unit;
 

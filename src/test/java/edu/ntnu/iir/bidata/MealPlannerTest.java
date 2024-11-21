@@ -1,11 +1,11 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.manager.MealPlanner;
+import edu.ntnu.iir.bidata.model.MealPlanner;
 import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
-import edu.ntnu.iir.bidata.storage.Cookbook;
-import edu.ntnu.iir.bidata.storage.Fridge;
+import edu.ntnu.iir.bidata.model.Cookbook;
+import edu.ntnu.iir.bidata.model.Fridge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

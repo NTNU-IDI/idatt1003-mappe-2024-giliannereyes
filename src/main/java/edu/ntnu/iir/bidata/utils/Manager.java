@@ -1,10 +1,11 @@
-package edu.ntnu.iir.bidata.manager;
+package edu.ntnu.iir.bidata.utils;
 
+import edu.ntnu.iir.bidata.model.MealPlanner;
 import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
-import edu.ntnu.iir.bidata.storage.Fridge;
-import edu.ntnu.iir.bidata.storage.Cookbook;
+import edu.ntnu.iir.bidata.model.Fridge;
+import edu.ntnu.iir.bidata.model.Cookbook;
 
 import java.time.LocalDate;
 import java.util.List;

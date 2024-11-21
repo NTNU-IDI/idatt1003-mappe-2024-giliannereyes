@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.storage.Fridge;
+import edu.ntnu.iir.bidata.model.Fridge;
 import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Unit;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,6 +1,5 @@
-package edu.ntnu.iir.bidata.storage;
+package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.model.Recipe;
 import java.util.ArrayList;
 import java.util.Optional;
 

@@ -1,9 +1,9 @@
-package edu.ntnu.iir.bidata.tui;
+package edu.ntnu.iir.bidata.ui;
 
-import edu.ntnu.iir.bidata.manager.Manager;
-import edu.ntnu.iir.bidata.manager.MealPlanner;
-import edu.ntnu.iir.bidata.storage.Cookbook;
-import edu.ntnu.iir.bidata.storage.Fridge;
+import edu.ntnu.iir.bidata.utils.Manager;
+import edu.ntnu.iir.bidata.model.MealPlanner;
+import edu.ntnu.iir.bidata.model.Cookbook;
+import edu.ntnu.iir.bidata.model.Fridge;
 
 /**
  * The MainUi class is responsible for managing the main user interaction

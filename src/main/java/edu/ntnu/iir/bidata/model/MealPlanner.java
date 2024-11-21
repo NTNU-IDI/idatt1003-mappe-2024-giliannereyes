@@ -1,9 +1,5 @@
-package edu.ntnu.iir.bidata.manager;
+package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.storage.Cookbook;
-import edu.ntnu.iir.bidata.storage.Fridge;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata;
 
 import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.storage.Cookbook;
+import edu.ntnu.iir.bidata.model.Cookbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

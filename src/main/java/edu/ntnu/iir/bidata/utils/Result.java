@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.manager;
+package edu.ntnu.iir.bidata.utils;
 
 import java.util.Collection;
 import java.util.Optional;

@@ -1,7 +1,5 @@
-package edu.ntnu.iir.bidata.storage;
+package edu.ntnu.iir.bidata.model;
 
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Unit;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
