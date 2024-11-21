@@ -7,19 +7,19 @@ import java.util.Arrays;
  * mass that are relevant for ingredients and recipes.
  */
 public enum Unit {
-  // Volume Units
   LITRE("L", 1.0, UnitType.VOLUME),            // Base unit for volume (liters)
   DECILITRE("dL", 0.1, UnitType.VOLUME),       // 1 dL = 0.1 L
   MILLILITRE("mL", 0.001, UnitType.VOLUME),    // 1 mL = 0.001 L
 
-  // Mass Units
   KILOGRAM("kg", 1.0, UnitType.MASS),        // Base unit for mass (kilograms)
   GRAM("g", 0.001, UnitType.MASS),           // 1 g = 0.001 kg
-  MILLIGRAM("mg", 0.000001, UnitType.MASS);  // 1 mg = 0.000001 kg
+  MILLIGRAM("mg", 0.000001, UnitType.MASS),  // 1 mg = 0.000001 kg
+
+  PIECE("piece", 1.0, UnitType.PIECE);      // Base unit for items measured by count
 
   private final String symbol;
   private final double conversionFactor; // Conversion factor to base unit
-  private final UnitType unitType;           // Type of unit (volume or mass)
+  private final UnitType type;           // Type of unit (volume or mass)
 
   /**
    * Constructs a new Unit instance.
@@ -30,7 +30,7 @@ public enum Unit {
   Unit(String symbol, double conversionFactor, UnitType unitType) {
     this.symbol = symbol;
     this.conversionFactor = conversionFactor;
-    this.unitType = unitType;
+    this.type = unitType;
   }
 
   /**
@@ -50,7 +50,7 @@ public enum Unit {
    * @return {@code true} if the unit types are not the same. Else {@code false}.
    */
   public boolean notSameType(Unit otherUnit) {
-    return this.unitType != otherUnit.unitType;
+    return this.type != otherUnit.type;
   }
 
   /**
@@ -60,7 +60,7 @@ public enum Unit {
    *
    * @return The value in base unit.
    */
-  public double convertToBaseUnit(double value) {
+  public double convertToBaseUnitValue(double value) {
     return conversionFactor * value;
   }
 
@@ -71,7 +71,7 @@ public enum Unit {
    *
    * @return The value in specified unit.
    */
-  public double convertFromBaseUnit(double value) {
+  public double convertFromBaseUnitValue(double value) {
     return value / conversionFactor;
   }
 
@@ -97,6 +97,7 @@ public enum Unit {
    */
   public enum UnitType {
     VOLUME, // Represents units for volume
-    MASS  // Represents units for mass
+    MASS, // Represents units for mass
+    PIECE
   }
 }
