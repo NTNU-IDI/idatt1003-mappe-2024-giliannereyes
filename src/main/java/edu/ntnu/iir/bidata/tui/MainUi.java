@@ -42,7 +42,7 @@ public class MainUi {
    * Starts the main application by displaying the main menu.
    */
   public void start() {
-      mainMenu();
+    mainMenu();
   }
 
   /**
@@ -71,6 +71,7 @@ public class MainUi {
           exitMainMenu = true;
           inputHandler.close();
         }
+        default -> System.out.println("Invalid option!");
       }
     }
   }
@@ -81,29 +82,30 @@ public class MainUi {
    * for further user interaction, depending on the choice.
    */
   private void manageIngredientsMenu() {
-    while (true) {
+    boolean keepRunning = true;
+    while (keepRunning) {
       System.out.print("""
         \n---------- MANAGE INGREDIENTS ----------
         [1] Add a new ingredient to the fridge.
         [2] Search for an ingredient.
-        [3] Remove a quantity of an ingredient from the fridge.
+        [3] Remove an ingredient from the fridge.
         [4] Return to main menu.
         """);
 
       int choice = inputHandler.readInt("\nPlease choose an option: ");
 
-      if (choice == 4) {
-        break;
-      }
-
       switch (choice) {
         case 1 -> ingredientUi.promptAddIngredient();
         case 2 -> ingredientUi.promptSearchIngredient();
         case 3 -> ingredientUi.promptDecreaseIngredientQuantity();
+        case 4 -> {
+          keepRunning = false;
+          continue;
+        }
         default -> System.out.println("Invalid input. Try again.");
       }
 
-      inputHandler.waitForKeyPress();
+      inputHandler.readEnter();
     }
   }
 
@@ -113,27 +115,28 @@ public class MainUi {
    * for further user interaction, depending on the choice.
    */
   private void viewIngredientsMenu() {
-    while (true) {
+    boolean keepRunning = true;
+    while (keepRunning) {
       System.out.print("""
         \n---------- VIEW INGREDIENTS ----------
-        [1] Check ingredients near expiry.
+        [1] View ingredients expiring before a specific date.
         [2] View alphabetically sorted ingredients.
         [3] Return to main menu.
         """);
 
       int choice = inputHandler.readInt("\nPlease choose an option: ");
 
-      if (choice == 3) {
-        break;
-      }
-
       switch (choice) {
         case 1 -> ingredientUi.promptCheckExpiringIngredients();
         case 2 -> ingredientUi.displaySortedIngredients();
+        case 3 -> {
+          keepRunning = false;
+          continue;
+        }
         default -> System.out.println("Invalid input. Try again.");
       }
 
-      inputHandler.waitForKeyPress();
+      inputHandler.readEnter();
     }
   }
 
@@ -143,7 +146,8 @@ public class MainUi {
    * for further user interaction, depending on the choice.
    */
   private void recipeMenu() {
-    while (true) {
+    boolean keepRunning = true;
+    while (keepRunning) {
       System.out.print("""
         \n---------- MANAGE RECIPES ----------
         [1] Create a recipe.
@@ -154,18 +158,18 @@ public class MainUi {
 
       int choice = inputHandler.readInt("\nPlease choose an option: ");
 
-      if (choice == 4) {
-        break;
-      }
-
       switch (choice) {
         case 1 -> recipeUi.promptAddRecipe();
         case 2 -> recipeUi.promptRecipeIngredientsCheck();
         case 3 -> recipeUi.displaySuggestedRecipes();
+        case 4 -> {
+          keepRunning = false;
+          continue;
+        }
         default -> System.out.println("Invalid input. Try again.");
       }
 
-      inputHandler.waitForKeyPress();
+      inputHandler.readEnter();
     }
   }
 

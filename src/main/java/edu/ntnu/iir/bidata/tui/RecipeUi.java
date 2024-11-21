@@ -81,14 +81,12 @@ public class RecipeUi {
    * @param recipe The recipe to which the ingredients are added to.
    */
   private void addIngredientsToRecipe(Recipe recipe) {
-    boolean addingIngredients = true;
+    System.out.println("You are now adding ingredients to recipe: " + recipe.getName());
 
+    boolean addingIngredients = true;
     while (addingIngredients) {
       promptAddIngredient(recipe);
-
-      System.out.println("Would you like to continue adding ingredients?");
-      int choice = inputHandler.readInt("[1] Yes\n[2] No\n");
-      addingIngredients = (choice == 1);
+      addingIngredients = inputHandler.readYes("Would you like to continue adding ingredients?");
     }
   }
 

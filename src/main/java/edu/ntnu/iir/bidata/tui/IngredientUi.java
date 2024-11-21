@@ -6,6 +6,7 @@ import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Unit;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -40,7 +41,8 @@ public class IngredientUi {
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
 
     Result<Void> result = manager.addIngredientToFridge(name, quantity, pricePerUnit, unit, expiryDate);
-    System.out.println(result.getMessage());
+    displayResult(result);
+    promptRetryOperationIfFailed(this::promptAddIngredient, result.isSuccess());
   }
 
   /**
@@ -50,13 +52,10 @@ public class IngredientUi {
    */
   public void promptSearchIngredient() {
     String name = inputHandler.readString("Enter ingredient name: ");
+
     Result<Ingredient> result = manager.searchForIngredient(name);
-
-    System.out.println(result.getMessage());
-
-    if (result.isSuccess()) {
-      result.getData().ifPresent(System.out::println);
-    }
+    displayResult(result, getIngredientHeader());
+    promptRetryOperationIfFailed(this::promptSearchIngredient, result.isSuccess());
   }
 
   /**
@@ -70,7 +69,8 @@ public class IngredientUi {
     double quantity = inputHandler.readDouble("Enter quantity to remove: ");
 
     Result<Void> result = manager.decreaseIngredientQuantity(name, unit, quantity);
-    System.out.println(result.getMessage());
+    displayResult(result);
+    promptRetryOperationIfFailed(this::promptDecreaseIngredientQuantity, result.isSuccess());
   }
 
   /**
@@ -80,14 +80,10 @@ public class IngredientUi {
    */
   public void promptCheckExpiringIngredients() {
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
+
     Result<List<Ingredient>> result = manager.checkExpiringIngredients(expiryDate);
-
-    System.out.println(result.getMessage());
-
-    if (result.isSuccess()) {
-      List<Ingredient> expiringIngredients = result.getData().orElseGet(List::of);
-      expiringIngredients.forEach(System.out::println);
-    }
+    displayResult(result, getIngredientHeader());
+    promptRetryOperationIfFailed(this::promptCheckExpiringIngredients, result.isSuccess());
   }
 
   /**
@@ -96,12 +92,53 @@ public class IngredientUi {
    */
   public void displaySortedIngredients() {
     Result<List<Ingredient>> result = manager.getSortedIngredients();
+    displayResult(result, getIngredientHeader());
+    promptRetryOperationIfFailed(this::displaySortedIngredients, result.isSuccess());
+  }
 
-    System.out.println(result.getMessage());
-
-    if (result.isSuccess()) {
-      List<Ingredient> sortedIngredients = result.getData().orElseGet(List::of);
-      sortedIngredients.forEach(System.out::println);
+  /**
+   * Prompts the user to choose whether to run an operation again or not
+   * if the operation failed.
+   *
+   * @param operation The operation to run if the user chooses to retry.
+   */
+  private void promptRetryOperationIfFailed(Runnable operation, boolean success) {
+    if (!success ) {
+      boolean retry = inputHandler.readYes("Would you like to try again?");
+      if (retry) {
+        operation.run();
+      }
     }
   }
+
+  // Overloaded method without a header
+  private <T> void displayResult(Result<T> result) {
+    displayResult(result, "");
+  }
+
+  // Main method with a header
+  private <T> void displayResult(Result<T> result, String header) {
+    System.out.println(result.getMessage());
+
+    if (result.isSuccess() && result.getData().isPresent()) {
+      if (!header.isBlank()) {
+        System.out.println(header);
+      }
+      T data = result.getData().get();
+
+      if (data instanceof Collection<?> collection) {
+        collection.forEach(System.out::println);
+      } else {
+        System.out.println(data);
+      }
+    }
+  }
+
+  private String getIngredientHeader() {
+    return String.format(
+        "%-15s %-10s %-10s %-15s %-15s %-10s%n%n",
+        "Name", "Quantity", "Unit", "Expiry Date", "Price/Unit", "Total Price"
+    );
+  }
+
 }

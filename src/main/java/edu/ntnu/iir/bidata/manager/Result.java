@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.manager;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -65,4 +66,25 @@ public class Result<T> {
   public Optional<T> getData() {
     return Optional.ofNullable(this.data);
   }
+
+  public String formatResult() {
+      StringBuilder builder = new StringBuilder();
+      builder.append(message).append("\n");
+
+      if (data != null) {
+        if (data instanceof Collection<?> collection) {
+          collection.forEach(item -> builder.append(item).append("\n"));
+        } else {
+          builder.append(data).append("\n");
+        }
+      }
+
+      return builder.toString();
+  }
+
+  @Override
+  public String toString() {
+    return formatResult();
+  }
+
 }

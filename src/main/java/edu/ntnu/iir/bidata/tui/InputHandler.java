@@ -21,6 +21,8 @@ public class InputHandler {
    *   Displays an error message if input is invalid and retries.
    * </p>
    *
+   * @param prompt The message to display to the user.
+   *
    * @return A string entered by the user.
    */
   public String readString(String prompt) {
@@ -42,6 +44,8 @@ public class InputHandler {
    *   Continuously prompts the user to enter a valid integer.
    *   Displays an error message if input is invalid and retries.
    * </p>
+   *
+   * @param prompt The message to display to the user.
    *
    * @return A valid integer entered by the user.
    *
@@ -75,6 +79,8 @@ public class InputHandler {
    *   Displays an error message if input is invalid and retries.
    * </p>
    *
+   * @param prompt The message to display to the user.
+   *
    * @return A valid double entered by the user.
    *
    * @throws NumberFormatException if the input is not a valid double.
@@ -107,6 +113,8 @@ public class InputHandler {
    *   Displays an error message if input is invalid and retries.
    * </p>
    *
+   * @param prompt The message to display to the user.
+   *
    * @return A valid {@link LocalDate} entered by the user.
    *
    * @throws DateTimeParseException if the input is not a valid LocalDate.
@@ -130,6 +138,8 @@ public class InputHandler {
    *   Continuously prompts the user to enter a valid unit. Displays
    *   an error message if input is invalid and retries.
    * </p>
+   *
+   * @param prompt The message to display to the user.
    *
    * @return A valid {@link Unit} entered by the user.
    *
@@ -157,9 +167,29 @@ public class InputHandler {
    * Reads any key pressed by the user. 'Pauses' the console output,
    * allowing the user to read content before proceeding to the next.
    */
-  public void waitForKeyPress() {
-    System.out.println("Press any button to continue...");
+  public void readEnter() {
+    System.out.println("\nPress enter to continue...");
     scanner.nextLine();
+  }
+
+  /**
+   * Reads a choice "yes" or "no" from the user.
+   *
+   * @param prompt The message to display to the user.
+   *
+   * @return {@code true} if the choice is "yes", or {@code false}
+   *         if the answer is "no".
+   */
+  public boolean readYes(String prompt) {
+    while (true) {
+      int choice = readInt(prompt + "\n[1] Yes\n[2] No\n");
+
+      if (choice == 1 || choice == 2) {
+        return choice == 1;
+      }
+
+      System.out.println("Invalid input. Enter 1 for Yes or 2 for no.\n");
+    }
   }
 
   /**
