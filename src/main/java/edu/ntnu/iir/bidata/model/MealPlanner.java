@@ -1,5 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +20,9 @@ public class MealPlanner {
    * @param cookbook The cookbook to retrieve recipes from.
    */
   public MealPlanner(Fridge fridge, Cookbook cookbook) {
+    Validation.validateFridge(fridge);
+    Validation.validateCookbook(cookbook);
+
     this.fridge = fridge;
     this.cookbook = cookbook;
   }
@@ -31,6 +36,7 @@ public class MealPlanner {
    * @return {@code true} if all ingredients required are available. Otherwise, {@code false}.
    */
   public boolean verifyIngredientsForRecipe(String recipeName) {
+    Validation.validateNonEmptyString(recipeName);
     Optional<Recipe> recipeOpt = findRecipeByName(recipeName);
 
     return recipeOpt.map(recipe ->

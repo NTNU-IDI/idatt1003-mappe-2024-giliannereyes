@@ -1,5 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
+
 import java.util.Arrays;
 
 /**
@@ -50,6 +52,7 @@ public enum Unit {
    * @return {@code true} if the unit types are not the same. Else {@code false}.
    */
   public boolean notSameType(Unit otherUnit) {
+    Validation.validateUnit(otherUnit);
     return this.type != otherUnit.type;
   }
 
@@ -61,6 +64,7 @@ public enum Unit {
    * @return The value in base unit.
    */
   public double convertToBaseUnitValue(double value) {
+    Validation.validatePositiveNumber(value);
     return conversionFactor * value;
   }
 
@@ -72,6 +76,7 @@ public enum Unit {
    * @return The value in specified unit.
    */
   public double convertFromBaseUnitValue(double value) {
+    Validation.validatePositiveNumber(value);
     return value / conversionFactor;
   }
 
@@ -85,6 +90,7 @@ public enum Unit {
    * @throws IllegalArgumentException if the provided symbol does not match any unit.
    */
   public static Unit getUnitBySymbol(String symbol) {
+    Validation.validateNonEmptyString(symbol);
     return Arrays.stream(Unit.values())
         .filter(unit -> unit.getSymbol().equalsIgnoreCase(symbol))
         .findFirst()

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import edu.ntnu.iir.bidata.utils.Validation;
 
 /**
  * Represents a fridge that stores ingredients.
@@ -40,8 +41,7 @@ public class Fridge {
    *                                  has the same name as a different ingredient in the fridge.
    */
   public void addIngredient(Ingredient newIngredient) {
-    validateIngredient(newIngredient);
-
+    Validation.validateIngredient(newIngredient);
     findIngredientByName(newIngredient.getName())
         .ifPresentOrElse(
             storedIngredient -> mergeIngredients(storedIngredient, newIngredient),
@@ -60,9 +60,9 @@ public class Fridge {
    *                                  or if the quantity provided is negative or becomes negative,
    */
   public void decreaseIngredientQuantity(String name, double quantity, Unit unit) {
-    validateQuantity(quantity);
-    validateUnit(unit);
-    validateName(name);
+    Validation.validatePositiveNumber(quantity);
+    Validation.validateUnit(unit);
+    Validation.validateNonEmptyString(name);
 
     Ingredient ingredient = findIngredientByName(name)
         .orElseThrow(() ->
@@ -81,6 +81,7 @@ public class Fridge {
    *         Otherwise, an empty Optional.
    */
   public Optional<Ingredient> findIngredientByName(String name) {
+    Validation.validateNonEmptyString(name);
     return ingredients.stream()
         .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name.trim()))
         .findFirst();
@@ -94,6 +95,7 @@ public class Fridge {
    * @return A list of ingredients.
    */
   public List<Ingredient> findIngredientsBeforeDate(LocalDate date) {
+    Validation.validateDate(date);
     return ingredients.stream()
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(date))
         .toList();
@@ -160,29 +162,4 @@ public class Fridge {
       ingredients.remove(ingredient);
     }
   }
-
-  private void validateIngredient(Ingredient ingredient) {
-    if (ingredient == null) {
-      throw new IllegalArgumentException("Ingredient cannot be null");
-    }
-  }
-
-  private void validateQuantity(double quantity) {
-    if (quantity < 0) {
-      throw new IllegalArgumentException("Quantity cannot be negative.");
-    }
-  }
-
-  private void validateUnit(Unit unit) {
-    if (unit == null) {
-      throw new IllegalArgumentException("Unit cannot be null.");
-    }
-  }
-
-  private void validateName(String name) {
-    if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException("Ingredient name cannot be null or blank.");
-    }
-  }
-
 }

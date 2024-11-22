@@ -1,5 +1,6 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
 import java.time.LocalDate;
 
 /**
@@ -29,11 +30,11 @@ public class Ingredient {
    */
   public Ingredient(
       String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate) {
-    validateName(name);
-    validateQuantity(quantity);
-    validatePricePerUnit(pricePerUnit);
-    validateUnit(unit);
-    validateExpiryDate(expiryDate);
+    Validation.validateNonEmptyString(name);
+    Validation.validatePositiveNumber(quantity);
+    Validation.validatePositiveNumber(pricePerUnit);
+    Validation.validateUnit(unit);
+    Validation.validateDate(expiryDate);
 
     this.name = name;
     this.quantity = quantity;
@@ -52,9 +53,9 @@ public class Ingredient {
    * @throws IllegalArgumentException if any of the parameters are invalid.
    */
   public Ingredient(String name, double quantity, Unit unit) {
-    validateName(name);
-    validateQuantity(quantity);
-    validateUnit(unit);
+    Validation.validateNonEmptyString(name);
+    Validation.validatePositiveNumber(quantity);
+    Validation.validateUnit(unit);
 
     this.name = name;
     this.quantity = quantity;
@@ -71,8 +72,8 @@ public class Ingredient {
    *         or if specified quantity is greater than available quantity.
    */
   public void decreaseQuantity(double quantityToRemove, Unit unitToRemove) {
-    validateQuantity(quantityToRemove);
-    validateUnit(unitToRemove);
+    Validation.validatePositiveNumber(quantityToRemove);
+    Validation.validateUnit(unitToRemove);
     verifyUnitMatch(unitToRemove);
 
     // Calculates the new quantity
@@ -80,7 +81,7 @@ public class Ingredient {
     double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
     double updatedBaseQuantity = baseAvailable - baseToRemove;
 
-    validateQuantity(updatedBaseQuantity);
+    Validation.validatePositiveNumber(updatedBaseQuantity);
     this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
 
@@ -93,8 +94,8 @@ public class Ingredient {
    * @throws IllegalArgumentException if the quantity is negative.
    */
   public void increaseQuantity(double quantityToAdd, Unit unitToAdd) {
-    validateQuantity(quantityToAdd);
-    validateUnit(unitToAdd);
+    Validation.validatePositiveNumber(quantityToAdd);
+    Validation.validateUnit(unitToAdd);
     verifyUnitMatch(unitToAdd);
 
     // Calculate the new quantity
@@ -222,70 +223,4 @@ public class Ingredient {
           + unit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
     }
   }
-
-  /**
-   * Validates a name.
-   *
-   * @param name The name to validate.
-   *
-   * @throws IllegalArgumentException if the name is null, blank or empty.
-   */
-  private void validateName(String name) {
-    if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException("Name cannot be null, empty or blank.");
-    }
-  }
-
-  /**
-   * Validates a quantity.
-   *
-   * @param quantity The quantity to validate.
-   *
-   * @throws IllegalArgumentException if the quantity is negative.
-   */
-  private void validateQuantity(double quantity) {
-    if (quantity < 0) {
-      throw new IllegalArgumentException("Quantity cannot be negative.");
-    }
-  }
-
-  /**
-   * Validates a unit of measurement.
-   *
-   * @param unit The unit of measurement to validate.
-   *
-   * @throws IllegalArgumentException if the unit of measurement is null.
-   */
-  private void validateUnit(Unit unit) {
-    if (unit == null) {
-      throw new IllegalArgumentException("Unit cannot be null.");
-    }
-  }
-
-  /**
-   * Validates the price per unit.
-   *
-   * @param pricePerUnit The price per unit to validate.
-   *
-   * @throws IllegalArgumentException if the price per unit is zero or null.
-   */
-  private void validatePricePerUnit(double pricePerUnit) {
-    if (pricePerUnit <= 0) {
-      throw new IllegalArgumentException("Price per unit cannot be negative or zero.");
-    }
-  }
-
-  /**
-   * Validates the expiry date.
-   *
-   * @param expiryDate The expiry date to validate.
-   *
-   * @throws IllegalArgumentException if the expiry date is null.
-   */
-  private void validateExpiryDate(LocalDate expiryDate) {
-    if (expiryDate == null) {
-      throw new IllegalArgumentException("Expiry date cannot be null.");
-    }
-  }
-
 }

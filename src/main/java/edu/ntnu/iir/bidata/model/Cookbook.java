@@ -1,5 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -32,7 +34,7 @@ public class Cookbook {
    *                                  or if the recipe is already in the cookbook.
    */
   public void addRecipe(Recipe recipe) {
-    validateRecipe(recipe);
+    Validation.validateRecipe(recipe);
 
     findRecipeByName(recipe.getName())
         .ifPresentOrElse(
@@ -49,7 +51,7 @@ public class Cookbook {
    * @return A list of recipes.
    */
   public ArrayList<Recipe> getRecipes() {
-    return this.recipes;
+    return new ArrayList<>(recipes);
   }
 
   /**
@@ -61,15 +63,9 @@ public class Cookbook {
    *         Otherwise, an empty Optional.
    */
   public Optional<Recipe> findRecipeByName(String name) {
+    Validation.validateNonEmptyString(name);
     return recipes.stream()
         .filter(recipe -> recipe.getName().equalsIgnoreCase(name.trim()))
         .findFirst();
   }
-
-  private void validateRecipe(Recipe recipe) {
-    if (recipe == null) {
-      throw new IllegalArgumentException("Recipe is null");
-    }
-  }
-
 }

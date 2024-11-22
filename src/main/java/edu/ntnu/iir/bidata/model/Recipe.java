@@ -1,5 +1,7 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,14 +29,14 @@ public class Recipe {
    * @param instruction The instruction for the recipe.
    */
   public Recipe(String name, String description, String instruction) {
+    Validation.validateNonEmptyString(name);
+    Validation.validateNonEmptyString(description);
+    Validation.validateNonEmptyString(instruction);
+
     this.name = name;
     this.description = description;
     this.instruction = instruction;
     this.ingredients = new ArrayList<>();
-
-    validateNonEmptyString(name, "name");
-    validateNonEmptyString(description, "description");
-    validateNonEmptyString(instruction, "instruction");
   }
 
   /**
@@ -45,10 +47,7 @@ public class Recipe {
    * @throws IllegalArgumentException if the ingredient is null.
    */
   public void addIngredient(Ingredient ingredient) {
-    if (ingredient == null) {
-      throw new IllegalArgumentException("Ingredient cannot be null.");
-    }
-
+    Validation.validateIngredient(ingredient);
     ingredients.add(ingredient);
   }
 
@@ -99,21 +98,6 @@ public class Recipe {
     return String.format(
         "Name: %s\nDescription: %s\nInstruction: %s\nIngredients:\n%s",
         name, description, instruction, getFormattedIngredientList());
-  }
-
-  /**
-   * Validates that a string is not null, empty or blank.
-   *
-   * @param value The string to validate.
-   * @param fieldName The name of the field being validated.
-   *
-   * @throws IllegalArgumentException if the value is null, empty or blank.
-   */
-  private void validateNonEmptyString(String value, String fieldName) {
-    if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException(
-          String.format("The %s cannot be null, empty or blank.", fieldName));
-    }
   }
 
   /**
