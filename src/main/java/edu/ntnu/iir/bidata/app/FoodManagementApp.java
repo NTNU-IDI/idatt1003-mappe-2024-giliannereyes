@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.MainApp;
+package edu.ntnu.iir.bidata.app;
 
 import edu.ntnu.iir.bidata.utils.Manager;
 import edu.ntnu.iir.bidata.model.MealPlanner;
@@ -7,7 +7,7 @@ import edu.ntnu.iir.bidata.model.Fridge;
 import edu.ntnu.iir.bidata.ui.InputHandler;
 import edu.ntnu.iir.bidata.ui.Ui;
 
-public class Main {
+public class FoodManagementApp {
   public static void main(String[] args) {
     // Create instances of the classes needed to run the application
     Fridge fridge = new Fridge();

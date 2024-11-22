@@ -15,11 +15,11 @@ a Java-based food management system.
 [//]: # (TODO: Describe the structure of your project here. How have you used packages in your structure. Where are all sourcefiles stored. Where are all JUnit-test classes stored. etc.)
 This project is structured using Maven. The source files are stored in the `src/main/java` directory
 while the JUnit test classes are stored in the `src/test/java` directory. The project is divided into
-different packages: `model`, `utils`, `ui` and `MainApp`. The `model` package includes the model classes
+different packages: `model`, `utils`, `ui` and `app`. The `model` package includes the model classes
 `Ingredient`, `Recipe`, `Fridge`, `Cookbook`, `MealPlanner` and `Unit`. The `utils` package's
 classes include helper methods used accross the project. The `ui` package includes the classes
-that interact with the user, which includes the `UserInterface` and `InputHandler`.
-The main application is stored in the `MainApp` package.
+that interact with the user, which includes the `Ui` and `InputHandler`.
+The main application is stored in the `app` package.
 
 ## Link to repository
 https://github.com/NTNU-IDI/idatt1003-mappe-2024-giliannereyes
