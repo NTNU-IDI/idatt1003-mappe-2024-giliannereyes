@@ -81,7 +81,7 @@ public class Ingredient {
     double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
     double updatedBaseQuantity = baseAvailable - baseToRemove;
 
-    Validation.validatePositiveNumber(updatedBaseQuantity);
+    Validation.validateNonNegativeNumber(updatedBaseQuantity);
     this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
 

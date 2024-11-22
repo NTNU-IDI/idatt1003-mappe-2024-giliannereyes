@@ -64,7 +64,7 @@ public enum Unit {
    * @return The value in base unit.
    */
   public double convertToBaseUnitValue(double value) {
-    Validation.validatePositiveNumber(value);
+    Validation.validateNonNegativeNumber(value);
     return conversionFactor * value;
   }
 
@@ -76,7 +76,7 @@ public enum Unit {
    * @return The value in specified unit.
    */
   public double convertFromBaseUnitValue(double value) {
-    Validation.validatePositiveNumber(value);
+    Validation.validateNonNegativeNumber(value);
     return value / conversionFactor;
   }
 

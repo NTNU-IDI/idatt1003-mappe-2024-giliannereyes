@@ -29,6 +29,17 @@ public class Validation {
   }
 
   /**
+   * Validates that the provided number is non-negative.
+   *
+   * @param number is the number to validate.
+   */
+  public static void validateNonNegativeNumber(double number) {
+    if (number < 0) {
+      throw new IllegalArgumentException("Number must be non-negative");
+    }
+  }
+
+  /**
    * Validates that the provided date is not null.
    *
    * @param date is the date to validate.
