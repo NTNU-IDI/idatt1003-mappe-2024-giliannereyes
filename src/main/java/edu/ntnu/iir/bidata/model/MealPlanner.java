@@ -3,7 +3,6 @@ package edu.ntnu.iir.bidata.model;
 import edu.ntnu.iir.bidata.utils.Validation;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The MealPlanner class is responsible for managing recipes in the cookbook
@@ -31,15 +30,13 @@ public class MealPlanner {
    * Verifies if all the ingredients required for a specified recipe
    * are available in the fridge.
    *
-   * @param recipeName The name of the recipe to check for.
+   * @param recipeName is a name of the recipe to check for.
    *
    * @return {@code true} if all ingredients required are available. Otherwise, {@code false}.
    */
-  public boolean verifyIngredientsForRecipe(String recipeName) {
+  public boolean ingredientsAreAvailableForRecipe(String recipeName) {
     Validation.validateNonEmptyString(recipeName);
-    Optional<Recipe> recipeOpt = findRecipeByName(recipeName);
-
-    return recipeOpt.map(recipe ->
+    return cookbook.findRecipeByName(recipeName).map(recipe ->
         recipe.getIngredients().stream()
         .allMatch(this::isIngredientAvailable))
         .orElse(false);
@@ -51,9 +48,9 @@ public class MealPlanner {
    *
    * @return A list of recipes.
    */
-  public List<Recipe> findSuggestedRecipes() {
+  public List<Recipe> findRecipesWithAvailableIngredients() {
     return cookbook.getRecipes().stream()
-        .filter(recipe -> verifyIngredientsForRecipe(recipe.getName()))
+        .filter(recipe -> ingredientsAreAvailableForRecipe(recipe.getName()))
         .toList();
   }
 
@@ -61,34 +58,31 @@ public class MealPlanner {
    * Checks if an ingredient required for a recipe is available, meaning there
    * is a sufficient quantity in the fridge, and that the ingredient is not expired.
    *
-   * @param recipeIngredient The ingredient from a recipe to check for.
+   * @param requiredIngredient is the ingredient required for a recipe.
    *
    * @return {@code true} if the ingredient is available. Otherwise, {@code false}.
    */
-  private boolean isIngredientAvailable(Ingredient recipeIngredient) {
-    return fridge.findIngredientByName(recipeIngredient.getName())
+  private boolean isIngredientAvailable(Ingredient requiredIngredient) {
+    return fridge.findIngredientByName(requiredIngredient.getName())
         .filter(fridgeIngredient -> !fridgeIngredient.isExpired())
-        .filter(fridgeIngredient -> !fridgeIngredient.getUnit().notSameType(recipeIngredient.getUnit()))
-        .map(fridgeIngredient -> isIngredientSufficient(fridgeIngredient, recipeIngredient))
+        .filter(fridgeIngredient -> fridgeIngredient.getUnit().isCompatibleWith(requiredIngredient.getUnit()))
+        .map(fridgeIngredient -> hasSufficientQuantity(fridgeIngredient, requiredIngredient))
         .orElse(false);
   }
 
-  private boolean isIngredientSufficient(Ingredient availableIngredient, Ingredient requiredIngredient) {
+  /**
+   * Checks if the quantity of an ingredient in the fridge is sufficient for a recipe.
+   * The quantity is considered sufficient if the quantity in the fridge is greater or equal.
+   *
+   * @param availableIngredient is the ingredient in the fridge.
+   * @param requiredIngredient is the ingredient required.
+   *
+   * @return {@code true} if the available quantity meets or exceeds the required quantity.
+   *         Otherwise, {@code false}.
+   */
+  private boolean hasSufficientQuantity(Ingredient availableIngredient, Ingredient requiredIngredient) {
     double availableQuantity = availableIngredient.getUnit().convertToBaseUnitValue(availableIngredient.getQuantity());
     double requiredQuantity = requiredIngredient.getUnit().convertToBaseUnitValue(requiredIngredient.getQuantity());
     return availableQuantity >= requiredQuantity;
   }
-
-  /**
-   * Retrieves a recipe with the specified name.
-   *
-   * @param recipeName The name of the recipe to retrieve.
-   * @return A recipe that matches the specified name.
-   */
-  private Optional<Recipe> findRecipeByName(String recipeName) {
-    return cookbook.getRecipes().stream()
-        .filter(recipe -> recipe.getName().equalsIgnoreCase(recipeName))
-        .findFirst();
-  }
-
 }

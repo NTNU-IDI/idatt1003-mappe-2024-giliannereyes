@@ -46,15 +46,6 @@ public class Cookbook {
   }
 
   /**
-   * Retrieves the recipes in the cookbook.
-   *
-   * @return A list of recipes.
-   */
-  public ArrayList<Recipe> getRecipes() {
-    return new ArrayList<>(recipes);
-  }
-
-  /**
    * Searches for and retrieves a recipe by the recipe's name.
    *
    * @param name The name of the recipe to search for.
@@ -67,5 +58,14 @@ public class Cookbook {
     return recipes.stream()
         .filter(recipe -> recipe.getName().equalsIgnoreCase(name.trim()))
         .findFirst();
+  }
+
+  /**
+   * Retrieves the recipes in the cookbook.
+   *
+   * @return A list of recipes.
+   */
+  public ArrayList<Recipe> getRecipes() {
+    return new ArrayList<>(recipes);
   }
 }

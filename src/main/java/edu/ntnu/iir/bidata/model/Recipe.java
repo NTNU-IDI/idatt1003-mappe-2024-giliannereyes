@@ -57,7 +57,7 @@ public class Recipe {
    * @return the name of the recipe.
    */
   public String getName() {
-    return this.name;
+    return name;
   }
 
   /**
@@ -66,7 +66,7 @@ public class Recipe {
    * @return the description of the recipe.
    */
   public String getDescription() {
-    return this.description;
+    return description;
   }
 
   /**
@@ -75,7 +75,7 @@ public class Recipe {
    * @return the instruction of the recipe.
    */
   public String getInstruction() {
-    return this.instruction;
+    return instruction;
   }
 
   /**
@@ -84,7 +84,7 @@ public class Recipe {
    * @return A list of ingredients.
    */
   public List<Ingredient> getIngredients() {
-    return this.ingredients;
+    return new ArrayList<>(ingredients);
   }
 
   /**
@@ -109,7 +109,6 @@ public class Recipe {
    */
   private String getFormattedIngredientList() {
     StringBuilder builder = new StringBuilder();
-
     ingredients.forEach(ingredient ->
         builder.append(
             String.format(
@@ -120,7 +119,6 @@ public class Recipe {
             )
         )
     );
-
     return builder.toString();
   }
 

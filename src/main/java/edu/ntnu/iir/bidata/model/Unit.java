@@ -51,9 +51,9 @@ public enum Unit {
    *
    * @return {@code true} if the unit types are not the same. Else {@code false}.
    */
-  public boolean notSameType(Unit otherUnit) {
+  public boolean isCompatibleWith(Unit otherUnit) {
     Validation.validateUnit(otherUnit);
-    return this.type != otherUnit.type;
+    return type == otherUnit.type;
   }
 
   /**

@@ -188,7 +188,7 @@ public class Manager {
    *         are available, or a message that there are insufficient ingredients.
    */
   public Result<Void> checkRecipeIngredients(String recipeName) {
-    boolean recipeAvailable = mealPlanner.verifyIngredientsForRecipe(recipeName);
+    boolean recipeAvailable = mealPlanner.ingredientsAreAvailableForRecipe(recipeName);
 
     if (recipeAvailable) {
       return new Result<>(true, String.format("You have all the ingredients to make '%s'!", recipeName));
@@ -204,7 +204,7 @@ public class Manager {
    *         or a message if there are none.
    */
   public Result<List<Recipe>> getSuggestedRecipes() {
-    List<Recipe> recipes = mealPlanner.findSuggestedRecipes();
+    List<Recipe> recipes = mealPlanner.findRecipesWithAvailableIngredients();
 
     if (!recipes.isEmpty()) {
       return new Result<>(true, recipes, "You have all the ingredients to make these recipes.");

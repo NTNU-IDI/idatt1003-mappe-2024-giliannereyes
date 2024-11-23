@@ -72,17 +72,14 @@ public class Ingredient {
    *         or if specified quantity is greater than available quantity.
    */
   public void decreaseQuantity(double quantityToRemove, Unit unitToRemove) {
-    Validation.validatePositiveNumber(quantityToRemove);
-    Validation.validateUnit(unitToRemove);
-    verifyUnitMatch(unitToRemove);
+    validateQuantityOperation(quantityToRemove, unitToRemove);
 
-    // Calculates the new quantity
-    double baseAvailable = this.unit.convertToBaseUnitValue(this.quantity);
+    double baseAvailable = unit.convertToBaseUnitValue(quantity);
     double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
     double updatedBaseQuantity = baseAvailable - baseToRemove;
 
     Validation.validateNonNegativeNumber(updatedBaseQuantity);
-    this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
+    quantity = unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
 
   /**
@@ -94,72 +91,13 @@ public class Ingredient {
    * @throws IllegalArgumentException if the quantity is negative.
    */
   public void increaseQuantity(double quantityToAdd, Unit unitToAdd) {
-    Validation.validatePositiveNumber(quantityToAdd);
-    Validation.validateUnit(unitToAdd);
-    verifyUnitMatch(unitToAdd);
+    validateQuantityOperation(quantityToAdd, unitToAdd);
 
-    // Calculate the new quantity
-    double baseAvailable = this.unit.convertToBaseUnitValue(this.quantity);
+    double baseAvailable = unit.convertToBaseUnitValue(quantity);
     double baseToAdd = unitToAdd.convertToBaseUnitValue(quantityToAdd);
     double updatedBaseQuantity = baseAvailable + baseToAdd;
 
-    // Update the ingredient's quantity
-    this.quantity = this.unit.convertFromBaseUnitValue(updatedBaseQuantity);
-  }
-
-  /**
-   * Returns the name of the ingredient.
-   *
-   * @return name of the ingredient.
-   */
-  public String getName() {
-    return this.name;
-  }
-
-  /**
-   * Returns the quantity of the ingredient.
-   *
-   * @return the quantity of the ingredient.
-   */
-  public double getQuantity() {
-    return this.quantity;
-  }
-
-  /**
-   * Returns the total price of the ingredient.
-   * Price is calculated based on the ingredient's current quantity and price per unit.
-   *
-   * @return the total price of the ingredient.
-   */
-  public double getPrice() {
-    return this.quantity * this.pricePerUnit;
-  }
-
-  /**
-   * Returns the price per unit of the ingredient.
-   *
-   * @return the price per unit of the ingredient.
-   */
-  public double getPricePerUnit() {
-    return this.pricePerUnit;
-  }
-
-  /**
-   * Returns the unit of measurement for the ingredient.
-   *
-   * @return the unit of measurement.
-   */
-  public Unit getUnit() {
-    return this.unit;
-  }
-
-  /**
-   * Returns the expiry date of the ingredient.
-   *
-   * @return the expiry date.
-   */
-  public LocalDate getExpiryDate() {
-    return this.expiryDate;
+    this.quantity = unit.convertFromBaseUnitValue(updatedBaseQuantity);
   }
 
   /**
@@ -182,11 +120,40 @@ public class Ingredient {
    * @return {@code true} if this and the other ingredient are of the same type.
    *         Otherwise, {@code false}.
    */
-  public boolean isSameAs(Ingredient otherIngredient) {
+  public boolean matchesIngredient(Ingredient otherIngredient) {
+    Validation.validateIngredient(otherIngredient);
     return otherIngredient.getName().equals(name)
         && otherIngredient.getExpiryDate().equals(expiryDate)
         && otherIngredient.getPricePerUnit() == (pricePerUnit)
-        && !otherIngredient.getUnit().notSameType(unit);
+        && otherIngredient.getUnit().isCompatibleWith(unit);
+  }
+
+  /**
+   * Verifies whether another unit type matches the ingredient's unit
+   * type, in which a type is either volume or mass.
+   *
+   * @param otherUnit The unit of measurement to compare with.
+   *
+   * @throws IllegalArgumentException if the unit types do not match.
+   */
+  private void verifyUnitMatch(Unit otherUnit) {
+    if (!unit.isCompatibleWith(otherUnit)) {
+      throw new IllegalArgumentException("Unit mismatch: Cannot operate with "
+          + unit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
+    }
+  }
+
+  /**
+   * Validates the quantity operation by checking if the quantity is positive,
+   * and if the unit of measurement is valid.
+   *
+   * @param quantity is the quantity to validate.
+   * @param unit is the unit of measurement to validate.
+   */
+  private void validateQuantityOperation(double quantity, Unit unit) {
+    Validation.validatePositiveNumber(quantity);
+    Validation.validateUnit(unit);
+    verifyUnitMatch(unit);
   }
 
   /**
@@ -210,17 +177,58 @@ public class Ingredient {
   }
 
   /**
-   * Verifies whether another unit type matches the ingredient's unit
-   * type, in which a type is either volume or mass.
+   * Returns the name of the ingredient.
    *
-   * @param unit The unit of measurement to compare with.
-   *
-   * @throws IllegalArgumentException if the unit types do not match.
+   * @return name of the ingredient.
    */
-  private void verifyUnitMatch(Unit unit) {
-    if (this.unit.notSameType(unit)) {
-      throw new IllegalArgumentException("Unit mismatch: Cannot operate with "
-          + unit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
-    }
+  public String getName() {
+    return name;
   }
+
+  /**
+   * Returns the quantity of the ingredient.
+   *
+   * @return the quantity of the ingredient.
+   */
+  public double getQuantity() {
+    return quantity;
+  }
+
+  /**
+   * Returns the total price of the ingredient.
+   * Price is calculated based on the ingredient's current quantity and price per unit.
+   *
+   * @return the total price of the ingredient.
+   */
+  public double getPrice() {
+    return quantity * pricePerUnit;
+  }
+
+  /**
+   * Returns the price per unit of the ingredient.
+   *
+   * @return the price per unit of the ingredient.
+   */
+  public double getPricePerUnit() {
+    return pricePerUnit;
+  }
+
+  /**
+   * Returns the unit of measurement for the ingredient.
+   *
+   * @return the unit of measurement.
+   */
+  public Unit getUnit() {
+    return unit;
+  }
+
+  /**
+   * Returns the expiry date of the ingredient.
+   *
+   * @return the expiry date.
+   */
+  public LocalDate getExpiryDate() {
+    return expiryDate;
+  }
+
 }

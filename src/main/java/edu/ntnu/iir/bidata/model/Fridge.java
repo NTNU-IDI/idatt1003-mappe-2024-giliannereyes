@@ -145,7 +145,7 @@ public class Fridge {
    * @throws IllegalArgumentException if the ingredients are not the same.
    */
   private void mergeIngredients(Ingredient storedIngredient, Ingredient newIngredient) {
-    if (!storedIngredient.isSameAs(newIngredient)) {
+    if (!storedIngredient.matchesIngredient(newIngredient)) {
       throw new IllegalArgumentException(
           "An ingredient with the same name but is different already exists."
       );
