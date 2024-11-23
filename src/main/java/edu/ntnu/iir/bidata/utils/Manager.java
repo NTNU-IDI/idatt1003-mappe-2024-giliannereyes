@@ -214,6 +214,29 @@ public class Manager {
   }
 
   /**
+   * Calculates the price of each ingredient in the provided list,
+   * and returns the total price.
+   *
+   * @param ingredients is the list of ingredients to calculate the price of.
+   *
+   * @return A Result object containing the total price and a message.
+   */
+  public Result<Double> calculateIngredientsPrice(List<Ingredient> ingredients) {
+    double totalPrice = fridge.calculateIngredientsPrice(ingredients);
+    return new Result<>(true, totalPrice, "The total price of the ingredients in NOK:");
+  }
+
+  /**
+   * Calculates the price of all ingredients in the fridge.
+   *
+   * @return A Result object containing the total price and a message.
+   */
+  public Result<Double> calculatePriceOfAllFridgeIngredients() {
+    double totalPrice = fridge.calculateIngredientsPrice(fridge.getIngredients());
+    return new Result<>(true, totalPrice, "The total price of all ingredients in the fridge in NOK:");
+  }
+
+  /**
    * Retrieves a recipe by its name from the cookbook.
    *
    * @param name The name of the recipe to retrieve.

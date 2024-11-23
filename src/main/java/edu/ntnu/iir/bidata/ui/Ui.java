@@ -86,7 +86,7 @@ public class Ui {
     while (!exit) {
       displayMenu();
       int choice = inputHandler.readInt("\nPlease choose an option: \n");
-      exit = choice == 9;
+      exit = choice == 10;
       handleMenuChoice(choice);
     }
   }
@@ -98,14 +98,14 @@ public class Ui {
     System.out.printf("""
             ------------------------------- MENU ---------------------------------
             ______________________________________________________________________
-            %-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s
+            %-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s %-40s%n%-40s %-40s
             ______________________________________________________________________
             """,
         "[1] Add Ingredient", "[2] Search Ingredient",
         "[3] Remove Ingredient", "[4] View Expiring Ingredients",
         "[5] View Sorted Ingredients", "[6] Add Recipe",
         "[7] Check Recipe Ingredients", "[8] Get Recipe Suggestions",
-        "[9] Exit"
+        "[9] Calculate Total Price Of Ingredients", "[10] Exit"
     );
   }
 
@@ -124,7 +124,8 @@ public class Ui {
       case 6 -> promptAddRecipe();
       case 7 -> promptRecipeIngredientsCheck();
       case 8 -> displaySuggestedRecipes();
-      case 9 -> System.out.println("Closing the application...");
+      case 9 -> displayFridgeTotalValue();
+      case 10 -> System.out.println("Closing the application...");
       default -> System.out.println("Invalid option! Enter a valid number from 1-9.");
     }
 
@@ -171,6 +172,7 @@ public class Ui {
   private void promptCheckExpiringIngredients() {
     LocalDate expiryDate = inputHandler.readDate("Enter the expiry date in this format 'dd/MM/yyyy': ");
     displayResult(manager.checkExpiringIngredients(expiryDate), INGREDIENT_HEADER);
+    displayResult(manager.calculateIngredientsPrice(manager.checkExpiringIngredients(expiryDate).getData().get()));
   }
 
   /**
@@ -178,6 +180,7 @@ public class Ui {
    */
   private void displaySortedIngredients() {
     displayResult(manager.getSortedIngredients(), INGREDIENT_HEADER);
+    displayFridgeTotalValue();
   }
 
   /**
@@ -243,6 +246,13 @@ public class Ui {
   }
 
   /**
+   * Displays the total value of all ingredients in the fridge.
+   */
+  public void displayFridgeTotalValue() {
+    displayResult(manager.calculatePriceOfAllFridgeIngredients());
+  }
+
+  /**
    * Displays the result in the console in a string representation.
    *
    * @param result The result object that contains the operation's result.
@@ -266,7 +276,9 @@ public class Ui {
       System.out.print(header);
     }
 
-    System.out.println(result.getFormattedResult());
+    if (result.getData().isPresent()) {
+      System.out.println(result.getFormattedResult());
+    }
   }
 }
 

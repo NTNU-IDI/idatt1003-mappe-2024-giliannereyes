@@ -113,11 +113,13 @@ public class Fridge {
   }
 
   /**
-   * Calculates the total price of all ingredients in the fridge.
+   * Calculates the total price of all the ingredients in the provided list.
    *
-   * @return The total price of the ingredients in the fridge.
+   * @param ingredients is the list of ingredients to calculate the price of.
+   *
+   * @return The total price of all the ingredients.
    */
-  public double calculateTotalPrice() {
+  public double calculateIngredientsPrice(List<Ingredient> ingredients) {
     return ingredients.stream()
         .mapToDouble(Ingredient::getPrice)
         .sum();
