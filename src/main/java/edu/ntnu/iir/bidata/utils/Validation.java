@@ -1,19 +1,32 @@
 package edu.ntnu.iir.bidata.utils;
 
-import edu.ntnu.iir.bidata.model.*;
-
-import java.time.LocalDate;
-
-public class Validation {
+/**
+ * Utility class for validating input parameters.
+ *
+ * <p>Provides methods for validating strings, numbers and objects.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.1
+ */
+public final class Validation {
+  /**
+   * Prevents instantiation of the utility class.
+   */
+  private Validation() {
+    throw new UnsupportedOperationException("Utility class cannot be instantiated");
+  }
 
   /**
-   * Validates that the provided string is not null, empty or blank.
+   * Validates that the provided string is not null or empty.
    *
    * @param str is the string to validate.
+   *
+   * @throws IllegalArgumentException if the string is null or empty.
    */
-  public static void validateNonEmptyString(String str) {
+  public static void validateNonEmptyString(String str, String fieldName) {
     if (str == null || str.isBlank()) {
-      throw new IllegalArgumentException("String cannot be empty or null");
+      throw new IllegalArgumentException(fieldName + " cannot be empty or null");
     }
   }
 
@@ -21,10 +34,12 @@ public class Validation {
    * Validates that the provided number is positive.
    *
    * @param number is the number to validate.
+   *
+   * @throws IllegalArgumentException if the number is not positive.
    */
-  public static void validatePositiveNumber(double number) {
+  public static void validatePositiveNumber(double number, String fieldName) {
     if (number <= 0) {
-      throw new IllegalArgumentException("Number must be positive");
+      throw new IllegalArgumentException(fieldName + " must be positive.");
     }
   }
 
@@ -32,76 +47,25 @@ public class Validation {
    * Validates that the provided number is non-negative.
    *
    * @param number is the number to validate.
+   *
+   * @throws IllegalArgumentException if the number is negative.
    */
-  public static void validateNonNegativeNumber(double number) {
+  public static void validateNonNegativeNumber(double number, String fieldName) {
     if (number < 0) {
-      throw new IllegalArgumentException("Number must be non-negative");
+      throw new IllegalArgumentException(fieldName + " cannot be negative.");
     }
   }
 
   /**
-   * Validates that the provided date is not null.
+   * Validates that the provided object is not null.
    *
-   * @param date is the date to validate.
-   */
-  public static void validateDate(LocalDate date) {
-    if (date == null) {
-      throw new IllegalArgumentException("Expiry date cannot be null.");
-    }
-  }
-
-  /**
-   * Validates that the provided unit is not null.
+   * @param obj is the object to validate.
    *
-   * @param unit is the unit to validate.
+   * @throws IllegalArgumentException if the object is null.
    */
-  public static void validateUnit(Unit unit) {
-    if (unit == null) {
-      throw new IllegalArgumentException("Unit cannot be null.");
-    }
-  }
-
-  /**
-   * Validates that the provided ingredient is not null.
-   *
-   * @param ingredient is the ingredient to validate.
-   */
-  public static void validateIngredient(Ingredient ingredient) {
-    if (ingredient == null) {
-      throw new IllegalArgumentException("Ingredient cannot be null");
-    }
-  }
-
-  /**
-   * Validates that the provided recipe is not null.
-   *
-   * @param recipe is the recipe to validate.
-   */
-  public static void validateRecipe(Recipe recipe) {
-    if (recipe == null) {
-      throw new IllegalArgumentException("Recipe cannot be null");
-    }
-  }
-
-  /**
-   * Validates that the provided fridge is not null.
-   *
-   * @param fridge is the fridge to validate.
-   */
-  public static void validateFridge(Fridge fridge) {
-    if (fridge == null) {
-      throw new IllegalArgumentException("Fridge cannot be null");
-    }
-  }
-
-  /**
-   * Validates that the provided cookbook is not null.
-   *
-   * @param cookbook is the cookbook to validate.
-   */
-  public static void validateCookbook(Cookbook cookbook) {
-    if (cookbook == null) {
-      throw new IllegalArgumentException("Cookbook cannot be null");
+  public static void validateNonNull(Object obj, String fieldName) {
+    if (obj == null) {
+      throw new IllegalArgumentException(fieldName +  " cannot be null.");
     }
   }
 }
