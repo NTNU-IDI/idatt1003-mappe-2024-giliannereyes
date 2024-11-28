@@ -1,47 +1,44 @@
 package edu.ntnu.iir.bidata.model;
 
+import edu.ntnu.iir.bidata.utils.Validation;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import edu.ntnu.iir.bidata.utils.Validation;
 
 /**
- * Represents a fridge that stores ingredients.
- *<br>
- * Fridge has the following functionalities:
- * <ul>
- *   <li>Add ingredients</li>
- *   <li>Remove ingredients</li>
- *   <li>Retrieve ingredients expiring before a specific date</li>
- *   <li>Retrieve alphabetically sorted ingredients</li>
- *   <li>Calculate total price of ingredients</li>
- * </ul>
+ * Represents a fridge that contains a list of {@link Ingredient}.
+ *
+ * <p>The fridge can add, remove, and search for ingredients. It can also calculate
+ * the value of ingredients in the fridge, and retrieve all ingredients or
+ * ingredients that expire before a specified date.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.0
  */
 public class Fridge {
-  private final List<Ingredient> ingredients; // List to hold the ingredients
+  private final List<Ingredient> ingredients;
 
   /**
-   * Constructs a new Fridge instance that initializes the ingredients list.
+   * Constructs a new fridge with an empty list of ingredients.
    */
   public Fridge() {
     ingredients = new ArrayList<>();
   }
 
   /**
-   * Adds a new ingredient to the fridge if it does not already exist in the fridge.
+   * Adds a new ingredient to the fridge if it is not already stored, or
+   * adds the quantity of the new ingredient to the stored ingredient.
    *
-   * <p>If an ingredient of the same type already exists, the quantity of
-   * the existing ingredient is increased with the new ingredient's quantity instead.</p>
+   * @param newIngredient is the ingredient to add.
    *
-   * @param newIngredient The ingredient to add.
-   *
-   * @throws IllegalArgumentException if the ingredient is null, or if it
-   *                                  has the same name as a different ingredient in the fridge.
+   * @throws IllegalArgumentException if the ingredient is null, or if the
+   *      ingredient cannot be added to the fridge.
    */
   public void addIngredient(Ingredient newIngredient) {
-    Validation.validateIngredient(newIngredient);
+    Validation.validateNonNull(newIngredient, "Ingredient");
     findIngredientByName(newIngredient.getName())
         .ifPresentOrElse(
             storedIngredient -> mergeIngredients(storedIngredient, newIngredient),
@@ -50,52 +47,56 @@ public class Fridge {
   }
 
   /**
-   * Removes a specified quantity of an ingredient by name.
+   * Removes a quantity of an ingredient from the fridge. If the quantity
+   * becomes zero, the ingredient is removed from the fridge.
    *
-   * @param name  The name of the ingredient to remove.
-   * @param quantity  The quantity to remove.
-   * @param unit The unit of measurement of the quantity to remove.
+   * @param name is the name of the ingredient to remove.
+   * @param quantity is the quantity to remove.
+   * @param unit is the unit of measurement of the quantity to remove.
    *
-   * @throws IllegalArgumentException if the ingredient is not found,
-   *                                  or if the quantity provided is negative or becomes negative,
+   * @throws IllegalArgumentException if the parameters are invalid, the ingredient
+   *      is not found in the fridge or the quantity becomes negative.
    */
-  public void decreaseIngredientQuantity(String name, double quantity, Unit unit) {
-    Validation.validatePositiveNumber(quantity);
-    Validation.validateUnit(unit);
-    Validation.validateNonEmptyString(name);
-
+  public void removeIngredient(String name, double quantity, Unit unit) {
+    Validation.validatePositiveNumber(quantity, "Quantity to remove");
+    Validation.validateNonNull(unit, "Unit");
+    Validation.validateNonEmptyString(name, "Ingredient name");
     Ingredient ingredient = findIngredientByName(name)
         .orElseThrow(() ->
             new IllegalArgumentException(String.format("Ingredient '%s' not found", name)));
-
     ingredient.decreaseQuantity(quantity, unit);
     removeIfEmpty(ingredient);
   }
 
   /**
-   * Searches for and retrieves an ingredient by the ingredient's name.
+   * Searches for an ingredient in the fridge by its name, and
+   * retrieves the ingredient if it is found.
    *
-   * @param name The name of the ingredient to search for.
+   * @param name is the name of the ingredient to search for.
    *
-   * @return An Optional containing the ingredient if an ingredient with the same name is found.
-   *         Otherwise, an empty Optional.
+   * @return An {@link Optional} containing the ingredient if found.
+   *      Otherwise, an empty {@link Optional}.
+   *
+   * @throws IllegalArgumentException if the name is blank.
    */
   public Optional<Ingredient> findIngredientByName(String name) {
-    Validation.validateNonEmptyString(name);
+    Validation.validateNonEmptyString(name, "Ingredient name");
     return ingredients.stream()
         .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name.trim()))
         .findFirst();
   }
 
   /**
-   * Retrieves all the ingredients that expire before the specified date.
+   * Retrieves ingredients in the fridge that expire before the specified date.
    *
-   * @param date The latest date ingredients can expire.
+   * @param date is the cutoff date to check if the ingredient is expired.
    *
-   * @return A list of ingredients.
+   * @return A list of ingredients that expire before the specified date.
+   *
+   * @throws IllegalArgumentException if the date is null.
    */
-  public List<Ingredient> findIngredientsBeforeDate(LocalDate date) {
-    Validation.validateDate(date);
+  public List<Ingredient> findExpiringIngredientsBeforeDate(LocalDate date) {
+    Validation.validateNonNull(date, "Date");
     return ingredients.stream()
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(date))
         .toList();
@@ -104,7 +105,7 @@ public class Fridge {
   /**
    * Retrieves all the ingredients in the fridge sorted alphabetically.
    *
-   * @return A list of ingredients.
+   * @return A list of ingredients sorted alphabetically.
    */
   public List<Ingredient> findSortedIngredients() {
     return ingredients.stream()
@@ -113,51 +114,63 @@ public class Fridge {
   }
 
   /**
-   * Calculates the total price of all the ingredients in the provided list.
+   * Calculates the total value of the ingredients in the fridge
+   * that expire before the specified date.
    *
-   * @param ingredients is the list of ingredients to calculate the price of.
+   * @param date is the cutoff date to check if the ingredient is expired.
    *
-   * @return The total price of all the ingredients.
+   * @return The total value of the ingredients expiring before the specified date.
    */
-  public double calculateIngredientsPrice(List<Ingredient> ingredients) {
+  public double calculateExpiringValueByDate(LocalDate date) {
+    Validation.validateNonNull(date, "Date");
+    return ingredients.stream()
+        .filter(ingredient -> ingredient.getExpiryDate().isBefore(date))
+        .mapToDouble(Ingredient::getPrice)
+        .sum();
+  }
+
+  /**
+   * Calculates the total value of the ingredients in the fridge.
+   *
+   * @return The total value of all ingredients in the fridge.
+   */
+  public double calculateTotalValue() {
     return ingredients.stream()
         .mapToDouble(Ingredient::getPrice)
         .sum();
   }
 
   /**
-   * Retrieves all the fridge's ingredients.
-   * Note: This method is only used for unit testing.
+   * Retrieves all ingredients in the fridge.
    *
-   * @return A list containing the fridge's ingredients.
+   * @return A list containing the ingredients in the fridge.
    */
   public List<Ingredient> getIngredients() {
     return new ArrayList<>(ingredients);
   }
 
   /**
-   * Merges two of the same ingredients by increasing the quantity of
-   * the first one stored with the new one's quantity.
+   * Increases the quantity of the stored ingredient by the quantity
+   * of the new ingredient, if the ingredients are the same.
    *
-   * @param storedIngredient The ingredient that is stored in the fridge.
-   * @param newIngredient The new ingredient to add in the fridge.
+   * @param storedIngredient is the ingredient that is stored in the fridge.
+   * @param newIngredient is the ingredient to add to the stored ingredient.
    *
    * @throws IllegalArgumentException if the ingredients are not the same.
    */
   private void mergeIngredients(Ingredient storedIngredient, Ingredient newIngredient) {
     if (!storedIngredient.matchesIngredient(newIngredient)) {
       throw new IllegalArgumentException(
-          "An ingredient with the same name but is different already exists."
+          "An ingredient with the same name but has different attributes already exists."
       );
     }
-
     storedIngredient.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit());
   }
 
   /**
    * Removes the ingredient from the fridge if the quantity is zero.
    *
-   * @param ingredient The ingredient to remove.
+   * @param ingredient is the ingredient to remove.
    */
   private void removeIfEmpty(Ingredient ingredient) {
     if (ingredient.getQuantity() == 0) {
