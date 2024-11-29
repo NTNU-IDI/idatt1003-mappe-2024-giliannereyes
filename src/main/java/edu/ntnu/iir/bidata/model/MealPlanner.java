@@ -1,41 +1,49 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.utils.Validation;
-
 import java.util.List;
 
 /**
- * The MealPlanner class is responsible for managing recipes in the cookbook
- * and checking if there are enough ingredients in the fridge to follow them.
+ * Represents a meal planning system that checks if recipes
+ * in the {@link Cookbook} can be prepared based on the availability
+ * of ingredients in the {@link Fridge}.
+ *
+ * <p>Provides methods to check availability of recipes and to retrieve
+ * recipes that have all ingredients required available.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.1
  */
 public class MealPlanner {
-  private final Fridge fridge;
-  private final Cookbook cookbook;
+  private Fridge fridge;
+  private Cookbook cookbook;
 
   /**
-   * Constructs an instance of MealPlanner.
+   * Constructs a MealPlanner instance with a fridge and cookbook.
    *
-   * @param fridge   The fridge to retrieve ingredients from.
-   * @param cookbook The cookbook to retrieve recipes from.
+   * @param fridge is the fridge to retrieve ingredients from.
+   * @param cookbook is the cookbook to retrieve recipes from.
+   *
+   * @throws IllegalArgumentException if the fridge or cookbook is null.
    */
   public MealPlanner(Fridge fridge, Cookbook cookbook) {
-    Validation.validateFridge(fridge);
-    Validation.validateCookbook(cookbook);
-
-    this.fridge = fridge;
-    this.cookbook = cookbook;
+    setFridge(fridge);
+    setCookbook(cookbook);
   }
 
   /**
    * Verifies if all the ingredients required for a specified recipe
    * are available in the fridge.
    *
-   * @param recipeName is a name of the recipe to check for.
+   * @param recipeName is the name of the recipe to check for.
    *
    * @return {@code true} if all ingredients required are available. Otherwise, {@code false}.
+   *
+   * @throws IllegalArgumentException if the recipe name is null or empty.
    */
   public boolean ingredientsAreAvailableForRecipe(String recipeName) {
-    Validation.validateNonEmptyString(recipeName);
+    Validation.validateNonEmptyString(recipeName, "Recipe name");
     return cookbook.findRecipeByName(recipeName).map(recipe ->
         recipe.getIngredients().stream()
         .allMatch(this::isIngredientAvailable))
@@ -55,34 +63,61 @@ public class MealPlanner {
   }
 
   /**
-   * Checks if an ingredient required for a recipe is available, meaning there
-   * is a sufficient quantity in the fridge, and that the ingredient is not expired.
+   * Checks if an ingredient is available in the fridge with sufficient quantity.
    *
-   * @param requiredIngredient is the ingredient required for a recipe.
+   * @param requiredIngredient is the ingredient required.
    *
    * @return {@code true} if the ingredient is available. Otherwise, {@code false}.
    */
   private boolean isIngredientAvailable(Ingredient requiredIngredient) {
     return fridge.findIngredientByName(requiredIngredient.getName())
         .filter(fridgeIngredient -> !fridgeIngredient.isExpired())
-        .filter(fridgeIngredient -> fridgeIngredient.getUnit().isCompatibleWith(requiredIngredient.getUnit()))
-        .map(fridgeIngredient -> hasSufficientQuantity(fridgeIngredient, requiredIngredient))
+        .filter(fridgeIngredient ->
+            fridgeIngredient.getUnit().isCompatibleWith(requiredIngredient.getUnit()))
+        .map(fridgeIngredient ->
+            isQuantitySufficient(fridgeIngredient, requiredIngredient))
         .orElse(false);
   }
 
   /**
-   * Checks if the quantity of an ingredient in the fridge is sufficient for a recipe.
-   * The quantity is considered sufficient if the quantity in the fridge is greater or equal.
+   * Checks if the quantity of the available ingredient meets or exceeds the required quantity.
    *
    * @param availableIngredient is the ingredient in the fridge.
    * @param requiredIngredient is the ingredient required.
    *
-   * @return {@code true} if the available quantity meets or exceeds the required quantity.
-   *         Otherwise, {@code false}.
+   * @return {@code true} if the available quantity is sufficient. Otherwise, {@code false}.
    */
-  private boolean hasSufficientQuantity(Ingredient availableIngredient, Ingredient requiredIngredient) {
-    double availableQuantity = availableIngredient.getUnit().convertToBaseUnitValue(availableIngredient.getQuantity());
-    double requiredQuantity = requiredIngredient.getUnit().convertToBaseUnitValue(requiredIngredient.getQuantity());
+  private boolean isQuantitySufficient(
+      Ingredient availableIngredient, Ingredient requiredIngredient
+  ) {
+    double availableQuantity = availableIngredient.getUnit()
+        .convertToBaseUnitValue(availableIngredient.getQuantity());
+    double requiredQuantity = requiredIngredient.getUnit()
+        .convertToBaseUnitValue(requiredIngredient.getQuantity());
     return availableQuantity >= requiredQuantity;
+  }
+
+  /**
+   * Sets the fridge.
+   *
+   * @param fridge is the fridge to retrieve ingredients from.
+   *
+   * @throws IllegalArgumentException if the fridge is null.
+   */
+  private void setFridge(Fridge fridge) {
+    Validation.validateNonNull(fridge, "Fridge");
+    this.fridge = fridge;
+  }
+
+  /**
+   * Sets the cookbook.
+   *
+   * @param cookbook is the cookbook to retrieve recipes from.
+   *
+   * @throws IllegalArgumentException if the cookbook is null.
+   */
+  private void setCookbook(Cookbook cookbook) {
+    Validation.validateNonNull(cookbook, "Cookbook");
+    this.cookbook = cookbook;
   }
 }
