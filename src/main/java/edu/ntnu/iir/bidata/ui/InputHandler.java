@@ -1,195 +1,162 @@
 package edu.ntnu.iir.bidata.ui;
 
 import edu.ntnu.iir.bidata.model.Unit;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Scanner;
+import java.util.function.Function;
 
-public class InputHandler {
+/**
+ * A utility class to handle user input from the console.
+ *
+ * <p>Provides methods to read strings, integers, doubles, dates, units of measurement,
+ * and other types of input from the console.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.1
+ */
+public class  InputHandler {
   private final Scanner scanner;
 
+  /**
+   * Constructs an InputHandler instance with a new {@link Scanner} object.
+   */
   public InputHandler() {
     this.scanner = new Scanner(System.in);
   }
 
   /**
-   * Reads the next line of text from the console.
-   * <p>
-   *   Continuously prompts the user to enter a valid string.
-   *   Displays an error message if input is invalid and retries.
-   * </p>
+   * Reads a string from the console. Continuously prompts the user to enter a non-empty string.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return A string entered by the user.
+   * @return A non-empty string entered by the user.
+   *
+   * @throws IllegalArgumentException if the input is an empty string.
    */
   public String readString(String prompt) {
-    System.out.print(prompt);
-
-    while (true) {
-      String input = scanner.nextLine().trim();
-      if (input.isEmpty() || input.isBlank()) {
-        System.out.println("Invalid input. Enter a new one.");
-      } else {
+    return readWithValidation(
+      prompt,
+      "Invalid input. Try again with a non-empty input.",
+      input -> {
+        if (input.isBlank()) {
+          throw new IllegalArgumentException();
+        }
         return input;
       }
-    }
+    );
   }
 
   /**
-   * Reads an integer from the console.
-   * <p>
-   *   Continuously prompts the user to enter a valid integer.
-   *   Displays an error message if input is invalid and retries.
-   * </p>
+   * Reads an integer from the console. Continuously prompts the user to enter a positive integer.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return A valid integer entered by the user.
+   * @return A positive integer entered by the user.
    *
-   * @throws NumberFormatException if the input is not a valid integer.
+   * @throws IllegalArgumentException if the input is not a positive integer.
    */
   public int readInt(String prompt) {
-    System.out.print(prompt);
-
-    while (true) {
-      try {
-        int userInt = Integer.parseInt(scanner.nextLine());
-
-        // Check if the input is a negative number
-        if (userInt <= 0) {
-          System.out.println("Invalid input. Enter a positive integer.");
-          continue; // Prompt the user again
+    return readWithValidation(
+        prompt,
+        "Invalid input. Please enter a positive whole number.",
+        input -> {
+          int value = Integer.parseInt(input.trim());
+          if (value <= 0) {
+            throw new IllegalArgumentException();
+          }
+          return value;
         }
-
-        return userInt;   // Return a valid integer
-
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Enter a valid whole number.");
-      }
-    }
+    );
   }
 
   /**
-   * Reads a double from the console.
-   * <p>
-   *   Continuously prompts the user to enter a valid double.
-   *   Displays an error message if input is invalid and retries.
-   * </p>
+   * Reads a double from the console. Continuously prompts the user to enter a positive number.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return A valid double entered by the user.
+   * @return A positive double entered by the user.
    *
-   * @throws NumberFormatException if the input is not a valid double.
+   * @throws IllegalArgumentException if the input is not a positive number.
    */
   public double readDouble(String prompt) {
-    System.out.print(prompt);
-
-    while (true) {
-      try {
-        double userDouble = Double.parseDouble(scanner.nextLine().replace(",", "."));
-
-        // Check if the input is a negative number
-        if (userDouble <= 0) {
-          System.out.println("Invalid input. Enter a positive double.");
-          continue; // Prompt the user again
+    return readWithValidation(prompt,
+        "Invalid input. Please enter a positive number.",
+        input -> {
+          double value = Double.parseDouble(input.trim());
+          if (value <= 0) {
+            throw new IllegalArgumentException("Invalid input. Enter a positive number: ");
+          }
+          return value;
         }
-
-        return userDouble;  // Return a valid double
-
-      } catch (NumberFormatException e) {
-        System.out.println("Invalid input. Enter a valid number.");
-      }
-    }
+    );
   }
 
   /**
-   * Reads a date from the console in the format "dd/MM/yyyy".
-   * <p>
-   *   Continuously prompts the user to enter a valid date.
-   *   Displays an error message if input is invalid and retries.
-   * </p>
+   * Reads a date from the console. Continuously prompts the user to enter a valid date
+   * in the format 'yyyy/MM/dd'.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return A valid {@link LocalDate} entered by the user.
-   *
-   * @throws DateTimeParseException if the input is not a valid LocalDate.
+   * @return A date entered by the user.
    */
   public LocalDate readDate(String prompt) {
-    System.out.print(prompt);
-
-    while (true) {
-      try {
-        return LocalDate.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-      } catch (DateTimeParseException e) {
-        System.out.println("Invalid date format. Enter a valid date with format 'dd/MM/yyyy'.");
-      }
-    }
+    return readWithValidation(
+        prompt,
+        "Invalid input. Please enter a valid date in the format 'yyyy/MM/dd'.",
+        input -> {
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+          return LocalDate.parse(input.trim(), formatter);
+        }
+    );
   }
 
   /**
-   * Reads a unit of measurement from the console.
-   * <p>
-   *   A list of valid units are displayed on the console.
-   *   Continuously prompts the user to enter a valid unit. Displays
-   *   an error message if input is invalid and retries.
-   * </p>
+   * Reads a unit from the user, chosen from a list of available units.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return A valid {@link Unit} entered by the user.
-   *
-   * @throws IllegalArgumentException if the input is an invalid unit.
+   * @return A unit selected by the user.
    */
   public Unit readUnit(String prompt) {
-    System.out.println(prompt);
-
-    // Displays a list of valid units on the console
-    for (Unit unit : Unit.values()) {
-      System.out.println("* " + unit.getSymbol());
-    }
-
-    // Prompts the user to enter a unit until it can be converted to a Unit instance
-    while (true) {
-      try {
-        return Unit.getUnitBySymbol(scanner.nextLine());
-      } catch (IllegalArgumentException e) {
-        System.out.println("Invalid unit. Enter a valid unit.");
-      }
-    }
+    displayUnits();
+    return readWithValidation(
+        prompt,
+        "Invalid input. Please enter a number corresponding to a unit.",
+        input -> {
+          int index = Integer.parseInt(input.trim());
+          return Unit.getUnitBySymbol(Unit.values()[index - 1].getSymbol());
+        });
   }
 
   /**
-   * Reads any key pressed by the user. 'Pauses' the console output,
-   * allowing the user to read content before proceeding to the next.
+   * Reads a string from the console without validation.
+   *
+   * @param prompt is the message to display to the user when asking for input.
    */
-  public void readEnter() {
-    System.out.println("\nPress enter to continue...");
+  public void readEnter(String prompt) {
+    System.out.println(prompt);
     scanner.nextLine();
   }
 
   /**
-   * Reads a choice "yes" or "no" from the user.
+   * Reads a boolean value from the user, where '1' is 'Yes' and '2' is 'No'.
    *
-   * @param prompt The message to display to the user.
+   * @param prompt is the message to display to the user when asking for input.
    *
-   * @return {@code true} if the choice is "yes", or {@code false}
-   *         if the answer is "no".
+   * @return {@code true} if the user enters '1' for 'Yes',
+   *      {@code false} if the user enters '2' for 'No'.
    */
   public boolean readYes(String prompt) {
-    while (true) {
-      int choice = readInt(prompt + "\n[1] Yes\n[2] No\n");
-
-      if (choice == 1 || choice == 2) {
-        return choice == 1;
-      }
-
-      System.out.println("Invalid input. Enter 1 for Yes or 2 for no.\n");
-    }
+    return readWithValidation(
+        prompt + "\n[1] Yes\n[2] No\n",
+        "Invalid input. Enter '1' for 'Yes' or '2' for 'No'.",
+        input -> switch (input.trim()) {
+          case "1" -> true;
+          case "2" -> false;
+          default -> throw new IllegalArgumentException();
+        });
   }
 
   /**
@@ -197,5 +164,49 @@ public class InputHandler {
    */
   public void close() {
     scanner.close();
+  }
+
+  /**
+   * Displays a list of valid units in the console.
+   * <strong>This method was generated by ChatGPT.</strong>
+   */
+  private void displayUnits() {
+    System.out.println("\nA list of available units of measurement:");
+
+    Unit[] units = Unit.values();
+    for (int i = 0; i < units.length; i++) {
+      System.out.printf("%d. %-10s", i + 1, units[i].getSymbol());
+      System.out.print((i + 1) % 4 == 0 ? "\n" : "  "); // Add a newline every 4 units
+    }
+    if (units.length % 4 != 0) {
+      System.out.println(); // Ensure the final line ends cleanly
+    }
+  }
+
+  /**
+   * Reads input from the user, applies a parsing/validation function to it,
+   * and retries if the input is invalid.
+   *<strong>The implementation of {@code parser} in this method was generated by ChatGPT.</strong>
+   *
+   * @param <T> The type of the value to be returned (e.g., Integer, Double, LocalDate).
+   * @param prompt The message displayed to the user, asking for input.
+   * @param parser A function that processes and validates the input string.
+   *      It must throw an exception (e.g., {@link IllegalArgumentException}) for invalid input.
+   *
+   * @return A valid, parsed, and validated value of type {@code T}.
+   */
+  private <T> T readWithValidation(String prompt, String errorMessage, Function<String, T> parser) {
+    T result = null;
+    boolean isValid = false;
+    do {
+      System.out.print(prompt);
+      try {
+        result = parser.apply(scanner.nextLine().trim());
+        isValid = true;
+      } catch (Exception e) {
+        System.out.println("\nError: " + errorMessage);
+      }
+    } while (!isValid);
+    return result;
   }
 }
