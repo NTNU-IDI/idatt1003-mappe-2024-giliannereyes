@@ -1,26 +1,22 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.model.Fridge;
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Unit;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.ntnu.iir.bidata.model.Fridge;
+import edu.ntnu.iir.bidata.model.Ingredient;
+import edu.ntnu.iir.bidata.model.Unit;
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 /**
  * Unit tests for the {@link Fridge} class.
  *
- * <p>The following tests validate the functionality and robustness of the
- * {@code Fridge} class:</p>
- *
- * <b>Positive Tests:</b>
+ * <br><b>Positive Tests:</b>
  * <ul>
  *   <li>Adds a valid ingredient to the fridge.</li>
  *   <li>Adds a duplicate ingredient and ensures that the
@@ -33,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>Calculates the correct total price of all ingredients.</li>
  * </ul>
  *
- * <b>Negative Tests:</b>
+ * <br><b>Negative Tests:</b>
  * <ul>
  *   <li>Adds a {@code null} ingredient.</li>
  *   <li>Decreases the quantity of a non-existent ingredient.</li>
@@ -73,7 +69,9 @@ public class FridgeTest {
    */
   @Test
   void testAddNewValidIngredient() {
-    Ingredient cheese = new Ingredient("Cheese", 0.5, 30, Unit.KILOGRAM, LocalDate.now().plusDays(10));
+    Ingredient cheese = new Ingredient(
+        "Cheese", 0.5, 30, Unit.KILOGRAM, LocalDate.now().plusDays(10)
+    );
     fridge.addIngredient(cheese);
     assertTrue(fridge.getIngredients().contains(cheese));
   }
@@ -82,7 +80,9 @@ public class FridgeTest {
    * Test adding an ingredient that matches an existing ingredient in the fridge.
    * Ingredients matching means they have the same name, price per unit, expiry date
    * and the units are compatible.
-   * Expected outcome: The existing ingredient's quantity should be increased by the new ingredient's quantity.
+   *
+   * <p>Expected outcome: The existing ingredient's quantity should be
+   * increased by the new ingredient's quantity.</p>
    */
   @Test
   void testAddDuplicateIngredient() {
@@ -103,7 +103,7 @@ public class FridgeTest {
    * Expected outcome: The ingredient's quantity should be decreased by the specified amount.
    */
   @Test
-  void testRemoveAValidQuantityOfIngredient() {
+  void testRemoveValidQuantityOfIngredient() {
     fridge.removeIngredient("Milk", 0.5, Unit.LITRE);
     assertTrue(fridge.findIngredientByName("Milk").isPresent());
     assertEquals(0.5, fridge.findIngredientByName("Milk").get().getQuantity());
@@ -142,7 +142,9 @@ public class FridgeTest {
   @Test
   void testFindExpiringIngredientsBeforeDate() {
     // All ingredients that expire before 10 months from now
-    List<Ingredient> foundIngredients = fridge.findExpiringIngredientsBeforeDate(LocalDate.now().plusMonths(10));
+    List<Ingredient> foundIngredients = fridge.findExpiringIngredientsBeforeDate(
+        LocalDate.now().plusMonths(10)
+    );
     assertTrue(foundIngredients.contains(milk));
     assertTrue(foundIngredients.contains(egg));
 
@@ -158,13 +160,18 @@ public class FridgeTest {
 
   /**
    * Test sorting the ingredients in the fridge alphabetically.
-   * Expected outcome: The ingredients should be sorted in ascending order by name.
+   *
+   * <p>Expected outcome: The ingredients should be sorted in ascending order by name.</p>
    */
   @Test
   void testFindSortedIngredients() {
-    Ingredient butter = new Ingredient("Butter", 0.2, 10, Unit.KILOGRAM, LocalDate.now().plusDays(5));
+    Ingredient butter = new Ingredient(
+        "Butter", 0.2, 10, Unit.KILOGRAM, LocalDate.now().plusDays(5)
+    );
     fridge.addIngredient(butter);
-    Ingredient apple = new Ingredient("Apple", 1, 20, Unit.KILOGRAM, LocalDate.now().plusDays(10));
+    Ingredient apple = new Ingredient(
+        "Apple", 1, 20, Unit.KILOGRAM, LocalDate.now().plusDays(10)
+    );
     fridge.addIngredient(apple);
 
     List<Ingredient> sortedIngredients = fridge.findSortedIngredients();
@@ -175,14 +182,27 @@ public class FridgeTest {
   }
 
   /**
-   * Test calculating the total price of a list of ingredients.
-   * The total price should be the sum of the price of each ingredient.
-   * Expected outcome: The total price should be calculated correctly.
+   * Test calculating the total price of all the ingredients in the fridge.
+   *
+   * <p>Expected outcome: The total price of all the ingredients should be calculated correctly.</p>
    */
   @Test
   void testCalculateTotalPrice() {
-    assertEquals(56, fridge.calculateIngredientsPrice(List.of(milk, egg)));
-    assertEquals(20, fridge.calculateIngredientsPrice(List.of(milk)));
+    assertEquals(56, fridge.calculateTotalValue());
+  }
+
+  /**
+   * Test calculating the total price of all the ingredients in the
+   * fridge that expire before a specified date.
+   *
+   * <p>Expected outcome: The total price of all the expiring
+   * ingredients should be calculated correctly.</p>
+   */
+  @Test
+  void testCalculateExpiringValueByDate() {
+    assertEquals(20, fridge.calculateExpiringValueByDate(LocalDate.now().plusDays(6)));
+    assertEquals(0, fridge.calculateExpiringValueByDate(LocalDate.now().minusDays(1)));
+    assertEquals(56, fridge.calculateExpiringValueByDate(LocalDate.now().plusMonths(1)));
   }
 
   // --------------------------- NEGATIVE TESTS ----------------------------------
@@ -226,7 +246,9 @@ public class FridgeTest {
    */
   @Test
   void testRemoveNonExistentIngredient() {
-    assertThrows(IllegalArgumentException.class, () -> fridge.removeIngredient("Bread", 1, Unit.KILOGRAM));
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Bread", 1, Unit.KILOGRAM)
+    );
   }
 
   /**
@@ -237,10 +259,14 @@ public class FridgeTest {
   @Test
   void testRemoveInvalidQuantityOfIngredient() {
     // Remove a negative quantity of an ingredient
-    assertThrows(IllegalArgumentException.class, () -> fridge.removeIngredient("Milk", -1, Unit.LITRE));
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Milk", -1, Unit.LITRE)
+    );
 
     // Remove a quantity that results in a negative quantity for the ingredient
-    assertThrows(IllegalArgumentException.class, () -> fridge.removeIngredient("Milk", 2, Unit.LITRE));
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Milk", 2, Unit.LITRE)
+    );
   }
 
   /**

@@ -1,24 +1,20 @@
 package edu.ntnu.iir.bidata;
 
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Unit;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.ntnu.iir.bidata.model.Ingredient;
+import edu.ntnu.iir.bidata.model.Unit;
+import java.time.LocalDate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 /**
  * Unit tests for the {@link Ingredient} class.
  *
- * <p>The following tests validate the functionality and robustness of the
- * {@code Ingredient} class:</p>
- *
- * <b>Positive Tests:</b>
+ * <br><b>Positive Tests:</b>
  * <ul>
  *   <li>Creates an Ingredient instance with valid fields</li>
  *   <li>Calculates the correct total price based on price per unit and quantity</li>
@@ -28,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>Correctly matches compatible ingredients</li>
  * </ul>
  *
- * <b>Negative Tests:</b>
+ * <br><b>Negative Tests:</b>
  * <ul>
  *   <li>Throws an exception for invalid names (e.g., blank, empty, or null)</li>
  *   <li>Throws an exception for invalid quantities (e.g., negative values)</li>
@@ -65,7 +61,8 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with a valid name, quantity, price per unit, unit and expiry date.
-   * Expected outcome: The ingredient is created successfully.
+   *
+   * <p>Expected outcome: The ingredient is created successfully.</p>
    */
   @Test
   void testValidConstructorWithAllFields() {
@@ -79,7 +76,8 @@ public class IngredientTest {
   /**
    * Test decreasing the ingredient's quantity with a valid amount - a positive amount
    * that is less than the current quantity and has a compatible unit.
-   * Expected outcome: The quantity is decreased by the specified amount.
+   *
+   * <p>Expected outcome: The quantity is decreased by the specified amount.</p>
    */
   @Test
   void testDecreaseQuantityWithValidAmount() {
@@ -94,7 +92,8 @@ public class IngredientTest {
   /**
    * Test increasing the ingredient's quantity with a valid amount - a positive amount
    * that has a compatible unit.
-   * Expected outcome: The quantity is increased by the specified amount.
+   *
+   * <p>Expected outcome: The quantity is increased by the specified amount.</p>
    */
   @Test
   void testIncreaseQuantityWithValidAmount() {
@@ -109,7 +108,8 @@ public class IngredientTest {
 
   /**
    * Test isExpired with an ingredient that is expired.
-   * Expected outcome: The method returns {@code true}.
+   *
+   * <p>Expected outcome: The method returns {@code true}.</p>
    */
   @Test
   void testIsExpiredWithExpiredIngredient() {
@@ -119,7 +119,8 @@ public class IngredientTest {
 
   /**
    * Test isExpired() with an ingredient that is not expired.
-   * Expected outcome: The method returns {@code false}.
+   *
+   * <p>Expected outcome: The method returns {@code false}.</p>
    */
   @Test
   void testIsExpiredWithNotExpiredIngredient() {
@@ -129,7 +130,8 @@ public class IngredientTest {
   /**
    * Test matching an ingredient with the same ingredient - same name, price per unit,
    * expiry date and compatible unit.
-   * Expected outcome: The method returns {@code true}.
+   *
+   *<p>Expected outcome: The method returns {@code true}.</p>
    */
   @Test
   void testMatchesIngredientWithSameIngredient() {
@@ -145,7 +147,8 @@ public class IngredientTest {
   /**
    * Test matching an ingredient with a different ingredient - different name, price per unit,
    * expiry date and incompatible unit.
-   * Expected outcome: The method returns {@code false}.
+   *
+   * <p>Expected outcome: The method returns {@code false}.</p>
    */
   @Test
   void testMatchesIngredientWithDifferentIngredient() {
@@ -168,7 +171,8 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with a valid name, quantity and unit.
-   * Expected outcome: The ingredient is created successfully.
+   *
+   *<p>Expected outcome: The ingredient is created successfully.</p>
    */
   @Test
   void testValidConstructorWithoutPriceAndExpiryDate() {
@@ -179,7 +183,8 @@ public class IngredientTest {
 
   /**
    * Test calculating the total price of an ingredient - price per unit multiplied by quantity.
-   * Expected outcome: The total price is calculated correctly.
+   *
+   * <p>Expected outcome: The total price is calculated correctly.</p>
    */
   @Test
   void testCalculateTotalPrice() {
@@ -190,7 +195,8 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with an invalid name, which is blank, empty or null.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   *<p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testConstructorWithInvalidName() {
@@ -204,7 +210,8 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with an invalid quantity, which is negative.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testConstructorWithInvalidQuantity() {
@@ -214,17 +221,21 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with an invalid price per unit, which is negative.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testConstructorWithInvalidPricePerUnit() {
     assertThrows(IllegalArgumentException.class, ()
         -> new Ingredient("Sugar", 5, -50, Unit.KILOGRAM, LocalDate.now().plusDays(10)));
+    assertThrows(IllegalArgumentException.class, ()
+        -> new Ingredient("Sugar", 5, 0, Unit.KILOGRAM, LocalDate.now().plusDays(10)));
   }
 
   /**
    * Test creating an ingredient with an invalid unit, which is null.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testConstructorWithInvalidUnit() {
@@ -234,7 +245,8 @@ public class IngredientTest {
 
   /**
    * Test creating an ingredient with an invalid expiry date, which is null.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testConstructorWithInvalidExpiryDate() {
@@ -243,11 +255,13 @@ public class IngredientTest {
   }
 
   /**
-   * <p>Test removing a specific invalid amounts from an ingredient's quantity,
+   * Test removing a specific invalid amounts from an ingredient's quantity,
    * and verify that the quantity remains unchanged.
    * Invalid amounts: negative amounts, amounts that are larger than the quantity available
-   * and amounts with incompatible units. </p>
-   * Expected outcome: An {@link IllegalArgumentException} is thrown and the quantity remains unchanged.
+   * and amounts with incompatible units.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown
+   * and the quantity remains unchanged.</p>
    */
   @Test
   void testDecreaseQuantityWithInvalidAmount() {
@@ -262,10 +276,12 @@ public class IngredientTest {
   }
 
   /**
-   * <p>Test increasing the ingredient's quantity with invalid amount, and
+   * Test increasing the ingredient's quantity with invalid amount, and
    * verify that the quantity remains unchanged.
-   * Invalid amounts: negative amounts. </p>
-   * Expected outcome: An {@link IllegalArgumentException} is thrown and the quantity remains unchanged.
+   * Invalid amounts: negative amounts.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown
+   * and the quantity remains unchanged.</p>
    */
   @Test
   void testIncreaseQuantityWithInvalidAmount() {
@@ -277,7 +293,8 @@ public class IngredientTest {
 
   /**
    * Test matching an ingredient with a null ingredient.
-   * Expected outcome: An {@link IllegalArgumentException} is thrown.
+   *
+   * <p>Expected outcome: An {@link IllegalArgumentException} is thrown.</p>
    */
   @Test
   void testMatchesIngredientWithNull() {
