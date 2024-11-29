@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import edu.ntnu.iir.bidata.model.Ingredient;
 import edu.ntnu.iir.bidata.model.Recipe;
 import edu.ntnu.iir.bidata.model.Unit;
-import edu.ntnu.iir.bidata.utils.FoodManager;
+import edu.ntnu.iir.bidata.service.FoodManager;
 import edu.ntnu.iir.bidata.utils.Result;
 import java.time.LocalDate;
 import java.util.List;

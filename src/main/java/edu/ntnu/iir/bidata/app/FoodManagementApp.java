@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.app;
 
-import edu.ntnu.iir.bidata.ui.Ui;
+import edu.ntnu.iir.bidata.ui.UserInterface;
 
 /**
  * Wrapper class for the Food Management Application.
@@ -12,7 +12,7 @@ public class FoodManagementApp {
    * @param args are the arguments for the main method.
    */
   public static void main(String[] args) {
-    Ui ui = new Ui();
-    ui.start();
+    UserInterface userInterface = new UserInterface();
+    userInterface.start();
   }
 }

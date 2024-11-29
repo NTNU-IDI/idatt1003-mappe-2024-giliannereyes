@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.ui;
+package edu.ntnu.iir.bidata.utils;
 
 import edu.ntnu.iir.bidata.model.Unit;
 import java.time.LocalDate;
