@@ -1,33 +1,39 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.utils.Validation;
-
 import java.util.Arrays;
 
 /**
- * An enum 'Unit' that represents different units of measurements for volume and
- * mass that are relevant for ingredients and recipes.
+ * Represents a unit of measurement, which can be of type volume, mass or piece.
+ * Each unit has a symbol, a conversion factor to the base unit and a type.
+ *
+ * <p>Provides methods to convert values between units and to check if two units are compatible.</p>
+ *
+ * <p>Base units: litre for volume, kilogram for mass and piece for items measured by count.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.1
  */
 public enum Unit {
+  // ChatGPT generated the conversion factors for each unit.
   LITRE("L", 1.0, UnitType.VOLUME),            // Base unit for volume (liters)
-  DECILITRE("dL", 0.1, UnitType.VOLUME),       // 1 dL = 0.1 L
-  MILLILITRE("mL", 0.001, UnitType.VOLUME),    // 1 mL = 0.001 L
-
+  DECILITRE("dL", 0.1, UnitType.VOLUME),
+  MILLILITRE("mL", 0.001, UnitType.VOLUME),
   KILOGRAM("kg", 1.0, UnitType.MASS),        // Base unit for mass (kilograms)
-  GRAM("g", 0.001, UnitType.MASS),           // 1 g = 0.001 kg
-  MILLIGRAM("mg", 0.000001, UnitType.MASS),  // 1 mg = 0.000001 kg
-
+  GRAM("g", 0.001, UnitType.MASS),
+  MILLIGRAM("mg", 0.000001, UnitType.MASS),
   PIECE("piece", 1.0, UnitType.PIECE);      // Base unit for items measured by count
 
   private final String symbol;
-  private final double conversionFactor; // Conversion factor to base unit
-  private final UnitType type;           // Type of unit (volume or mass)
+  private final double conversionFactor;
+  private final UnitType type;
 
   /**
-   * Constructs a new Unit instance.
+   * Constructor for the Unit enum.
    *
-   * @param symbol The symbol representing the unit.
-   * @param conversionFactor The conversion factor to the base unit.
+   * @param symbol is the symbol representing the unit.
+   * @param conversionFactor is the conversion factor to the base unit.
    */
   Unit(String symbol, double conversionFactor, UnitType unitType) {
     this.symbol = symbol;
@@ -45,52 +51,59 @@ public enum Unit {
   }
 
   /**
-   * Checks if two units are of different types. The type is either volume or mass.
+   * Checks if the units are compatible by comparing their types.
    *
-   * @param otherUnit The other unit to compare with.
+   * @param otherUnit is the unit to compare with.
    *
-   * @return {@code true} if the unit types are not the same. Else {@code false}.
+   * @return {@code true} if the units are compatible, {@code false} otherwise.
+   *
+   * @throws IllegalArgumentException if the provided unit is null.
    */
   public boolean isCompatibleWith(Unit otherUnit) {
-    Validation.validateUnit(otherUnit);
+    Validation.validateNonNull(otherUnit, "Unit");
     return type == otherUnit.type;
   }
 
   /**
-   * Converts a value to the base unit.
+   * Convert a value to its base unit value.
    *
-   * @param value The value to convert.
+   * @param value is the value to convert.
    *
    * @return The value in base unit.
+   *
+   * @throws IllegalArgumentException if the value to convert is negative.
    */
   public double convertToBaseUnitValue(double value) {
-    Validation.validateNonNegativeNumber(value);
+    Validation.validateNonNegativeNumber(value, "Value to convert");
     return conversionFactor * value;
   }
 
   /**
-   * Converts a value from the base unit.
+   * Converts a base unit value to a value of this unit.
    *
-   * @param value The value in base unit to convert.
+   * @param value is the value in base unit to convert.
    *
-   * @return The value in specified unit.
+   * @return The value in this unit.
+   *
+   * @throws IllegalArgumentException if the value or conversion factor is negative.
    */
   public double convertFromBaseUnitValue(double value) {
-    Validation.validateNonNegativeNumber(value);
+    Validation.validateNonNegativeNumber(value, "Value to convert");
+    Validation.validateNonNegativeNumber(conversionFactor, "Conversion factor");
     return value / conversionFactor;
   }
 
   /**
-   * Retrieves a Unit instance that matches the provided symbol.
+   * Retrieves a unit by its symbol.
    *
-   * @param symbol The symbol of the unit to retrieve.
+   * @param symbol is the symbol of the unit to retrieve.
    *
-   * @return A Unit instance.
+   * @return A unit with the provided symbol.
    *
    * @throws IllegalArgumentException if the provided symbol does not match any unit.
    */
   public static Unit getUnitBySymbol(String symbol) {
-    Validation.validateNonEmptyString(symbol);
+    Validation.validateNonEmptyString(symbol, "Unit symbol");
     return Arrays.stream(Unit.values())
         .filter(unit -> unit.getSymbol().equalsIgnoreCase(symbol))
         .findFirst()
@@ -99,11 +112,11 @@ public enum Unit {
   }
 
   /**
-   * An enum that for separating units between volume or mass types.
+   * Represents the type of unit.
    */
   public enum UnitType {
-    VOLUME, // Represents units for volume
-    MASS, // Represents units for mass
+    VOLUME,
+    MASS,
     PIECE
   }
 }
