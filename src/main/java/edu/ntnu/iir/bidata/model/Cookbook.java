@@ -1,60 +1,59 @@
 package edu.ntnu.iir.bidata.model;
 
 import edu.ntnu.iir.bidata.utils.Validation;
-
 import java.util.ArrayList;
 import java.util.Optional;
 
 /**
- * Represents a cookbook with a collection of recipes.
- * <br>
- * Cookbook has the following functionalities:
- * <ul>
- *   <li>Add a recipe.</li>
- *   <li>Display recipes that can be made with the ingredients in the fridge.</li>
- *   <li>Retrieve a recipe by name.</li>
- * </ul>
+ * Represents a cookbook with a collection of {@link Recipe}.
+ *
+ * <p>Provides methods to add a recipe, search for a recipe by name,
+ * and retrieve all recipes.</p>
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.0
  */
 public class Cookbook {
   private final ArrayList<Recipe> recipes;
 
   /**
-   * Constructs a new Cookbook instance with an empty list of recipes.
+   * Constructs a Cookbook instance with an empty list of recipes.
    */
   public Cookbook() {
     recipes = new ArrayList<>();
   }
 
   /**
-   * Adds a recipe to the cookbook.
+   * Adds a recipe to the cookbook, if it is not already present.
    *
-   * @param recipe The recipe to be added.
+   * @param recipe is the recipe to add.
    *
-   * @throws IllegalArgumentException if the recipe is {@code null},
-   *                                  or if the recipe is already in the cookbook.
+   * @throws IllegalArgumentException if the recipe is null,
+   *      or if the recipe is already in the cookbook.
    */
   public void addRecipe(Recipe recipe) {
-    Validation.validateRecipe(recipe);
-
-    findRecipeByName(recipe.getName())
-        .ifPresentOrElse(
-            r -> {
-              throw new IllegalArgumentException("Recipe is already in the cookbook: " + r);
-            },
-            () -> recipes.add(recipe)
-        );
+    Validation.validateNonNull(recipe, "Recipe");
+    if (findRecipeByName(recipe.getName()).isPresent()) {
+      throw new IllegalArgumentException(
+          "A recipe with the same name already exists in the cookbook."
+      );
+    }
+    recipes.add(recipe);
   }
 
   /**
-   * Searches for and retrieves a recipe by the recipe's name.
+   * Searches for and retrieves a recipe by its name.
    *
-   * @param name The name of the recipe to search for.
+   * @param name is the name of the recipe to search for.
    *
-   * @return An Optional containing the recipe if a recipe with the same name is found.
-   *         Otherwise, an empty Optional.
+   * @return An {@link Optional} containing the recipe if found.
+   *         Otherwise, an empty {@link Optional}.
+   *
+   * @throws IllegalArgumentException if the name is null or empty.
    */
   public Optional<Recipe> findRecipeByName(String name) {
-    Validation.validateNonEmptyString(name);
+    Validation.validateNonEmptyString(name, "Recipe name");
     return recipes.stream()
         .filter(recipe -> recipe.getName().equalsIgnoreCase(name.trim()))
         .findFirst();
