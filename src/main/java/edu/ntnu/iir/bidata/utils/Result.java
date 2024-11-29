@@ -1,16 +1,20 @@
 package edu.ntnu.iir.bidata.utils;
 
-import java.util.Collection;
 import java.util.Optional;
 
 /**
- * The Result class represents the result of an operation, either successful or unsuccessful.
- * It can hold a message and data of the type {@code T} if successful,
- * or just a message.
+ * Represents the result of an operation, either successful or failed.
+ * Provides a message describing the result and, optionally, data associated with the result.
  *
- * @param <T> The type of data that may be included in the result.
+ * <p>Instances of this class are immutable and can be created using the static factory methods.</p>
+ *
+ * @param <T> is the type of data that may be included in the result.
+ *
+ * @author Gilianne Reyes
+ * @version 1.2
+ * @since 1.1
  */
-public class Result<T> {
+public final class Result<T> {
   private final boolean success;
   private final T data;
   private final String message;
@@ -18,30 +22,68 @@ public class Result<T> {
   /**
    * Constructs an instance of Result.
    *
-   * @param success A boolean value indicating if the operation was successful or not.
-   * @param message A message providing details about the result.
+   * @param success is a boolean value indicating if the operation was successful or not.
+   * @param data is the data associated with the result of the operation.
+   * @param message is a message providing details about the result.
    */
-  public Result(boolean success, String message) {
-    this.success = success;
-    this.data = null;
-    this.message = message;
-  }
-
-  /**
-   * Constructs an instance of Result.
-   *
-   * @param success A boolean value indicating if the operation was successful or not.
-   * @param data The data associated with the result of the operation.
-   * @param message A message providing details about the result.
-   */
-  public Result(boolean success, T data, String message) {
+  private Result(boolean success, T data, String message) {
     this.success = success;
     this.data = data;
     this.message = message;
   }
 
   /**
-   * Gets the message describing the result.
+   * Creates a successful result with no data and a message.
+   *
+   * @param message is the message describing the result.
+   * @param <T> is the type of data that may be included in the result.
+   *
+   * @return A successful result with no data.
+   */
+  public static <T> Result<T> success(String message) {
+    return new Result<>(true, null, message);
+  }
+
+  /**
+   * Creates a successful result with data and a message.
+   *
+   * @param message is the message describing the result.
+   * @param data is the data associated with the result.
+   * @param <T> is the type of data that may be included in the result.
+   *
+   * @return A successful result with data.
+   */
+  public static <T> Result<T> success(String message, T data) {
+    return new Result<>(true, data, message);
+  }
+
+  /**
+   * Creates a failed result with a message.
+   *
+   * @param message is the message describing the result.
+   * @param <T> is the type of data that may be included in the result.
+   *
+   * @return A failed result with a message.
+   */
+  public static <T> Result<T> failure(String message) {
+    return new Result<>(false, null, message);
+  }
+
+  /**
+   * Creates a failed result with a message and details.
+   *
+   * @param message is the message describing the result.
+   * @param details is the details of the result.
+   * @param <T> is the type of data that may be included in the result.
+   *
+   * @return A failed result with a message and details.
+   */
+  public static <T> Result<T> failure(String message, String details) {
+    return new Result<>(false, null, String.format("%s\nReason: %s", message, details));
+  }
+
+  /**
+   * Retrieves the message describing the result.
    *
    * @return The result message.
    */
@@ -50,7 +92,7 @@ public class Result<T> {
   }
 
   /**
-   * Indicates whether the operation was successful or not.
+   * Retrieves the status of the operation.
    *
    * @return {@code true} if the operation was successful, otherwise {@code false}.
    */
@@ -59,32 +101,12 @@ public class Result<T> {
   }
 
   /**
-   * Gets the data associated with the result, if available.
+   * Retrieves the data associated with the result, if available.
    *
-   * @return An {@code Optional} containing the data, or an empty {@code Optional} if there are none.
+   * @return An {@code Optional} containing the data,
+   *      or an empty {@code Optional} if there are none.
    */
   public Optional<T> getData() {
     return Optional.ofNullable(this.data);
   }
-
-  /**
-   * Retrieves the formatted result, a string representation of the result
-   * formatted based on the type of data.
-   *
-   * @return The formatted result.
-   */
-  public String getFormattedResult() {
-      StringBuilder builder = new StringBuilder();
-
-      if (data != null) {
-        if (data instanceof Collection<?> collection) {
-          collection.forEach(item -> builder.append(item).append("\n"));
-        } else {
-          builder.append(data).append("\n");
-        }
-      }
-
-      return builder.toString();
-  }
-
 }
