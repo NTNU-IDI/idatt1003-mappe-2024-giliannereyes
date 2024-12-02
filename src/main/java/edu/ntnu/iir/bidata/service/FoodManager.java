@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Manages the fridge, cookbook and meal planning functionalities.
@@ -54,16 +55,11 @@ public class FoodManager {
   public Result<Void> addIngredientToFridge(
       String name, double quantity, double pricePerUnit, Unit unit, LocalDate expiryDate
   ) {
-    try {
+    return handleOperation(() -> {
       Ingredient newIngredient = new Ingredient(name, quantity, pricePerUnit, unit, expiryDate);
       fridge.addIngredient(newIngredient);
       return Result.success(String.format("Ingredient '%s' was added to the fridge!", name));
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          String.format("Failed to add ingredient '%s' to the fridge!", name),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -75,7 +71,7 @@ public class FoodManager {
    *        or a failure message if it failed.
    */
   public Result<Ingredient> findIngredient(String name) {
-    try {
+    return handleOperation(() -> {
       Optional<Ingredient> ingredientOpt = fridge.findIngredientByName(name);
       return ingredientOpt.map(ingredient ->
               Result.success(
@@ -85,12 +81,7 @@ public class FoodManager {
           .orElseGet(() -> Result.failure(
               String.format("The ingredient '%s' is not in the fridge!", name))
           );
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          String.format("Failed to find ingredient '%s'!", name),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -104,17 +95,12 @@ public class FoodManager {
    *       or a failure message if it failed.
    */
   public Result<Void> removeIngredientFromFridge(String name, Unit unit, double quantity) {
-    try {
+    return handleOperation(() -> {
       fridge.removeIngredient(name, quantity, unit);
       return Result.success(String.format(
           "%.2f %s of '%s' was removed from the fridge!", quantity, unit.getSymbol(), name)
       );
-    } catch (IllegalArgumentException e) {
-      return Result.failure(String.format(
-          "Failed to remove %.2f %s of '%s' from the fridge!", quantity, unit.getSymbol(), name),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -126,7 +112,7 @@ public class FoodManager {
    *       or a failure message if there are none.
    */
   public Result<List<Ingredient>> getIngredientsExpiringBefore(LocalDate date) {
-    try {
+    return handleOperation(() -> {
       List<Ingredient> expiringIngredients = fridge.findExpiringIngredientsBeforeDate(date);
       if (!expiringIngredients.isEmpty()) {
         return Result.success(
@@ -138,12 +124,7 @@ public class FoodManager {
             String.format("There are no ingredients that expire before %s.", date.toString())
         );
       }
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          "Failed to retrieve expiring ingredients.",
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -172,12 +153,10 @@ public class FoodManager {
    *      or a failure message if it failed.
    */
   public Result<Void> addRecipe(Recipe recipe) {
-    try {
+    return handleOperation(() -> {
       cookbook.addRecipe(recipe);
       return Result.success("The recipe was added to the cookbook!");
-    } catch (IllegalArgumentException e) {
-      return Result.failure("The recipe could not be added to the cookbook.", e.getMessage());
-    }
+    });
   }
 
   /**
@@ -191,18 +170,13 @@ public class FoodManager {
    *        or a failure message if it failed.
    */
   public Result<Recipe> createRecipe(String name, String description, String instruction) {
-    try {
+    return handleOperation(() -> {
       Recipe recipe = new Recipe(name, description, instruction);
       return Result.success(
           String.format("Recipe '%s' was successfully created.", recipe.getName()),
           recipe
       );
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          String.format("Failed to create recipe '%s'.", name),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -219,19 +193,13 @@ public class FoodManager {
   public Result<Void> addIngredientToRecipe(
       Recipe recipe, String name, double quantity, Unit unit
   ) {
-    try {
+    return handleOperation(() -> {
       Ingredient ingredient = new Ingredient(name, quantity, unit);
       recipe.addIngredient(ingredient);
       return Result.success(
           String.format("Ingredient '%s' was added to the recipe.", ingredient.getName())
       );
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          String.format(
-              "The ingredient '%s' could not be added to recipe '%s'.", name, recipe.getName()),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -260,7 +228,7 @@ public class FoodManager {
    *     or a failure message if there are missing ingredients.
    */
   public Result<Void> verifyRecipeAvailability(String recipeName) {
-    try {
+    return handleOperation(() -> {
       boolean recipeAvailable = mealPlanner.ingredientsAreAvailableForRecipe(recipeName);
       if (recipeAvailable) {
         return Result.success(
@@ -269,17 +237,12 @@ public class FoodManager {
       } else {
         return Result.failure(String.format("You are missing ingredients to make %s!", recipeName));
       }
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          String.format("Failed to verify ingredients for recipe '%s'.", recipeName),
-          e.getMessage()
-      );
-    }
+    });
   }
 
   /**
-   * Calculates the price of each ingredient in the provided list,
-   * and returns the total price.
+   * Calculates the total price of ingredients in the fridge that is
+   * expiring before a specified date, and returns the total price.
    *
    * @param date is the date to check if the ingredient is expired.
    *
@@ -287,18 +250,14 @@ public class FoodManager {
    *     or a failure message if it failed.
    */
   public Result<String> calculateExpiringValueByDate(LocalDate date) {
-    try {
+    return handleOperation(() -> {
       double value = fridge.calculateExpiringValueByDate(date);
       String valueString = String.format("%.2f kr", value);
       return Result.success(
           "The total value of ingredients expiring before " + date.toString(),
           valueString
       );
-    } catch (IllegalArgumentException e) {
-      return Result.failure(
-          "Failed to calculate the value of expiring ingredients.", e.getMessage()
-      );
-    }
+    });
   }
 
   /**
@@ -315,6 +274,24 @@ public class FoodManager {
     String valueString = String.format("%.2f kr", value);
     return Result.success("The ingredients in the fridge are worth:", valueString);
   }
+
+  /**
+   * Handles a given operation, catches any exceptions and
+   * returns a {@link Result} object with the outcome.
+   *
+   * @param operation is the operation to perform.
+   * @param <T> is the type of the result.
+   *
+   * @return A {@link Result} object containing the outcome of the operation.
+   */
+  private <T> Result<T> handleOperation(Supplier<Result<T>> operation) {
+    try {
+      return operation.get();
+    } catch (IllegalArgumentException e) {
+      return Result.failure("Operation failed.", e.getMessage());
+    }
+  }
+
 
   /**
    * Populates the fridge and cookbook with ingredients and recipes.
