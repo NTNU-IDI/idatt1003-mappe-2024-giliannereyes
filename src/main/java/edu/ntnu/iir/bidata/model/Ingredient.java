@@ -20,6 +20,7 @@ public class Ingredient {
   private double pricePerUnit;
   private Unit unit;
   private LocalDate expiryDate;
+  private static final double tolerance = 1e-6;
 
   /**
    * Constructs a new Ingredient instance.
@@ -70,7 +71,9 @@ public class Ingredient {
     double baseAvailable = unit.convertToBaseUnitValue(quantity);
     double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
     double updatedBaseQuantity = baseAvailable - baseToRemove;
-    Validation.validateNonNegativeNumber(updatedBaseQuantity, "Remaining quantity after removal");
+    if (updatedBaseQuantity < -tolerance) {
+      Validation.validateNonNegativeNumber(updatedBaseQuantity, "Remaining quantity after removal");
+    }
     setQuantity(unit.convertFromBaseUnitValue(updatedBaseQuantity));
   }
 
