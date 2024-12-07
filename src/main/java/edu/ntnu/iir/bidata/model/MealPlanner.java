@@ -72,31 +72,10 @@ public class MealPlanner {
   private boolean isIngredientAvailable(Ingredient requiredIngredient) {
     return fridge.findIngredientByName(requiredIngredient.getName())
         .filter(fridgeIngredient -> !fridgeIngredient.isExpired())
-        .filter(fridgeIngredient ->
-            fridgeIngredient.getUnit().isCompatibleWith(requiredIngredient.getUnit()))
-        .map(fridgeIngredient ->
-            isQuantitySufficient(fridgeIngredient, requiredIngredient))
+        .map(fridgeIngredient -> fridgeIngredient.hasSufficientQuantityFor(requiredIngredient))
         .orElse(false);
   }
-
-  /**
-   * Checks if the quantity of the available ingredient meets or exceeds the required quantity.
-   *
-   * @param availableIngredient is the ingredient in the fridge.
-   * @param requiredIngredient is the ingredient required.
-   *
-   * @return {@code true} if the available quantity is sufficient. Otherwise, {@code false}.
-   */
-  private boolean isQuantitySufficient(
-      Ingredient availableIngredient, Ingredient requiredIngredient
-  ) {
-    double availableQuantity = availableIngredient.getUnit()
-        .convertToBaseUnitValue(availableIngredient.getQuantity());
-    double requiredQuantity = requiredIngredient.getUnit()
-        .convertToBaseUnitValue(requiredIngredient.getQuantity());
-    return availableQuantity >= requiredQuantity;
-  }
-
+  
   /**
    * Sets the fridge.
    *

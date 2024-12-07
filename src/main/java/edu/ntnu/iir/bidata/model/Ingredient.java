@@ -68,13 +68,16 @@ public class Ingredient {
    */
   public void decreaseQuantity(double quantityToRemove, Unit unitToRemove) {
     validateQuantityOperation(quantityToRemove, unitToRemove);
-    double baseAvailable = unit.convertToBaseUnitValue(quantity);
-    double baseToRemove = unitToRemove.convertToBaseUnitValue(quantityToRemove);
-    double updatedBaseQuantity = baseAvailable - baseToRemove;
-    if (updatedBaseQuantity < -tolerance) {
-      Validation.validateNonNegativeNumber(updatedBaseQuantity, "Remaining quantity after removal");
+    double convertedQuantityToRemove = unitToRemove.convertTo(unit, quantityToRemove);
+    double updatedQuantity = quantity - convertedQuantityToRemove;
+
+    if (updatedQuantity < -tolerance) {
+      Validation.validateNonNegativeNumber(updatedQuantity, "Remaining quantity after removal");
+    } else if (updatedQuantity < tolerance) {
+      setQuantity(0); // Close enough to zero to be considered zero
+    } else {
+      setQuantity(updatedQuantity);
     }
-    setQuantity(unit.convertFromBaseUnitValue(updatedBaseQuantity));
   }
 
   /**
@@ -87,10 +90,9 @@ public class Ingredient {
    */
   public void increaseQuantity(double quantityToAdd, Unit unitToAdd) {
     validateQuantityOperation(quantityToAdd, unitToAdd);
-    double baseAvailable = unit.convertToBaseUnitValue(quantity);
-    double baseToAdd = unitToAdd.convertToBaseUnitValue(quantityToAdd);
-    double updatedBaseQuantity = baseAvailable + baseToAdd;
-    setQuantity(unit.convertFromBaseUnitValue(updatedBaseQuantity));
+    double convertedQuantityToAdd = unitToAdd.convertTo(unit, quantityToAdd);
+    double updatedQuantity = quantity + convertedQuantityToAdd;
+    setQuantity(updatedQuantity);
   }
 
   /**
@@ -121,6 +123,25 @@ public class Ingredient {
   }
 
   /**
+   * Checks if the ingredient has sufficient quantity for another ingredient.
+   *
+   * @param requiredIngredient is the ingredient to compare with.
+   *
+   * @return {@code true} if the ingredient has sufficient quantity. Otherwise, {@code false}.
+   *
+   * @throws IllegalArgumentException if the required ingredient is null.
+   */
+  public boolean hasSufficientQuantityFor(Ingredient requiredIngredient) {
+    Validation.validateNonNull(requiredIngredient, "Required ingredient");
+    if (!unit.isCompatibleWith(requiredIngredient.getUnit())) {
+      return false;
+    }
+    double requiredQuantity = requiredIngredient.getUnit()
+        .convertTo(unit, requiredIngredient.getQuantity());
+    return quantity >= requiredQuantity;
+  }
+
+  /**
    * Verifies if the unit of measurement of the ingredient is compatible with
    * another unit of measurement. Compatibility is determined by the unit type.
    *
@@ -137,7 +158,8 @@ public class Ingredient {
 
   /**
    * Validates the quantity operation by checking if the quantity is positive,
-   * and if the unit of measurement is valid.
+   * and if the unit of measurement is not null and compatible
+   * with the ingredient's unit.
    *
    * @param quantity is the quantity to validate.
    * @param unit is the unit of measurement to validate.

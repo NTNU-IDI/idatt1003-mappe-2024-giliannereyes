@@ -65,32 +65,23 @@ public enum Unit {
   }
 
   /**
-   * Convert a value to its base unit value.
+   * Converts a value from this unit to a specified unit's value,
+   * if the units are compatible.
    *
+   * @param targetUnit is the unit to convert to.
    * @param value is the value to convert.
    *
-   * @return The value in base unit.
+   * @return The value in the specified unit.
    *
-   * @throws IllegalArgumentException if the value to convert is negative.
+   * @throws IllegalArgumentException if the target unit is null or the units are not compatible.
    */
-  public double convertToBaseUnitValue(double value) {
-    Validation.validateNonNegativeNumber(value, "Value to convert");
-    return conversionFactor * value;
-  }
-
-  /**
-   * Converts a base unit value to a value of this unit.
-   *
-   * @param value is the value in base unit to convert.
-   *
-   * @return The value in this unit.
-   *
-   * @throws IllegalArgumentException if the value or conversion factor is negative.
-   */
-  public double convertFromBaseUnitValue(double value) {
-    Validation.validateNonNegativeNumber(value, "Value to convert");
-    Validation.validateNonNegativeNumber(conversionFactor, "Conversion factor");
-    return value / conversionFactor;
+  public double convertTo(Unit targetUnit, double value) {
+    Validation.validateNonNull(targetUnit, "Value to convert");
+    if (!this.isCompatibleWith(targetUnit)) {
+      throw new IllegalArgumentException("Units are not compatible for conversion.");
+    }
+    double baseValue = this.convertToBaseUnitValue(value);
+    return targetUnit.convertFromBaseUnitValue(baseValue);
   }
 
   /**
@@ -109,6 +100,35 @@ public enum Unit {
         .findFirst()
         .orElseThrow(() ->
             new IllegalArgumentException("Provided unit is not valid. Enter another unit."));
+  }
+
+  /**
+   * Convert a value to its base unit value.
+   *
+   * @param value is the value to convert.
+   *
+   * @return The value in base unit.
+   *
+   * @throws IllegalArgumentException if the value to convert is negative.
+   */
+  private double convertToBaseUnitValue(double value) {
+    Validation.validateNonNegativeNumber(value, "Value to convert");
+    return conversionFactor * value;
+  }
+
+  /**
+   * Converts a base unit value to a value of this unit.
+   *
+   * @param value is the value in base unit to convert.
+   *
+   * @return The value in this unit.
+   *
+   * @throws IllegalArgumentException if the value or conversion factor is negative.
+   */
+  private double convertFromBaseUnitValue(double value) {
+    Validation.validateNonNegativeNumber(value, "Value to convert");
+    Validation.validateNonNegativeNumber(conversionFactor, "Conversion factor");
+    return value / conversionFactor;
   }
 
   /**
