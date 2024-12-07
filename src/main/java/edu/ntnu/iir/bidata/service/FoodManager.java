@@ -241,6 +241,23 @@ public class FoodManager {
   }
 
   /**
+   * Retrieves all recipes in the cookbook.
+   *
+   * @return A {@link Result} object containing a list of sorted recipes if found,
+   *      or a failure message if there are none.
+   */
+  public Result<List<Recipe>> findAllRecipes() {
+    List<Recipe> recipes = cookbook.getRecipes();
+    if (!recipes.isEmpty()) {
+      return Result.success(
+          "All recipes in the cookbook.", recipes
+      );
+    } else {
+      return Result.failure("There are no recipes in the cookbook.");
+    }
+  }
+
+  /**
    * Calculates the total price of ingredients in the fridge that is
    * expiring before a specified date, and returns the total price.
    *

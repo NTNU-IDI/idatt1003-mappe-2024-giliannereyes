@@ -45,6 +45,7 @@ public class UserInterface {
     menu.put(7, Map.of("Add recipe", this::handleAddRecipeToCookbook));
     menu.put(8, Map.of("Show suggested recipes", this::handleDisplaySuggestedRecipes));
     menu.put(9, Map.of("Check recipe availability", this::handleRecipeAvailability));
+    menu.put(10, Map.of("Show all recipes", this::displayAllRecipes));
   }
 
   /**
@@ -53,6 +54,7 @@ public class UserInterface {
    */
   public void start() {
     init();
+    System.out.println("Welcome to the Food Management Application!");
     boolean exit = false;
     while (!exit) {
       displayMenu();
@@ -129,7 +131,7 @@ public class UserInterface {
    * Prompts the user for name, quantity, unit, price per unit, and expiry date of an ingredient,
    * and attempts to add it to the fridge. Displays the result of the operation.
    */
-  public void handleAddIngredientToFridge() {
+  private void handleAddIngredientToFridge() {
     System.out.println("\nYou are now adding an ingredient to the fridge.");
     String name = inputHandler.readString("\nEnter ingredient name: ");
     double quantity = inputHandler.readDouble("\nEnter ingredient quantity: ");
@@ -183,7 +185,7 @@ public class UserInterface {
   /**
    * Displays the total value of ingredients in the fridge.
    */
-  public void displayFridgeValue() {
+  private void displayFridgeValue() {
     displayResult(foodManager.calculateFridgeValue());
   }
 
@@ -229,7 +231,7 @@ public class UserInterface {
         \nYou are now adding ingredients to the recipe '%s'%n.
         You will be asked to add ingredients to the recipe until you choose to stop.%n
         """,
-        recipe.getIngredients()
+        recipe.getName()
     );
     boolean addingIngredients = true;
     while (addingIngredients) {
@@ -254,7 +256,7 @@ public class UserInterface {
   /**
    * Displays the suggested recipes based on the ingredients in the fridge.
    */
-  public void handleDisplaySuggestedRecipes() {
+  private void handleDisplaySuggestedRecipes() {
     displayResult(foodManager.findSuggestedRecipes());
   }
 
@@ -262,10 +264,17 @@ public class UserInterface {
    * Prompts the user for a recipe name and checks if the recipe is available.
    * Displays the result of the operation.
    */
-  public void handleRecipeAvailability() {
+  private void handleRecipeAvailability() {
     System.out.println("\nYou chose to check if a recipe is available.");
     String name = inputHandler.readString("\nEnter the recipe's name: ");
     displayResult(foodManager.verifyRecipeAvailability(name));
+  }
+
+  /**
+   * Displays all recipes in the cookbook.
+   */
+  private void displayAllRecipes() {
+    displayResult(foodManager.findAllRecipes());
   }
 
   /**
