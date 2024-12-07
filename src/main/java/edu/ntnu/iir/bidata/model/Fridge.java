@@ -4,7 +4,9 @@ import edu.ntnu.iir.bidata.utils.Validation;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -19,13 +21,13 @@ import java.util.Optional;
  * @since 1.0
  */
 public class Fridge {
-  private final List<Ingredient> ingredients;
+  private final Map<String, List<Ingredient>> ingredientMap;
 
   /**
    * Constructs a new fridge with an empty list of ingredients.
    */
   public Fridge() {
-    ingredients = new ArrayList<>();
+    ingredientMap = new HashMap<>();
   }
 
   /**
@@ -39,10 +41,16 @@ public class Fridge {
    */
   public void addIngredient(Ingredient newIngredient) {
     Validation.validateNonNull(newIngredient, "Ingredient");
-    findIngredientByName(newIngredient.getName())
+
+    List<Ingredient> ingredientBatches = ingredientMap
+        .computeIfAbsent(
+            newIngredient.getName().toLowerCase().trim(), ignored -> new ArrayList<>()
+        );
+
+    findExactMatch(ingredientBatches, newIngredient)
         .ifPresentOrElse(
-            storedIngredient -> mergeIngredients(storedIngredient, newIngredient),
-            () -> ingredients.add(newIngredient)
+            match -> match.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit()),
+            () -> ingredientBatches.add(newIngredient)
         );
   }
 
@@ -53,37 +61,39 @@ public class Fridge {
    * @param name is the name of the ingredient to remove.
    * @param quantity is the quantity to remove.
    * @param unit is the unit of measurement of the quantity to remove.
+   * @param expiryDate is the expiry date of the ingredient to remove.
    *
    * @throws IllegalArgumentException if the parameters are invalid, the ingredient
-   *      is not found in the fridge or the quantity becomes negative.
+   *     is not found in the fridge or the quantity becomes negative.
    */
-  public void removeIngredient(String name, double quantity, Unit unit) {
+  public void removeIngredient(String name, double quantity, Unit unit, LocalDate expiryDate) {
     Validation.validatePositiveNumber(quantity, "Quantity to remove");
     Validation.validateNonNull(unit, "Unit");
     Validation.validateNonEmptyString(name, "Ingredient name");
-    Ingredient ingredient = findIngredientByName(name)
-        .orElseThrow(() ->
-            new IllegalArgumentException(String.format("Ingredient '%s' not found", name)));
-    ingredient.decreaseQuantity(quantity, unit);
-    removeIfEmpty(ingredient);
+    Validation.validateNonNull(expiryDate, "Expiry date");
+
+    List<Ingredient> ingredientBatches = ingredientMap
+        .getOrDefault(name.trim().toLowerCase(), new ArrayList<>());
+    Ingredient targetBatch = findBatchByUnitAndExpiry(ingredientBatches, unit, expiryDate)
+        .orElseThrow(() -> new IllegalArgumentException(
+            "The ingredient with the specified expiry date and unit was not found."
+        ));
+    targetBatch.decreaseQuantity(quantity, unit);
+    removeBatchIfEmpty(targetBatch, ingredientBatches, name.toLowerCase());
   }
 
   /**
-   * Searches for an ingredient in the fridge by its name, and
-   * retrieves the ingredient if it is found.
+   * Retrieves the ingredients in the fridge that match the specified name.
    *
    * @param name is the name of the ingredient to search for.
    *
-   * @return An {@link Optional} containing the ingredient if found.
-   *      Otherwise, an empty {@link Optional}.
+   * @return A list of ingredients that match the specified name.
    *
-   * @throws IllegalArgumentException if the name is blank.
+   * @throws IllegalArgumentException if the name is null or empty.
    */
-  public Optional<Ingredient> findIngredientByName(String name) {
+  public List<Ingredient> findIngredientsByName(String name) {
     Validation.validateNonEmptyString(name, "Ingredient name");
-    return ingredients.stream()
-        .filter(ingredient -> ingredient.getName().equalsIgnoreCase(name.trim()))
-        .findFirst();
+    return ingredientMap.getOrDefault(name.trim().toLowerCase(), new ArrayList<>());
   }
 
   /**
@@ -97,7 +107,8 @@ public class Fridge {
    */
   public List<Ingredient> findExpiringIngredientsBeforeDate(LocalDate date) {
     Validation.validateNonNull(date, "Date");
-    return ingredients.stream()
+    return ingredientMap.values().stream()
+        .flatMap(List::stream)
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(date))
         .toList();
   }
@@ -108,7 +119,8 @@ public class Fridge {
    * @return A list of ingredients sorted alphabetically.
    */
   public List<Ingredient> findSortedIngredients() {
-    return ingredients.stream()
+    return ingredientMap.values().stream()
+        .flatMap(List::stream)
         .sorted(Comparator.comparing(Ingredient::getName))
         .toList();
   }
@@ -123,7 +135,8 @@ public class Fridge {
    */
   public double calculateExpiringValueByDate(LocalDate date) {
     Validation.validateNonNull(date, "Date");
-    return ingredients.stream()
+    return ingredientMap.values().stream()
+        .flatMap(List::stream)
         .filter(ingredient -> ingredient.getExpiryDate().isBefore(date))
         .mapToDouble(Ingredient::getPrice)
         .sum();
@@ -135,8 +148,9 @@ public class Fridge {
    * @return The total value of all ingredients in the fridge.
    */
   public double calculateTotalValue() {
-    return ingredients.stream()
-        .mapToDouble(Ingredient::getPrice)
+    return ingredientMap.values().stream()
+        .flatMap(List::stream)
+        .mapToDouble(ingredient -> ingredient.getPricePerUnit() * ingredient.getQuantity())
         .sum();
   }
 
@@ -146,35 +160,49 @@ public class Fridge {
    * @return A list containing the ingredients in the fridge.
    */
   public List<Ingredient> getIngredients() {
-    return new ArrayList<>(ingredients);
+    return ingredientMap.values().stream()
+        .flatMap(List::stream)
+        .toList();
   }
 
   /**
-   * Increases the quantity of the stored ingredient by the quantity
-   * of the new ingredient, if the ingredients are the same.
-   *
-   * @param storedIngredient is the ingredient that is stored in the fridge.
-   * @param newIngredient is the ingredient to add to the stored ingredient.
-   *
-   * @throws IllegalArgumentException if the ingredients are not the same.
+   * Finds an exact match for the given ingredient in the list.
    */
-  private void mergeIngredients(Ingredient storedIngredient, Ingredient newIngredient) {
-    if (!storedIngredient.matchesIngredient(newIngredient)) {
-      throw new IllegalArgumentException(
-          "An ingredient with the same name but has different attributes already exists."
-      );
-    }
-    storedIngredient.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit());
+  private Optional<Ingredient> findExactMatch(
+      List<Ingredient> ingredients, Ingredient ingredientToFind
+  ) {
+    return ingredients.stream()
+        .filter(existingIngredient -> existingIngredient.matchesIngredient(ingredientToFind))
+        .findFirst();
   }
 
   /**
-   * Removes the ingredient from the fridge if the quantity is zero.
-   *
-   * @param ingredient is the ingredient to remove.
+   * Finds a batch in the ingredient list matching the unit and expiry date.
    */
-  private void removeIfEmpty(Ingredient ingredient) {
-    if (ingredient.getQuantity() == 0) {
-      ingredients.remove(ingredient);
+  private Optional<Ingredient> findBatchByUnitAndExpiry(
+      List<Ingredient> ingredients, Unit unit, LocalDate expiryDate
+  ) {
+    return ingredients.stream()
+        .filter(ingredient -> ingredient.getExpiryDate().equals(expiryDate)
+            && ingredient.getUnit().isCompatibleWith(unit))
+        .findFirst();
+  }
+
+  /**
+   * Removes a specific ingredient batch from the fridge if its quantity is zero.
+   *
+   * @param ingredientBatch the specific batch of the ingredient to remove.
+   * @param ingredientBatches the list of batches for the same ingredient name.
+   * @param ingredientKey the key representing the ingredient name in the fridge.
+   */
+  private void removeBatchIfEmpty(
+      Ingredient ingredientBatch, List<Ingredient> ingredientBatches, String ingredientKey
+  ) {
+    if (ingredientBatch.getQuantity() <= 0) {
+      ingredientBatches.remove(ingredientBatch);
+      if (ingredientBatches.isEmpty()) {
+        ingredientMap.remove(ingredientKey);
+      }
     }
   }
 }

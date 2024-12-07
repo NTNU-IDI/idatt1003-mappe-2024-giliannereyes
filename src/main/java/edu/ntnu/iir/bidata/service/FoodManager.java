@@ -10,7 +10,6 @@ import edu.ntnu.iir.bidata.utils.Result;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -70,17 +69,17 @@ public class FoodManager {
    * @return {@link Result} object containing the ingredient if found,
    *        or a failure message if it failed.
    */
-  public Result<Ingredient> findIngredient(String name) {
+  public Result<List<Ingredient>> findIngredient(String name) {
     return handleOperation(() -> {
-      Optional<Ingredient> ingredientOpt = fridge.findIngredientByName(name);
-      return ingredientOpt.map(ingredient ->
-              Result.success(
-                  String.format("Ingredient '%s' was found in the fridge!", name),
-                  ingredient
-              ))
-          .orElseGet(() -> Result.failure(
-              String.format("The ingredient '%s' is not in the fridge!", name))
-          );
+      List<Ingredient> ingredients = fridge.findIngredientsByName(name);
+      if (!ingredients.isEmpty()) {
+        return Result.success(
+            String.format("Ingredient(s) with the name '%s' found in the fridge.", name),
+            ingredients
+        );
+      } else {
+        return Result.failure(String.format("Ingredient with the name '%s' not found.", name));
+      }
     });
   }
 
@@ -94,9 +93,11 @@ public class FoodManager {
    * @return A {@link Result} object containing a success message if the ingredient was removed,
    *       or a failure message if it failed.
    */
-  public Result<Void> removeIngredientFromFridge(String name, Unit unit, double quantity) {
+  public Result<Void> removeIngredientFromFridge(
+      String name, Unit unit, double quantity, LocalDate expiryDate
+  ) {
     return handleOperation(() -> {
-      fridge.removeIngredient(name, quantity, unit);
+      fridge.removeIngredient(name, quantity, unit, expiryDate);
       return Result.success(String.format(
           "%.2f %s of '%s' was removed from the fridge!", quantity, unit.getSymbol(), name)
       );

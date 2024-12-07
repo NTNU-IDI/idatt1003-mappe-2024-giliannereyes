@@ -70,12 +70,15 @@ public class MealPlanner {
    * @return {@code true} if the ingredient is available. Otherwise, {@code false}.
    */
   private boolean isIngredientAvailable(Ingredient requiredIngredient) {
-    return fridge.findIngredientByName(requiredIngredient.getName())
-        .filter(fridgeIngredient -> !fridgeIngredient.isExpired())
-        .map(fridgeIngredient -> fridgeIngredient.hasSufficientQuantityFor(requiredIngredient))
-        .orElse(false);
+    List<Ingredient> ingredientBatches = fridge.findIngredientsByName(requiredIngredient.getName());
+    double totalAvailableQuantity = ingredientBatches.stream()
+        .filter(batch -> !batch.isExpired())
+        .filter(batch -> batch.unitIsCompatibleWith(requiredIngredient.getUnit()))
+        .mapToDouble(batch -> batch.convertQuantityTo(requiredIngredient.getUnit()))
+        .sum();
+    return totalAvailableQuantity >= requiredIngredient.getQuantity();
   }
-  
+
   /**
    * Sets the fridge.
    *

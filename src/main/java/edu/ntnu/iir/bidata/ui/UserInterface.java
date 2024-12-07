@@ -154,8 +154,11 @@ public class UserInterface {
     String name = inputHandler.readString("\nEnter ingredient name: ");
     Unit unit = inputHandler.readUnit("\nEnter the number of the unit to remove: ");
     double quantity = inputHandler.readDouble("\nEnter quantity to remove: ");
+    LocalDate expiryDate = inputHandler.readDate(
+        "\nEnter the expiry date of the ingredient in this format 'yyyy/MM/dd': "
+    );
 
-    displayResult(foodManager.removeIngredientFromFridge(name, unit, quantity));
+    displayResult(foodManager.removeIngredientFromFridge(name, unit, quantity, expiryDate));
   }
 
   /**

@@ -123,22 +123,30 @@ public class Ingredient {
   }
 
   /**
-   * Checks if the ingredient has sufficient quantity for another ingredient.
+   * Converts the quantity of the ingredient to the value
+   * in the specified unit of measurement.
    *
-   * @param requiredIngredient is the ingredient to compare with.
+   * @param targetUnit is the unit of measurement to convert to.
    *
-   * @return {@code true} if the ingredient has sufficient quantity. Otherwise, {@code false}.
+   * @return The converted quantity.
    *
-   * @throws IllegalArgumentException if the required ingredient is null.
+   * @throws IllegalArgumentException if the provided unit is null or incompatible.
    */
-  public boolean hasSufficientQuantityFor(Ingredient requiredIngredient) {
-    Validation.validateNonNull(requiredIngredient, "Required ingredient");
-    if (!unit.isCompatibleWith(requiredIngredient.getUnit())) {
-      return false;
-    }
-    double requiredQuantity = requiredIngredient.getUnit()
-        .convertTo(unit, requiredIngredient.getQuantity());
-    return quantity >= requiredQuantity;
+  public double convertQuantityTo(Unit targetUnit) {
+    Validation.validateNonNull(targetUnit, "Unit");
+    return unit.convertTo(targetUnit, quantity);
+  }
+
+  /**
+   * Verifies if the unit of measurement of the ingredient is compatible with
+   * another unit of measurement.
+   *
+   * @param otherUnit is the unit of measurement to compare with.
+   *
+   * @return {@code true} if the units are compatible. Otherwise, {@code false}.
+   */
+  public boolean unitIsCompatibleWith(Unit otherUnit) {
+    return unit.isCompatibleWith(otherUnit);
   }
 
   /**
