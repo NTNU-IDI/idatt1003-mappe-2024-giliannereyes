@@ -48,41 +48,19 @@ public class UnitTest {
   }
 
   /**
-   * Tests converting values to the base unit
-   * using the {@link Unit#convertToBaseUnitValue(double)} method.
+   * Tests converting values of a unit to values of another unit.
+   * using the {@link Unit#convertTo(Unit, double)} method.
    *
-   * <p>Expected outcome: The method should correctly convert values to the base unit.</p>
+   * <p>Expected outcome: The method should correctly convert values to
+   * the specified unit.</p>
    */
   @Test
-  void testConvertToBaseUnitValue() {
-    assertEquals(1.0, Unit.LITRE.convertToBaseUnitValue(1.0));
-    assertEquals(0.1, Unit.DECILITRE.convertToBaseUnitValue(1.0));
-    assertEquals(0.001, Unit.MILLILITRE.convertToBaseUnitValue(1.0));
-
-    assertEquals(1.0, Unit.KILOGRAM.convertToBaseUnitValue(1.0));
-    assertEquals(0.001, Unit.GRAM.convertToBaseUnitValue(1.0));
-    assertEquals(0.000001, Unit.MILLIGRAM.convertToBaseUnitValue(1.0));
-
-    assertEquals(1.0, Unit.PIECE.convertToBaseUnitValue(1.0));
-  }
-
-  /**
-   * Tests converting values from the base unit
-   * using the {@link Unit#convertFromBaseUnitValue(double)} method.
-   *
-   * <p>Expected outcome: The method should correctly convert values from the base unit.</p>
-   */
-  @Test
-  void testConvertFromBaseUnitValue() {
-    assertEquals(10.0, Unit.DECILITRE.convertFromBaseUnitValue(1.0));
-    assertEquals(1000.0, Unit.MILLILITRE.convertFromBaseUnitValue(1.0));
-    assertEquals(1.0, Unit.LITRE.convertFromBaseUnitValue(1.0));
-
-    assertEquals(1000.0, Unit.GRAM.convertFromBaseUnitValue(1.0));
-    assertEquals(1000000.0, Unit.MILLIGRAM.convertFromBaseUnitValue(1.0));
-    assertEquals(1.0, Unit.KILOGRAM.convertFromBaseUnitValue(1.0));
-
-    assertEquals(1.0, Unit.PIECE.convertFromBaseUnitValue(1.0));
+  void testConvertToValidUnits() {
+    assertEquals(0.001, Unit.MILLILITRE.convertTo(Unit.LITRE, 1));
+    assertEquals(1000, Unit.LITRE.convertTo(Unit.MILLILITRE, 1));
+    assertEquals(0.001, Unit.GRAM.convertTo(Unit.KILOGRAM, 1));
+    assertEquals(1000, Unit.KILOGRAM.convertTo(Unit.GRAM, 1));
+    assertEquals(1, Unit.PIECE.convertTo(Unit.PIECE, 1));
   }
 
   /**
@@ -132,31 +110,17 @@ public class UnitTest {
   }
 
   /**
-   * Tests converting values to the base unit
-   * using the {@link Unit#convertToBaseUnitValue(double)} method.
+   * Tests converting values from one unit to an incompatible unit
+   * using the {@link Unit#convertTo(Unit, double)} method.
    *
-   * <p>Expected outcome: The method should throw an
-   * IllegalArgumentException when given a negative value.</p>
+   * <p>Expected outcome: The method should throw an IllegalArgumentException.</p>
    */
   @Test
-  void testConvertToBaseUnitValueInvalid() {
-    assertThrows(IllegalArgumentException.class, () -> Unit.LITRE.convertToBaseUnitValue(-0.5));
-    assertThrows(IllegalArgumentException.class, () -> Unit.GRAM.convertToBaseUnitValue(-100));
-    assertThrows(IllegalArgumentException.class, () -> Unit.PIECE.convertToBaseUnitValue(-12.0));
-  }
-
-  /**
-   * Tests converting values from the base unit
-   * using the {@link Unit#convertFromBaseUnitValue(double)} method.
-   *
-   * <p>Expected outcome: The method should throw an IllegalArgumentException
-   * when given a negative value.</p>
-   */
-  @Test
-  void testConvertFromBaseUnitValueInvalid() {
-    assertThrows(IllegalArgumentException.class, () -> Unit.LITRE.convertFromBaseUnitValue(-0.5));
-    assertThrows(IllegalArgumentException.class, () -> Unit.GRAM.convertFromBaseUnitValue(-100));
-    assertThrows(IllegalArgumentException.class, () -> Unit.PIECE.convertFromBaseUnitValue(-12.0));
+  void testConvertToInvalidUnits() {
+    assertThrows(IllegalArgumentException.class, () -> Unit.LITRE.convertTo(Unit.GRAM, 0.5));
+    assertThrows(IllegalArgumentException.class, () -> Unit.GRAM.convertTo(Unit.PIECE, 500));
+    assertThrows(IllegalArgumentException.class, () -> Unit.PIECE.convertTo(Unit.LITRE, 1));
+    assertThrows(IllegalArgumentException.class, () -> Unit.KILOGRAM.convertTo(Unit.LITRE, 100));
   }
 
   /**
