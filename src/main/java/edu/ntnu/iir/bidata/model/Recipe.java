@@ -8,17 +8,17 @@ import java.util.List;
  * Represents a recipe with a name, description, instruction
  * and a list of ingredients.
  *
- * <p>Provides methods to add ingredients and retrieve each property.</p>
+ * <p>Provides methods to add ingredients and retrieve each field.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.0
  */
 public class Recipe {
   private String name;
   private String description;
   private String instruction;
-  private final List<Ingredient> ingredients;
+  private final ArrayList<Ingredient> ingredients;
 
   /**
    * Constructs a new Recipe instance.
@@ -39,13 +39,22 @@ public class Recipe {
   /**
    * Adds an ingredient to the recipe.
    *
-   * @param ingredient is the ingredient to add.
+   * @param newIngredient is the ingredient to add.
    *
    * @throws IllegalArgumentException if the ingredient is null.
    */
-  public void addIngredient(Ingredient ingredient) {
-    Validation.validateNonNull(ingredient, "Ingredient");
-    ingredients.add(ingredient);
+  public void addIngredient(Ingredient newIngredient) {
+    Validation.validateNonNull(newIngredient, "Ingredient");
+    ingredients.stream()
+        .filter(ingredient ->
+            ingredient.getName().trim().equalsIgnoreCase(newIngredient.getName().trim())
+            && ingredient.unitIsCompatibleWith(newIngredient.getUnit()))
+        .findFirst()
+        .ifPresentOrElse(
+            ingredient -> ingredient.increaseQuantity(
+                newIngredient.getQuantity(), newIngredient.getUnit()),
+            () -> ingredients.add(newIngredient)
+        );
   }
 
   /**

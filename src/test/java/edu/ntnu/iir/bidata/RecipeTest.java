@@ -78,6 +78,24 @@ public class RecipeTest {
     assertEquals(ingredient, ingredients.getFirst());
   }
 
+  /**
+   * Test adding a duplicate ingredient to a recipe, which should increase the quantity
+   * instead of adding a new ingredient.
+   */
+  @Test
+  void testAddDuplicateIngredient() {
+    Recipe recipe = new Recipe("Pasta Recipe", "Delicious pasta recipe", "Cook for 10 minutes");
+    Ingredient ingredient1 = new Ingredient("Pasta", 200, Unit.GRAM);
+    Ingredient ingredient2 = new Ingredient("PaSTA ", 0.2, Unit.KILOGRAM);
+    recipe.addIngredient(ingredient1);
+    recipe.addIngredient(ingredient2);
+    List<Ingredient> ingredients = recipe.getIngredients();
+    assertEquals(1, ingredients.size());
+    assertEquals(
+        400, ingredients.getFirst().getQuantity())
+    ;
+  }
+
   // --------------------------- NEGATIVE TESTS ----------------------------------
 
   /**
