@@ -12,7 +12,7 @@ import java.util.Arrays;
  * <p>Base units: litre for volume, kilogram for mass and piece for items measured by count.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.1
  */
 public enum Unit {
@@ -34,6 +34,7 @@ public enum Unit {
    *
    * @param symbol is the symbol representing the unit.
    * @param conversionFactor is the conversion factor to the base unit.
+   * @param unitType is the type of the unit.
    */
   Unit(String symbol, double conversionFactor, UnitType unitType) {
     this.symbol = symbol;
@@ -99,7 +100,18 @@ public enum Unit {
         .filter(unit -> unit.getSymbol().equalsIgnoreCase(symbol))
         .findFirst()
         .orElseThrow(() ->
-            new IllegalArgumentException("Provided unit is not valid. Enter another unit."));
+            new IllegalArgumentException("No unit found with the provided symbol: " + symbol));
+  }
+
+  /**
+   * Retrieves the conversion ratio between this unit and a target unit.
+   *
+   * @param targetUnit is the unit to calculate the conversion ratio to.
+   *
+   * @return The conversion ratio between this unit and the target unit.
+   */
+  public double getConversionRatio(Unit targetUnit) {
+    return targetUnit.conversionFactor / this.conversionFactor;
   }
 
   /**
@@ -129,14 +141,5 @@ public enum Unit {
     Validation.validateNonNegativeNumber(value, "Value to convert");
     Validation.validateNonNegativeNumber(conversionFactor, "Conversion factor");
     return value / conversionFactor;
-  }
-
-  /**
-   * Represents the type of unit.
-   */
-  public enum UnitType {
-    VOLUME,
-    MASS,
-    PIECE
   }
 }

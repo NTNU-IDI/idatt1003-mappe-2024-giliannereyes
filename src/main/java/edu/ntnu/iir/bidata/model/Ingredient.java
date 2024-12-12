@@ -4,14 +4,14 @@ import edu.ntnu.iir.bidata.utils.Validation;
 import java.time.LocalDate;
 
 /**
- * Represents an ingredient with properties such as name, quantity,
+ * Represents an ingredient with fields such as name, quantity,
  * price per unit, unit of measurement, and expiry date.
  *
  * <p>Provides methods to validate ingredient properties, check expiration
  * status, set quantity and check compatibility with other ingredients.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.0
  */
 public class Ingredient {
@@ -20,7 +20,7 @@ public class Ingredient {
   private double pricePerUnit;
   private Unit unit;
   private LocalDate expiryDate;
-  private static final double tolerance = 1e-6;
+  private final double tolerance = 1e-6;
 
   /**
    * Constructs a new Ingredient instance.
@@ -61,7 +61,7 @@ public class Ingredient {
    * Removes the specified quantity from the ingredient.
    *
    * @param quantityToRemove is the quantity to remove.
-   * @param unitToRemove is the unit of measurement of the quantity to remove.
+   * @param unitToRemove is the unit the quantity to remove is measured in.
    *
    * @throws IllegalArgumentException if the provided quantity or unit is invalid,
    *     or if the specified quantity is greater than available quantity.
@@ -84,9 +84,10 @@ public class Ingredient {
    * Increases the quantity of the ingredient by the specified amount.
    *
    * @param quantityToAdd is the quantity to add.
-   * @param unitToAdd is the unit of measurement of the quantity to add.
+   * @param unitToAdd is the unit the quantity to add is measured in.
    *
-   * @throws IllegalArgumentException if the quantity is negative.
+   * @throws IllegalArgumentException if the quantity is negative, or the unit
+   *      is null or incompatible.
    */
   public void increaseQuantity(double quantityToAdd, Unit unitToAdd) {
     validateQuantityOperation(quantityToAdd, unitToAdd);
@@ -96,8 +97,8 @@ public class Ingredient {
   }
 
   /**
-   * Checks if the ingredient is expired by comparing the expiry date with the
-   * current date, and returns the result.
+   * Checks if the ingredient is expired by comparing
+   * the expiry date with the current date.
    *
    * @return {@code true} if the ingredient is expired. Otherwise, {@code false}.
    */
@@ -106,29 +107,34 @@ public class Ingredient {
   }
 
   /**
-   * Checks if the ingredient matches another ingredient by comparing their
-   * name, expiry date, price per unit, and unit of measurement. A match
-   * indicates that the ingredients are of the same type.
+   * Checks if the ingredient matches another ingredient in terms of name,
+   * expiry date, and price per unit and unit type.
    *
    * @param otherIngredient is the ingredient to compare with.
    *
    * @return {@code true} if the ingredients match. Otherwise, {@code false}.
+   *
+   * @throws IllegalArgumentException if the provided ingredient is null.
    */
   public boolean matchesIngredient(Ingredient otherIngredient) {
     Validation.validateNonNull(otherIngredient, "Ingredient");
-    return otherIngredient.getName().equalsIgnoreCase(name)
+    if (!otherIngredient.getUnit().isCompatibleWith(unit)) {
+      return false;
+    }
+    double conversionRatio = unit.getConversionRatio(otherIngredient.getUnit());
+    double normalizedPricePerUnit = pricePerUnit * conversionRatio;
+    return otherIngredient.getName().trim().equalsIgnoreCase(name.trim())
         && otherIngredient.getExpiryDate().equals(expiryDate)
-        && otherIngredient.getPricePerUnit() == (pricePerUnit)
-        && otherIngredient.getUnit().isCompatibleWith(unit);
+        && Math.abs(otherIngredient.getPricePerUnit() - normalizedPricePerUnit) < tolerance;
   }
 
   /**
    * Converts the quantity of the ingredient to the value
-   * in the specified unit of measurement.
+   * in the provided unit.
    *
-   * @param targetUnit is the unit of measurement to convert to.
+   * @param targetUnit is the unit to convert to.
    *
-   * @return The converted quantity.
+   * @return The quantity measured in the specified unit.
    *
    * @throws IllegalArgumentException if the provided unit is null or incompatible.
    */
@@ -138,51 +144,41 @@ public class Ingredient {
   }
 
   /**
-   * Verifies if the unit of measurement of the ingredient is compatible with
-   * another unit of measurement.
+   * Verifies if the unit is compatible with another unit.
    *
-   * @param otherUnit is the unit of measurement to compare with.
+   * @param otherUnit is the unit to compare with.
    *
    * @return {@code true} if the units are compatible. Otherwise, {@code false}.
+   *
+   * @throws IllegalArgumentException if the provided unit is null.
    */
   public boolean unitIsCompatibleWith(Unit otherUnit) {
+    Validation.validateNonNull(otherUnit, "Unit");
     return unit.isCompatibleWith(otherUnit);
   }
 
   /**
-   * Verifies if the unit of measurement of the ingredient is compatible with
-   * another unit of measurement. Compatibility is determined by the unit type.
-   *
-   * @param otherUnit is the unit of measurement to compare with.
-   *
-   * @throws IllegalArgumentException if the unit types do not match.
-   */
-  private void verifyUnitMatch(Unit otherUnit) {
-    if (!unit.isCompatibleWith(otherUnit)) {
-      throw new IllegalArgumentException("Unit mismatch: Cannot operate with "
-          + otherUnit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
-    }
-  }
-
-  /**
-   * Validates the quantity operation by checking if the quantity is positive,
-   * and if the unit of measurement is not null and compatible
-   * with the ingredient's unit.
+   * Validates if the provided quantity is positive and the unit is not
+   * null or incompatible with the ingredient's unit.
    *
    * @param quantity is the quantity to validate.
-   * @param unit is the unit of measurement to validate.
+   * @param unit is the unit to validate.
    *
-   * @throws IllegalArgumentException if the quantity is negative or the unit is null.
+   * @throws IllegalArgumentException if the quantity is negative, or
+   *      the unit is null or incompatible.
    */
   private void validateQuantityOperation(double quantity, Unit unit) {
     Validation.validatePositiveNumber(quantity, "Quantity");
     Validation.validateNonNull(unit, "Unit");
-    verifyUnitMatch(unit);
+    if (!this.unit.isCompatibleWith(unit)) {
+      throw new IllegalArgumentException("Unit mismatch: Cannot operate with "
+          + unit.getSymbol() + " on an ingredient measured in " + this.unit.getSymbol());
+    }
   }
 
   /**
    * Returns a string representation of the ingredient containing its details.
-   * <strong>The string format was generated by ChatGPT.</strong>
+   * <strong>The format string was generated by ChatGPT.</strong>
    *
    * @return A string representation of the ingredient.
    */
