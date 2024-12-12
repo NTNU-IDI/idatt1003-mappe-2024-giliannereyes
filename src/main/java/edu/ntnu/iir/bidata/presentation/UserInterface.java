@@ -1,8 +1,8 @@
-package edu.ntnu.iir.bidata.ui;
+package edu.ntnu.iir.bidata.presentation;
 
-import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.model.Unit;
-import edu.ntnu.iir.bidata.service.FoodManager;
+import edu.ntnu.iir.bidata.domain.Recipe;
+import edu.ntnu.iir.bidata.domain.Unit;
+import edu.ntnu.iir.bidata.service.FoodManagementService;
 import edu.ntnu.iir.bidata.utils.InputHandler;
 import edu.ntnu.iir.bidata.utils.Result;
 import java.time.LocalDate;
@@ -33,7 +33,7 @@ public class UserInterface {
   );
   private final LinkedHashMap<Integer, Map<String, Runnable>> menu = new LinkedHashMap<>();
   private InputHandler inputHandler;
-  private FoodManager foodManager;
+  private FoodManagementService foodManagementService;
 
   {
     menu.put(1, Map.of("Add ingredient", this::handleAddIngredientToFridge));
@@ -70,14 +70,14 @@ public class UserInterface {
   }
 
   /**
-   * Initializes the application by instantiating {@link InputHandler} and {@link FoodManager},
-   * and populating the fridge and cookbook with initial data.
+   * Initializes the application by instantiating {@link InputHandler}
+   * and {@link FoodManagementService}, and populating the fridge and cookbook with initial data.
    */
   private void init() {
     try {
       inputHandler = new InputHandler();
-      foodManager = new FoodManager();
-      foodManager.populateFridgeAndCookbook();
+      foodManagementService = new FoodManagementService();
+      foodManagementService.populateFridgeAndCookbook();
     } catch (Exception e) {
       System.out.println("Failed to initialize the application: " + e.getMessage());
     }
@@ -140,7 +140,7 @@ public class UserInterface {
     LocalDate expiryDate = inputHandler.readDate(
         "\nEnter the expiry date in this format 'yyyy/MM/dd': "
     );
-    displayResult(foodManager.addIngredientToFridge(
+    displayResult(foodManagementService.addIngredientToFridge(
         name, quantity, pricePerUnit, unit, expiryDate)
     );
   }
@@ -153,14 +153,16 @@ public class UserInterface {
   private void handleRemoveIngredientFromFridge() {
     System.out.println("\nYou are now removing an ingredient from the fridge.");
     String name = inputHandler.readString("\nEnter ingredient name: ");
-    displayResult(foodManager.findIngredient(name), ingredientHeader);
-    if (foodManager.findIngredient(name).isSuccess()) {
+    displayResult(foodManagementService.findIngredient(name), ingredientHeader);
+    if (foodManagementService.findIngredient(name).isSuccess()) {
       double quantity = inputHandler.readDouble("\nEnter quantity to remove: ");
       Unit unit = inputHandler.readUnit("\nEnter the number of the unit to remove: ");
       LocalDate expiryDate = inputHandler.readDate(
           "\nEnter the expiry date of the ingredient in this format 'yyyy/MM/dd': "
       );
-      displayResult(foodManager.removeIngredientFromFridge(name, unit, quantity, expiryDate));
+      displayResult(foodManagementService.removeIngredientFromFridge(
+          name, unit, quantity, expiryDate)
+      );
     }
   }
 
@@ -171,7 +173,7 @@ public class UserInterface {
   private void handleFindIngredient() {
     System.out.println("\nYou chose to search for an ingredient.");
     String name = inputHandler.readString("\nEnter ingredient name: ");
-    displayResult(foodManager.findIngredient(name), ingredientHeader);
+    displayResult(foodManagementService.findIngredient(name), ingredientHeader);
   }
 
   /**
@@ -184,15 +186,17 @@ public class UserInterface {
         "Ingredients expiring before the date (e.g. '2024/10/28') you enter will be shown."
     );
     LocalDate expiryDate = inputHandler.readDate("\nEnter the date in this format 'yyyy/MM/dd': ");
-    displayResult(foodManager.findIngredientsExpiringBefore(expiryDate), ingredientHeader);
-    displayResult(foodManager.calculateExpiringValueByDate(expiryDate));
+    displayResult(
+        foodManagementService.findIngredientsExpiringBefore(expiryDate), ingredientHeader
+    );
+    displayResult(foodManagementService.calculateExpiringValueByDate(expiryDate));
   }
 
   /**
    * Displays the total value of ingredients in the fridge.
    */
   private void displayFridgeValue() {
-    displayResult(foodManager.calculateFridgeValue());
+    displayResult(foodManagementService.calculateFridgeValue());
   }
 
   /**
@@ -200,7 +204,7 @@ public class UserInterface {
    * Also displays the total value of ingredients in the fridge.
    */
   private void handleDisplaySortedIngredients() {
-    displayResult(foodManager.findSortedIngredients(), ingredientHeader);
+    displayResult(foodManagementService.findSortedIngredients(), ingredientHeader);
     displayFridgeValue();
   }
 
@@ -214,12 +218,12 @@ public class UserInterface {
     String description = inputHandler.readString("\nEnter recipe description: ");
     String instruction = inputHandler.readString("\nEnter recipe instruction: ");
 
-    Result<Recipe> result = foodManager.createRecipe(name, description, instruction);
+    Result<Recipe> result = foodManagementService.createRecipe(name, description, instruction);
 
     if (result.isSuccess()) {
       result.getData().ifPresent(recipe -> {
         handleRecipeIngredientAddition(recipe);
-        displayResult(foodManager.addRecipe(recipe));
+        displayResult(foodManagementService.addRecipe(recipe));
       });
     } else {
       displayResult(result);
@@ -250,14 +254,14 @@ public class UserInterface {
     String name = inputHandler.readString("\nEnter the ingredient's name: ");
     double quantity = inputHandler.readDouble("\nEnter the ingredient's quantity: ");
     Unit unit = inputHandler.readUnit("\nEnter the number of the ingredient's unit: ");
-    displayResult(foodManager.addIngredientToRecipe(recipe, name, quantity, unit));
+    displayResult(foodManagementService.addIngredientToRecipe(recipe, name, quantity, unit));
   }
 
   /**
    * Displays the suggested recipes based on the ingredients in the fridge.
    */
   private void handleDisplaySuggestedRecipes() {
-    displayResult(foodManager.findSuggestedRecipes());
+    displayResult(foodManagementService.findSuggestedRecipes());
   }
 
   /**
@@ -267,14 +271,14 @@ public class UserInterface {
   private void handleRecipeAvailability() {
     System.out.println("\nYou chose to check if a recipe is available.");
     String name = inputHandler.readString("\nEnter the recipe's name: ");
-    displayResult(foodManager.verifyRecipeAvailability(name));
+    displayResult(foodManagementService.verifyRecipeAvailability(name));
   }
 
   /**
    * Displays all recipes in the cookbook.
    */
   private void displayAllRecipes() {
-    displayResult(foodManager.findAllRecipes());
+    displayResult(foodManagementService.findAllRecipes());
   }
 
   /**

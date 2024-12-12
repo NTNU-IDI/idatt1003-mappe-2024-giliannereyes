@@ -1,7 +1,7 @@
 package edu.ntnu.iir.bidata.utils;
 
 /**
- * Utility class for validating input parameters.
+ * Utility class for validating parameters.
  *
  * <p>Provides methods for validating strings, numbers and objects.</p>
  *

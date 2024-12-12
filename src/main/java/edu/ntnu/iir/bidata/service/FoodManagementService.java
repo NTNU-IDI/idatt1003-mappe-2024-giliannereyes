@@ -1,11 +1,11 @@
 package edu.ntnu.iir.bidata.service;
 
-import edu.ntnu.iir.bidata.model.Cookbook;
-import edu.ntnu.iir.bidata.model.Fridge;
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.MealPlanner;
-import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.domain.Cookbook;
+import edu.ntnu.iir.bidata.domain.Fridge;
+import edu.ntnu.iir.bidata.domain.Ingredient;
+import edu.ntnu.iir.bidata.domain.MealPlanner;
+import edu.ntnu.iir.bidata.domain.Recipe;
+import edu.ntnu.iir.bidata.domain.Unit;
 import edu.ntnu.iir.bidata.utils.Result;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -25,16 +25,16 @@ import java.util.function.Supplier;
  * @version 1.3
  * @since 1.1
  */
-public class FoodManager {
+public class FoodManagementService {
   private final Fridge fridge;
   private final Cookbook cookbook;
   private final MealPlanner mealPlanner;
 
   /**
-   * Constructs a FoodManager instance with a {@link Fridge}, {@link Cookbook}
+   * Constructs a FoodManagementService instance with a {@link Fridge}, {@link Cookbook}
    * and {@link MealPlanner}.
    */
-  public FoodManager() {
+  public FoodManagementService() {
     this.fridge = new Fridge();
     this.cookbook = new Cookbook();
     this.mealPlanner = new MealPlanner(fridge, cookbook);

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.domain.Ingredient;
+import edu.ntnu.iir.bidata.domain.Unit;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

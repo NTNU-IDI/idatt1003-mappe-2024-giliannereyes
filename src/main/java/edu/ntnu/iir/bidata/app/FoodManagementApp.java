@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.app;
 
-import edu.ntnu.iir.bidata.ui.UserInterface;
+import edu.ntnu.iir.bidata.presentation.UserInterface;
 
 /**
  * Wrapper class for the Food Management Application.

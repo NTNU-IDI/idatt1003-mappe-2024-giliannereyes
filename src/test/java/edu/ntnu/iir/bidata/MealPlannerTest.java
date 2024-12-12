@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.ntnu.iir.bidata.model.Cookbook;
-import edu.ntnu.iir.bidata.model.Fridge;
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.MealPlanner;
-import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.domain.Cookbook;
+import edu.ntnu.iir.bidata.domain.Fridge;
+import edu.ntnu.iir.bidata.domain.Ingredient;
+import edu.ntnu.iir.bidata.domain.MealPlanner;
+import edu.ntnu.iir.bidata.domain.Recipe;
+import edu.ntnu.iir.bidata.domain.Unit;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

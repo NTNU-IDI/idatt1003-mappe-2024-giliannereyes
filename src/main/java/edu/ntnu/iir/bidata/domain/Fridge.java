@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.model;
+package edu.ntnu.iir.bidata.domain;
 
 import edu.ntnu.iir.bidata.utils.Validation;
 import java.time.LocalDate;

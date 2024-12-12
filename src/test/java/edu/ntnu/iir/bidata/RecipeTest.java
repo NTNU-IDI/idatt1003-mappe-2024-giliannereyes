@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.ntnu.iir.bidata.model.Ingredient;
-import edu.ntnu.iir.bidata.model.Recipe;
-import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.domain.Ingredient;
+import edu.ntnu.iir.bidata.domain.Recipe;
+import edu.ntnu.iir.bidata.domain.Unit;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;

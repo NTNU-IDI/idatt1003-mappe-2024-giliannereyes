@@ -1,6 +1,6 @@
 package edu.ntnu.iir.bidata.utils;
 
-import edu.ntnu.iir.bidata.model.Unit;
+import edu.ntnu.iir.bidata.domain.Unit;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
