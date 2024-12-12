@@ -15,14 +15,14 @@ import java.util.function.Supplier;
 /**
  * Manages the fridge, cookbook and meal planning functionalities.
  *
- * <p>Orchestrates interactions between the model classes and the user interface,
+ * <p>Orchestrates interactions between the domain classes and the user interface,
  * by delegating user input to the appropriate model classes and
  * returning the results to the UI. </p>
  *
- * <p>It also contains pre-populated data for the fridge and cookbook.</p>
+ * <p>It also contains pre-population data for {@link Fridge} and {@link Cookbook}.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.1
  */
 public class FoodManager {
@@ -31,7 +31,8 @@ public class FoodManager {
   private final MealPlanner mealPlanner;
 
   /**
-   * Constructs a FoodManager instance with a fridge, cookbook and meal planner.
+   * Constructs a FoodManager instance with a {@link Fridge}, {@link Cookbook}
+   * and {@link MealPlanner}.
    */
   public FoodManager() {
     this.fridge = new Fridge();
@@ -43,7 +44,7 @@ public class FoodManager {
    * Adds a new ingredient to the fridge.
    *
    * @param name is the name of the ingredient.
-   * @param quantity is the quantity of the ingredient to add.
+   * @param quantity is the quantity of the ingredient.
    * @param unit is the unit of measurement.
    * @param pricePerUnit is the price per unit.
    * @param expiryDate is the ingredient's expiry date.
@@ -62,12 +63,12 @@ public class FoodManager {
   }
 
   /**
-   * Searches for an ingredient in the fridge by its name.
+   * Searches for ingredients in the fridge by name.
    *
    * @param name is the name of the ingredient.
    *
-   * @return {@link Result} object containing the ingredient if found,
-   *        or a failure message if it failed.
+   * @return {@link Result} object containing a list of ingredients if found,
+   *        or a failure message if none were found.
    */
   public Result<List<Ingredient>> findIngredient(String name) {
     return handleOperation(() -> {
@@ -89,6 +90,7 @@ public class FoodManager {
    * @param name is the name of the ingredient.
    * @param quantity is the quantity to decrease the ingredient with.
    * @param unit is the unit of measurement of the quantity to decrease.
+   * @param expiryDate is the expiry date of the ingredient.
    *
    * @return A {@link Result} object containing a success message if the ingredient was removed,
    *       or a failure message if it failed.
@@ -105,14 +107,14 @@ public class FoodManager {
   }
 
   /**
-   * Checks for expiring ingredients before a specified date.
+   * Searches for ingredients in the fridge that are expiring before a specified date.
    *
    * @param date is the cut-off date to check for expiring ingredients.
    *
    * @return A {@link Result} object containing a list of expiring ingredients if found,
-   *       or a failure message if there are none.
+   *       or a failure message if there are none found.
    */
-  public Result<List<Ingredient>> getIngredientsExpiringBefore(LocalDate date) {
+  public Result<List<Ingredient>> findIngredientsExpiringBefore(LocalDate date) {
     return handleOperation(() -> {
       List<Ingredient> expiringIngredients = fridge.findExpiringIngredientsBeforeDate(date);
       if (!expiringIngredients.isEmpty()) {
@@ -204,20 +206,22 @@ public class FoodManager {
   }
 
   /**
-   * Retrieves all recipes that has all required ingredients available in the fridge.
+   * Retrieves recipes that has all required ingredients available in the fridge.
    *
    * @return A {@link Result} object containing a list of recipes if found,
    *      or a failure message if there are none.
    */
   public Result<List<Recipe>> findSuggestedRecipes() {
-    List<Recipe> recipes = mealPlanner.findRecipesWithAvailableIngredients();
-    if (!recipes.isEmpty()) {
-      return Result.success(
-          "These recipes can be prepared with ingredients in the fridge.", recipes
-      );
-    } else {
-      return Result.failure("No recipes can be prepared with the ingredients in the fridge.");
-    }
+    return handleOperation(() -> {
+      List<Recipe> recipes = mealPlanner.findRecipesWithAvailableIngredients();
+      if (!recipes.isEmpty()) {
+        return Result.success(
+            "These recipes can be prepared with ingredients in the fridge.", recipes
+        );
+      } else {
+        return Result.failure("No recipes can be prepared with the ingredients in the fridge.");
+      }
+    });
   }
 
   /**
@@ -230,7 +234,7 @@ public class FoodManager {
    */
   public Result<Void> verifyRecipeAvailability(String recipeName) {
     return handleOperation(() -> {
-      boolean recipeAvailable = mealPlanner.ingredientsAreAvailableForRecipe(recipeName);
+      boolean recipeAvailable = mealPlanner.areIngredientsAvailableForRecipe(recipeName);
       if (recipeAvailable) {
         return Result.success(
             String.format("You have all the ingredients to make %s!", recipeName)
@@ -248,14 +252,16 @@ public class FoodManager {
    *      or a failure message if there are none.
    */
   public Result<List<Recipe>> findAllRecipes() {
-    List<Recipe> recipes = cookbook.getRecipes();
-    if (!recipes.isEmpty()) {
-      return Result.success(
-          "All recipes in the cookbook.", recipes
-      );
-    } else {
-      return Result.failure("There are no recipes in the cookbook.");
-    }
+    return handleOperation(() -> {
+      List<Recipe> recipes = cookbook.getRecipes();
+      if (!recipes.isEmpty()) {
+        return Result.success(
+            "All recipes in the cookbook.", recipes
+        );
+      } else {
+        return Result.failure("There are no recipes in the cookbook.");
+      }
+    });
   }
 
   /**
@@ -285,12 +291,14 @@ public class FoodManager {
    *      or a failure message if it failed.
    */
   public Result<String> calculateFridgeValue() {
-    double value = fridge.calculateTotalValue();
-    if (value == 0) {
-      return Result.failure("There value of the fridge is 0.0 kr, as there are no ingredients.");
-    }
-    String valueString = String.format("%.2f kr", value);
-    return Result.success("The ingredients in the fridge are worth:", valueString);
+    return handleOperation(() -> {
+      double value = fridge.calculateTotalValue();
+      if (value == 0) {
+        return Result.failure("There value of the fridge is 0.0 kr, as there are no ingredients.");
+      }
+      String valueString = String.format("%.2f kr", value);
+      return Result.success("The total value of ingredients in the fridge is:", valueString);
+    });
   }
 
   /**
@@ -307,9 +315,10 @@ public class FoodManager {
       return operation.get();
     } catch (IllegalArgumentException e) {
       return Result.failure("Operation failed.", e.getMessage());
+    } catch (Exception e) {
+      return Result.failure("Unexpected error occurred.", e.getMessage());
     }
   }
-
 
   /**
    * Populates the fridge and cookbook with ingredients and recipes.
@@ -320,7 +329,7 @@ public class FoodManager {
   }
 
   /**
-   * Pre-adds ingredients to the fridge.
+   * Adds pre-defined ingredients to the fridge.
    */
   private void preAddIngredientsToFridge() {
     List<Ingredient> ingredients = List.of(
@@ -333,7 +342,7 @@ public class FoodManager {
   }
 
   /**
-   * Pre-adds recipes to cookbook.
+   * Adds pre-defined recipes to the cookbook.
    */
   private void preAddRecipesToCookbook() {
     HashMap<Recipe, List<Ingredient>> recipeIngredientsMap = new HashMap<>();

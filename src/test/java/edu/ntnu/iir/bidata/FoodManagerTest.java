@@ -135,10 +135,11 @@ public class FoodManagerTest {
     foodManager.addIngredientToFridge(
         validName, validQuantity, validPrice, validUnit, validExpiryDate
     );
-    Result<Ingredient> result = foodManager.findIngredient(validName);
+    Result<List<Ingredient>> result = foodManager.findIngredient(validName);
     assertTrue(result.isSuccess());
     assertTrue(result.getData().isPresent());
-    assertInstanceOf(Ingredient.class, result.getData().get());
+    List<Ingredient> ingredients = result.getData().get();
+    ingredients.forEach(ingredient -> assertInstanceOf(Ingredient.class, ingredient));
   }
 
   /**
@@ -154,11 +155,13 @@ public class FoodManagerTest {
         validName, validQuantity, validPrice, validUnit, validExpiryDate
     );
     Result<Void> result = foodManager.removeIngredientFromFridge(
-        validName, validUnit, validQuantity - 1
+        validName, validUnit, validQuantity - 1, validExpiryDate
     );
     assertTrue(result.isSuccess());
 
-    Result<Void> result2 = foodManager.removeIngredientFromFridge(validName, validUnit, 1);
+    Result<Void> result2 = foodManager.removeIngredientFromFridge(
+        validName, validUnit, 1, validExpiryDate
+    );
     assertTrue(result2.isSuccess());
     assertFalse(foodManager.findIngredient(validName).getData().isPresent());
   }
@@ -175,7 +178,7 @@ public class FoodManagerTest {
         validName, validQuantity, validPrice, validUnit, LocalDate.now().plusDays(1)
     );
     Result<List<Ingredient>> result =
-        foodManager.getIngredientsExpiringBefore(LocalDate.now().plusDays(10)
+        foodManager.findIngredientsExpiringBefore(LocalDate.now().plusDays(10)
     );
     assertTrue(result.isSuccess());
     assertTrue(result.getData().isPresent());
@@ -234,9 +237,7 @@ public class FoodManagerTest {
   // --------------------------- NEGATIVE TESTS ----------------------------------
 
   /**
-   * Test adding invalid ingredients to the fridge - an ingredient with invalid
-   * attributes, and an ingredient that shares the same name as an existing ingredient,
-   * but has different attributes.
+   * Test adding an ingredient with invalid attributes.
    *
    * <p>Expected outcome: The result should be unsuccessful in both cases.</p>
    */
@@ -246,15 +247,6 @@ public class FoodManagerTest {
         validName, validQuantity, -50, validUnit, validExpiryDate
     );
     assertFalse(result.isSuccess());
-
-    foodManager.addIngredientToFridge(
-        validName, validQuantity, validPrice, validUnit, validExpiryDate
-    );
-    assertFalse(validUnit.isCompatibleWith(Unit.GRAM));
-    Result<Void> result2 = foodManager.addIngredientToFridge(
-        validName, validQuantity, validPrice, Unit.GRAM, validExpiryDate
-    );
-    assertFalse(result2.isSuccess());
   }
 
   /**
@@ -265,7 +257,7 @@ public class FoodManagerTest {
    */
   @Test
   void testFindNonExistentIngredient() {
-    Result<Ingredient> result = foodManager.findIngredient("Non-existent ingredient");
+    Result<List<Ingredient>> result = foodManager.findIngredient("Non-existent ingredient");
     assertFalse(result.isSuccess());
     assertFalse(result.getData().isPresent());
   }
@@ -277,7 +269,7 @@ public class FoodManagerTest {
    */
   @Test
   void testFindIngredientInvalidName() {
-    Result<Ingredient> result = foodManager.findIngredient(null);
+    Result<List<Ingredient>> result = foodManager.findIngredient(null);
     assertFalse(result.isSuccess());
     assertFalse(result.getData().isPresent());
   }
@@ -294,18 +286,18 @@ public class FoodManagerTest {
         validName, validQuantity, validPrice, validUnit, validExpiryDate
     );
     Result<Void> result = foodManager.removeIngredientFromFridge(
-        validName, validUnit, validQuantity + 10
+        validName, validUnit, validQuantity + 10, validExpiryDate
     );
     assertFalse(result.isSuccess());
 
     assertFalse(validUnit.isCompatibleWith(Unit.GRAM));
     Result<Void> result2 = foodManager.removeIngredientFromFridge(
-        validName, Unit.GRAM, validQuantity
+        validName, Unit.GRAM, validQuantity, validExpiryDate
     );
     assertFalse(result2.isSuccess());
 
     Result<Void> result3 = foodManager.removeIngredientFromFridge(
-        "Non-existent ingredient", validUnit, validQuantity
+        "Non-existent ingredient", validUnit, validQuantity, validExpiryDate
     );
     assertFalse(result3.isSuccess());
   }
@@ -318,7 +310,7 @@ public class FoodManagerTest {
    */
   @Test
   void testFindNonExistentExpiringIngredients() {
-    Result<List<Ingredient>> result = foodManager.getIngredientsExpiringBefore(LocalDate.now());
+    Result<List<Ingredient>> result = foodManager.findIngredientsExpiringBefore(LocalDate.now());
     assertFalse(result.isSuccess());
   }
 
@@ -329,7 +321,7 @@ public class FoodManagerTest {
    */
   @Test
   void testFindExpiringIngredientsWithInvalidDate() {
-    Result<List<Ingredient>> result = foodManager.getIngredientsExpiringBefore(null);
+    Result<List<Ingredient>> result = foodManager.findIngredientsExpiringBefore(null);
     assertFalse(result.isSuccess());
   }
 
