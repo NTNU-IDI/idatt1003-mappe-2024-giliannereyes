@@ -84,9 +84,14 @@ public class IngredientTest {
     // Decrease quantity with a valid amount of same unit
     meat.decreaseQuantity(0.5, Unit.KILOGRAM);
     assertEquals(4.5, meat.getQuantity());
+
     // Decrease quantity with a valid amount of different unit
     meat.decreaseQuantity(100, Unit.GRAM);
     assertEquals(4.4, meat.getQuantity());
+
+    // Decrease quantity with all available quantity
+    meat.decreaseQuantity(4.4, Unit.KILOGRAM);
+    assertEquals(0, meat.getQuantity());
   }
 
   /**
@@ -139,8 +144,8 @@ public class IngredientTest {
     Ingredient meat2 = new Ingredient("Meat", 5, 50, Unit.KILOGRAM, LocalDate.now().plusDays(10));
     assertTrue(meat.matchesIngredient(meat2));
 
-    // Same ingredient, different unit and quantity
-    Ingredient meat3 = new Ingredient("Meat", 200, 50, Unit.GRAM, LocalDate.now().plusDays(10));
+    // Same ingredient, different unit, quantity and price per unit
+    Ingredient meat3 = new Ingredient("Meat", 200, 0.05, Unit.GRAM, LocalDate.now().plusDays(10));
     assertTrue(meat.matchesIngredient(meat3));
   }
 
