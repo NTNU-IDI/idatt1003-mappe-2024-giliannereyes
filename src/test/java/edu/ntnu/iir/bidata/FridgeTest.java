@@ -46,8 +46,8 @@ import org.junit.jupiter.api.Test;
  */
 public class FridgeTest {
   private Fridge fridge;
-  private Ingredient milk;
   private Ingredient egg;
+  private Ingredient solidButter;
 
   /**
    * Set up the fridge and ingredients before each test.
@@ -55,47 +55,64 @@ public class FridgeTest {
   @BeforeEach
   void setUp() {
     fridge = new Fridge();
-    milk = new Ingredient("Milk", 1, 20, Unit.LITRE, LocalDate.now().plusDays(5));
-    egg = new Ingredient("Egg", 12, 3, Unit.PIECE, LocalDate.now().plusDays(20));
-    fridge.addIngredient(milk);
+    solidButter = new Ingredient(
+        "Butter", 0.5, 10, Unit.KILOGRAM, LocalDate.now().plusDays(5)
+    );
+    egg = new Ingredient(
+        "Egg", 12, 3, Unit.PIECE, LocalDate.now().plusDays(20)
+    );
     fridge.addIngredient(egg);
+    fridge.addIngredient(solidButter);
   }
 
   // --------------------------- POSITIVE TESTS ----------------------------------
 
   /**
-   * Test adding a new ingredient to the fridge where the ingredient is a valid instance.
-   * Expected outcome: The ingredient should be added to the fridge's list of ingredients.
+   * Test adding new ingredients with valid fields to the fridge.
+   *
+   * <p>Expected outcome: The ingredients should be added as new objects as they do not match
+   * any existing ingredients in the fridge.</p>
    */
   @Test
   void testAddNewValidIngredient() {
-    Ingredient cheese = new Ingredient(
-        "Cheese", 0.5, 30, Unit.KILOGRAM, LocalDate.now().plusDays(10)
+    // New ingredient - same name, different unit type
+    Ingredient meltedButter = new Ingredient(
+        "Butter", 0.3, 10, Unit.LITRE, LocalDate.now().plusDays(5)
     );
-    fridge.addIngredient(cheese);
-    assertTrue(fridge.getIngredients().contains(cheese));
+    fridge.addIngredient(meltedButter);
+    assertTrue(fridge.getIngredients().contains(meltedButter));
+
+    // New ingredient, same name, different expiry date
+    Ingredient solidButterWithDiffExpiry = new Ingredient(
+        "Butter", 0.3, 10, Unit.KILOGRAM, LocalDate.now().plusDays(22)
+    );
+    fridge.addIngredient(solidButterWithDiffExpiry);
+    assertTrue(fridge.getIngredients().contains(solidButterWithDiffExpiry));
   }
 
   /**
-   * Test adding an ingredient that matches an existing ingredient in the fridge.
+   * Test adding ingredients that matches an existing ingredient in the fridge.
    * Ingredients matching means they have the same name, price per unit, expiry date
    * and the units are compatible.
    *
    * <p>Expected outcome: The existing ingredient's quantity should be
-   * increased by the new ingredient's quantity.</p>
+   * increased by the quantities of the new ingredients.</p>
    */
   @Test
   void testAddDuplicateIngredient() {
-    Ingredient milk2 = new Ingredient("Milk", 2.5, 20, Unit.LITRE, LocalDate.now().plusDays(5));
-    fridge.addIngredient(milk2);
-    assertFalse(fridge.getIngredients().contains(milk2));
-    assertTrue(fridge.findIngredientByName("Milk").isPresent());
-    assertEquals(3.5, fridge.findIngredientByName("Milk").get().getQuantity());
+    Ingredient solidButter2 = new Ingredient(
+        "BUTTER", 0.5, 10, Unit.KILOGRAM, LocalDate.now().plusDays(5)
+    );
+    fridge.addIngredient(solidButter2);
+    assertFalse(fridge.getIngredients().contains(solidButter2));
 
-    Ingredient milk3 = new Ingredient("MILK", 10, 20, Unit.DECILITRE, LocalDate.now().plusDays(5));
-    fridge.addIngredient(milk3);
-    assertFalse(fridge.getIngredients().contains(milk3));
-    assertEquals(4.5, fridge.findIngredientByName("Milk").get().getQuantity());
+    Ingredient solidButter3 = new Ingredient(
+        "Butter   ", 500, 0.01, Unit.GRAM, LocalDate.now().plusDays(5)
+    );
+    fridge.addIngredient(solidButter3);
+    assertFalse(fridge.getIngredients().contains(solidButter3));
+
+    assertEquals(1.5, solidButter.getQuantity());
   }
 
   /**
@@ -104,11 +121,19 @@ public class FridgeTest {
    */
   @Test
   void testRemoveValidQuantityOfIngredient() {
-    fridge.removeIngredient("Milk", 0.5, Unit.LITRE);
-    assertTrue(fridge.findIngredientByName("Milk").isPresent());
-    assertEquals(0.5, fridge.findIngredientByName("Milk").get().getQuantity());
-    fridge.removeIngredient("Milk", 2, Unit.DECILITRE);
-    assertEquals(0.3, fridge.findIngredientByName("Milk").get().getQuantity());
+    // Add another ingredient called "Butter" to the fridge
+    Ingredient meltedButter = new Ingredient(
+        "Butter", 0.3, 10, Unit.LITRE, LocalDate.now().plusDays(5)
+    );
+    fridge.addIngredient(meltedButter);
+
+    // Remove quantities of solid butter from the fridge
+    fridge.removeIngredient("Butter", 100, Unit.GRAM, LocalDate.now().plusDays(5));
+    assertEquals(0.4, solidButter.getQuantity());
+    fridge.removeIngredient("Butter", 0.2, Unit.KILOGRAM, LocalDate.now().plusDays(5));
+    assertEquals(0.2, solidButter.getQuantity());
+
+    assertEquals(0.3, meltedButter.getQuantity()); // Unchanged
   }
 
   /**
@@ -117,22 +142,31 @@ public class FridgeTest {
    */
   @Test
   void testRemoveAllQuantityOfIngredient() {
-    fridge.removeIngredient("Milk", 1, Unit.LITRE);
-    assertTrue(fridge.findIngredientByName("Milk").isEmpty());
-    assertFalse(fridge.getIngredients().contains(milk));
+    fridge.removeIngredient("Butter", 500, Unit.GRAM, LocalDate.now().plusDays(5));
+    assertEquals(0, solidButter.getQuantity());
+    assertFalse(fridge.getIngredients().contains(solidButter));
   }
 
   /**
-   * Test finding an ingredient by its name. The search should be case-insensitive
-   * and ignore any surrounding whitespace.
-   * Expected outcome: The ingredient should be found regardless of the case of the name.
+   * Test finding ingredients by name regardless of case or surrounding whitespace.
+   *
+   * <p>Expected outcome: The search should return all ingredients that match the name
+   * regardless of case or surrounding whitespace.</p>
    */
   @Test
-  void testFindExistingIngredientByName() {
-    assertTrue(fridge.findIngredientByName("Milk    ").isPresent());
-    assertEquals(milk, fridge.findIngredientByName("Milk    ").get());
-    assertTrue(fridge.findIngredientByName("miLk").isPresent());
-    assertEquals(milk, fridge.findIngredientByName("miLk").get());
+  void testFindExistingIngredientsByName() {
+    Ingredient meltedButter = new Ingredient(
+        "Butter", 0.3, 10, Unit.LITRE, LocalDate.now().plusDays(5)
+    );
+    fridge.addIngredient(meltedButter);
+
+    List<Ingredient> searchWithCaps = fridge.findIngredientsByName("BUTTeR");
+    assertTrue(searchWithCaps.contains(solidButter));
+    assertTrue(searchWithCaps.contains(meltedButter));
+
+    List<Ingredient> searchWithWhitespace = fridge.findIngredientsByName("  Butter  ");
+    assertTrue(searchWithWhitespace.contains(solidButter));
+    assertTrue(searchWithWhitespace.contains(meltedButter));
   }
 
   /**
@@ -141,20 +175,25 @@ public class FridgeTest {
    */
   @Test
   void testFindExpiringIngredientsBeforeDate() {
-    // All ingredients that expire before 10 months from now
+    // Ingredients expiring 10 months from now (expected: all ingredients)
     List<Ingredient> foundIngredients = fridge.findExpiringIngredientsBeforeDate(
         LocalDate.now().plusMonths(10)
     );
-    assertTrue(foundIngredients.contains(milk));
+    assertEquals(2, foundIngredients.size());
     assertTrue(foundIngredients.contains(egg));
+    assertTrue(foundIngredients.contains(solidButter));
 
-    // All ingredients that expire before 6 days from now
-    foundIngredients = fridge.findExpiringIngredientsBeforeDate(LocalDate.now().plusDays(6));
-    assertTrue(foundIngredients.contains(milk));
-    assertFalse(foundIngredients.contains(egg));
+    // Ingredients expiring 6 days from now (expected: butter)
+    foundIngredients = fridge.findExpiringIngredientsBeforeDate(
+        LocalDate.now().plusDays(6)
+    );
+    assertEquals(1, foundIngredients.size());
+    assertTrue(foundIngredients.contains(solidButter));
 
-    // All ingredients that expired in the past
-    foundIngredients = fridge.findExpiringIngredientsBeforeDate(LocalDate.now().minusDays(1));
+    // Ingredients expiring 1 day from now (expected: none)
+    foundIngredients = fridge.findExpiringIngredientsBeforeDate(
+        LocalDate.now().plusDays(1)
+    );
     assertTrue(foundIngredients.isEmpty());
   }
 
@@ -165,10 +204,6 @@ public class FridgeTest {
    */
   @Test
   void testFindSortedIngredients() {
-    Ingredient butter = new Ingredient(
-        "Butter", 0.2, 10, Unit.KILOGRAM, LocalDate.now().plusDays(5)
-    );
-    fridge.addIngredient(butter);
     Ingredient apple = new Ingredient(
         "Apple", 1, 20, Unit.KILOGRAM, LocalDate.now().plusDays(10)
     );
@@ -176,9 +211,8 @@ public class FridgeTest {
 
     List<Ingredient> sortedIngredients = fridge.findSortedIngredients();
     assertEquals(apple, sortedIngredients.get(0));
-    assertEquals(butter, sortedIngredients.get(1));
+    assertEquals(solidButter, sortedIngredients.get(1)); // stored with name "Butter"
     assertEquals(egg, sortedIngredients.get(2));
-    assertEquals(milk, sortedIngredients.get(3));
   }
 
   /**
@@ -188,7 +222,9 @@ public class FridgeTest {
    */
   @Test
   void testCalculateTotalPrice() {
-    assertEquals(56, fridge.calculateTotalValue());
+    double eggPrice = egg.getPrice();
+    double butterPrice = solidButter.getPrice();
+    assertEquals(eggPrice + butterPrice, fridge.calculateTotalValue());
   }
 
   /**
@@ -200,9 +236,17 @@ public class FridgeTest {
    */
   @Test
   void testCalculateExpiringValueByDate() {
-    assertEquals(20, fridge.calculateExpiringValueByDate(LocalDate.now().plusDays(6)));
-    assertEquals(0, fridge.calculateExpiringValueByDate(LocalDate.now().minusDays(1)));
-    assertEquals(56, fridge.calculateExpiringValueByDate(LocalDate.now().plusMonths(1)));
+    double eggPrice = egg.getPrice();
+    double butterPrice = solidButter.getPrice();
+    assertEquals(
+        eggPrice + butterPrice, fridge.calculateExpiringValueByDate(LocalDate.now().plusMonths(10))
+    );
+    assertEquals(
+        butterPrice, fridge.calculateExpiringValueByDate(LocalDate.now().plusDays(6))
+    );
+    assertEquals(
+        0, fridge.calculateExpiringValueByDate(LocalDate.now().plusDays(1))
+    );
   }
 
   // --------------------------- NEGATIVE TESTS ----------------------------------
@@ -216,30 +260,6 @@ public class FridgeTest {
   }
 
   /**
-   * Test adding a duplicate ingredient with an incompatible unit, expiry date or price per unit.
-   * Expected outcome: The existing ingredient should not be updated,
-   * and the new ingredient should not be added.
-   */
-  @Test
-  void testAddDuplicateInvalidIngredient() {
-    // Add ingredient 'egg' but with an incompatible unit
-    Ingredient egg2 = new Ingredient("Egg", 12, 3, Unit.KILOGRAM, LocalDate.now().plusDays(20));
-    assertThrows(IllegalArgumentException.class, () -> fridge.addIngredient(egg2));
-
-    // Add ingredient 'egg' but with a different expiry date
-    Ingredient egg3 = new Ingredient("Egg", 12, 3, Unit.PIECE, LocalDate.now().plusDays(10));
-    assertThrows(IllegalArgumentException.class, () -> fridge.addIngredient(egg3));
-
-    // Add ingredient 'egg' but with a different price per unit
-    Ingredient egg4 = new Ingredient("Egg", 2, 15, Unit.PIECE, LocalDate.now().plusDays(20));
-    assertThrows(IllegalArgumentException.class, () -> fridge.addIngredient(egg4));
-
-    // Ensure that the original ingredient 'egg' was not updated
-    assertTrue(fridge.findIngredientByName("Egg").isPresent());
-    assertEquals(12, fridge.findIngredientByName("Egg").get().getQuantity());
-  }
-
-  /**
    * Test removing a non-existent ingredient from the fridge.
    * Expected outcome: An IllegalArgumentException should be thrown,
    * and the fridge should not be updated.
@@ -247,7 +267,7 @@ public class FridgeTest {
   @Test
   void testRemoveNonExistentIngredient() {
     assertThrows(IllegalArgumentException.class, () ->
-        fridge.removeIngredient("Bread", 1, Unit.KILOGRAM)
+        fridge.removeIngredient("NON-EXISTENT", 1, Unit.KILOGRAM, LocalDate.now().plusDays(10))
     );
   }
 
@@ -258,14 +278,30 @@ public class FridgeTest {
    */
   @Test
   void testRemoveInvalidQuantityOfIngredient() {
-    // Remove a negative quantity of an ingredient
+    // Null unit
     assertThrows(IllegalArgumentException.class, () ->
-        fridge.removeIngredient("Milk", -1, Unit.LITRE)
+        fridge.removeIngredient("Butter", 0.5, null, LocalDate.now().plusDays(5))
+    );
+    // Negative quantity
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Butter", -1, Unit.KILOGRAM, LocalDate.now().plusDays(5))
+    );
+    // Would result in negative quantity
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Butter", 1, Unit.KILOGRAM, LocalDate.now().plusDays(5))
+    );
+    // Wrong expiry date
+    assertThrows(IllegalArgumentException.class, () ->
+        fridge.removeIngredient("Butter", 0.5, Unit.KILOGRAM, LocalDate.now().minusDays(10))
     );
 
-    // Remove a quantity that results in a negative quantity for the ingredient
+    assertEquals(0.5, solidButter.getQuantity());
+  }
+
+  @Test
+  void testRemoveQuantityOfNonExistentIngredient() {
     assertThrows(IllegalArgumentException.class, () ->
-        fridge.removeIngredient("Milk", 2, Unit.LITRE)
+        fridge.removeIngredient("NON-EXISTENT", 1, Unit.KILOGRAM, LocalDate.now().plusDays(10))
     );
   }
 
@@ -275,6 +311,6 @@ public class FridgeTest {
    */
   @Test
   void testFindNonExistentIngredientByName() {
-    assertTrue(fridge.findIngredientByName("Bread").isEmpty());
+    assertTrue(fridge.findIngredientsByName("NON-EXISTENT").isEmpty());
   }
 }

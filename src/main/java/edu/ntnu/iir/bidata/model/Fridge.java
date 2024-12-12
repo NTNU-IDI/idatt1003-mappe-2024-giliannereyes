@@ -10,43 +10,40 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Represents a fridge that contains a list of {@link Ingredient}.
+ * Represents a fridge that contains a collection of {@link Ingredient}.
  *
  * <p>The fridge can add, remove, and search for ingredients. It can also calculate
  * the value of ingredients in the fridge, and retrieve all ingredients or
  * ingredients that expire before a specified date.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.0
  */
 public class Fridge {
   private final Map<String, List<Ingredient>> ingredientMap;
 
   /**
-   * Constructs a new fridge with an empty list of ingredients.
+   * Constructs a new Fridge instance with an empty ingredient map.
    */
   public Fridge() {
     ingredientMap = new HashMap<>();
   }
 
   /**
-   * Adds a new ingredient to the fridge if it is not already stored, or
+   * Adds a new ingredient to the fridge if not already stored, or
    * adds the quantity of the new ingredient to the stored ingredient.
    *
    * @param newIngredient is the ingredient to add.
    *
-   * @throws IllegalArgumentException if the ingredient is null, or if the
-   *      ingredient cannot be added to the fridge.
+   * @throws IllegalArgumentException if the ingredient is null.
    */
   public void addIngredient(Ingredient newIngredient) {
     Validation.validateNonNull(newIngredient, "Ingredient");
-
     List<Ingredient> ingredientBatches = ingredientMap
         .computeIfAbsent(
-            newIngredient.getName().toLowerCase().trim(), ignored -> new ArrayList<>()
+            newIngredient.getName().trim().toLowerCase(), ignored -> new ArrayList<>()
         );
-
     findExactMatch(ingredientBatches, newIngredient)
         .ifPresentOrElse(
             match -> match.increaseQuantity(newIngredient.getQuantity(), newIngredient.getUnit()),
@@ -60,23 +57,24 @@ public class Fridge {
    *
    * @param name is the name of the ingredient to remove.
    * @param quantity is the quantity to remove.
-   * @param unit is the unit of measurement of the quantity to remove.
+   * @param unit is the unit the quantity to remove is measured in.
    * @param expiryDate is the expiry date of the ingredient to remove.
    *
    * @throws IllegalArgumentException if the parameters are invalid, the ingredient
    *     is not found in the fridge or the quantity becomes negative.
    */
   public void removeIngredient(String name, double quantity, Unit unit, LocalDate expiryDate) {
+    Validation.validateNonEmptyString(name, "Ingredient name");
     Validation.validatePositiveNumber(quantity, "Quantity to remove");
     Validation.validateNonNull(unit, "Unit");
-    Validation.validateNonEmptyString(name, "Ingredient name");
     Validation.validateNonNull(expiryDate, "Expiry date");
 
     List<Ingredient> ingredientBatches = ingredientMap
         .getOrDefault(name.trim().toLowerCase(), new ArrayList<>());
     Ingredient targetBatch = findBatchByUnitAndExpiry(ingredientBatches, unit, expiryDate)
         .orElseThrow(() -> new IllegalArgumentException(
-            "The ingredient with the specified expiry date and unit was not found."
+            String.format("Ingredient '%s' with specified unit '%s' and expiry date '%s' not found",
+                name, unit.getSymbol(), expiryDate)
         ));
     targetBatch.decreaseQuantity(quantity, unit);
     removeBatchIfEmpty(targetBatch, ingredientBatches, name.toLowerCase());
@@ -132,6 +130,8 @@ public class Fridge {
    * @param date is the cutoff date to check if the ingredient is expired.
    *
    * @return The total value of the ingredients expiring before the specified date.
+   *
+   * @throws IllegalArgumentException if the date is null.
    */
   public double calculateExpiringValueByDate(LocalDate date) {
     Validation.validateNonNull(date, "Date");
@@ -166,7 +166,12 @@ public class Fridge {
   }
 
   /**
-   * Finds an exact match for the given ingredient in the list.
+   * Finds an ingredient in the list that matches the ingredient to find.
+   *
+   * @param ingredients is the list of ingredients to search.
+   * @param ingredientToFind is the ingredient to find in the list.
+   *
+   * @return An {@link Optional} containing the ingredient if found, otherwise empty.
    */
   private Optional<Ingredient> findExactMatch(
       List<Ingredient> ingredients, Ingredient ingredientToFind
@@ -177,7 +182,13 @@ public class Fridge {
   }
 
   /**
-   * Finds a batch in the ingredient list matching the unit and expiry date.
+   * Finds an ingredient batch in the ingredient list matching the unit and expiry date.
+   *
+   * @param ingredients is the list of ingredients to search.
+   * @param unit is the unit to match.
+   * @param expiryDate is the expiry date to match.
+   *
+   * @return An {@link Optional} containing the ingredient batch if found, otherwise empty.
    */
   private Optional<Ingredient> findBatchByUnitAndExpiry(
       List<Ingredient> ingredients, Unit unit, LocalDate expiryDate
@@ -191,9 +202,9 @@ public class Fridge {
   /**
    * Removes a specific ingredient batch from the fridge if its quantity is zero.
    *
-   * @param ingredientBatch the specific batch of the ingredient to remove.
-   * @param ingredientBatches the list of batches for the same ingredient name.
-   * @param ingredientKey the key representing the ingredient name in the fridge.
+   * @param ingredientBatch is the specific batch of the ingredient to remove.
+   * @param ingredientBatches is the list of batches for the same ingredient name.
+   * @param ingredientKey is the key representing the ingredient name in the fridge.
    */
   private void removeBatchIfEmpty(
       Ingredient ingredientBatch, List<Ingredient> ingredientBatches, String ingredientKey
