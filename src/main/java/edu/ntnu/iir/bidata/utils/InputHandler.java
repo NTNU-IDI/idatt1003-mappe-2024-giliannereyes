@@ -3,8 +3,11 @@ package edu.ntnu.iir.bidata.utils;
 import edu.ntnu.iir.bidata.model.Unit;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A utility class to handle user input from the console.
@@ -32,8 +35,6 @@ public class  InputHandler {
    * @param prompt is the message to display to the user when asking for input.
    *
    * @return A non-empty string entered by the user.
-   *
-   * @throws IllegalArgumentException if the input is an empty string.
    */
   public String readString(String prompt) {
     return readWithValidation(
@@ -54,8 +55,6 @@ public class  InputHandler {
    * @param prompt is the message to display to the user when asking for input.
    *
    * @return A positive integer entered by the user.
-   *
-   * @throws IllegalArgumentException if the input is not a positive integer.
    */
   public int readInt(String prompt) {
     return readWithValidation(
@@ -77,8 +76,6 @@ public class  InputHandler {
    * @param prompt is the message to display to the user when asking for input.
    *
    * @return A positive double entered by the user.
-   *
-   * @throws IllegalArgumentException if the input is not a positive number.
    */
   public double readDouble(String prompt) {
     return readWithValidation(prompt,
@@ -174,13 +171,19 @@ public class  InputHandler {
     System.out.println("\nA list of available units of measurement:");
 
     Unit[] units = Unit.values();
-    for (int i = 0; i < units.length; i++) {
-      System.out.printf("%d. %-10s", i + 1, units[i].getSymbol());
-      System.out.print((i + 1) % 4 == 0 ? "\n" : "  "); // Add a newline every 4 units
-    }
-    if (units.length % 4 != 0) {
-      System.out.println(); // Ensure the final line ends cleanly
-    }
+
+    List<String> formattedUnits = IntStream.range(0, units.length)
+        .mapToObj(i -> String.format("%d. %-10s", i + 1, units[i].getSymbol()))
+        .toList();
+
+    String output = IntStream.range(0, (formattedUnits.size() + 3) / 4)
+        .mapToObj(i -> formattedUnits.stream()
+            .skip(i * 4L)
+            .limit(4)
+            .collect(Collectors.joining(" ")))
+        .collect(Collectors.joining("\n"));
+
+    System.out.println(output);
   }
 
   /**
