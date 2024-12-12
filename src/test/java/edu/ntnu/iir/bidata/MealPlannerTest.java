@@ -72,7 +72,7 @@ public class MealPlannerTest {
    */
   @Test
   void testVerifyAvailableIngredientsForRecipe() {
-    assertTrue(mealPlanner.ingredientsAreAvailableForRecipe("Fried Eggs"));
+    assertTrue(mealPlanner.areIngredientsAvailableForRecipe("Fried Eggs"));
   }
 
   /**
@@ -84,7 +84,7 @@ public class MealPlannerTest {
   @Test
   void testFindRecipesWithAvailableIngredients() {
     Recipe friedEggRecipe = new Recipe("Fried eggs", "simple recipe", "fry the eggs");
-    friedEggRecipe.addIngredient(new Ingredient("egg", 100, Unit.GRAM));
+    friedEggRecipe.addIngredient(new Ingredient("egg", 200, Unit.GRAM));
 
     List<Recipe> expectedList = List.of(friedEggRecipe);
     List<Recipe> actualList = mealPlanner.findRecipesWithAvailableIngredients();
@@ -103,8 +103,8 @@ public class MealPlannerTest {
    */
   @Test
   void testVerifyUnavailableIngredientsForRecipe() {
-    assertFalse(mealPlanner.ingredientsAreAvailableForRecipe("Scrambled Eggs"));
-    assertFalse(mealPlanner.ingredientsAreAvailableForRecipe("Carbonara"));
+    assertFalse(mealPlanner.areIngredientsAvailableForRecipe("Scrambled Eggs"));
+    assertFalse(mealPlanner.areIngredientsAvailableForRecipe("Carbonara"));
   }
 
   // --------------------------- HELPER METHODS ----------------------------------
@@ -115,22 +115,20 @@ public class MealPlannerTest {
    * @return A list of the ingredients created.
    */
   private List<Ingredient> createIngredients() {
-    Ingredient egg = new Ingredient(
-        "egg", 200, 1, Unit.KILOGRAM, LocalDate.of(2025, 1, 2)
+    return List.of(
+        new Ingredient(
+            "egg", 100, 1, Unit.GRAM, LocalDate.now().plusDays(10)
+        ),
+        new Ingredient(
+            "egg", 2, 30, Unit.KILOGRAM, LocalDate.now().plusDays(25)
+        ),
+        new Ingredient(
+            "milk", 2, 30, Unit.LITRE, LocalDate.now().minusMonths(10)
+        ),
+        new Ingredient(
+            "parmesan", 200, 0.5, Unit.GRAM, LocalDate.now().plusDays(11)
+        )
     );
-    Ingredient milk =  new Ingredient(
-        "milk", 2, 30, Unit.LITRE, LocalDate.of(2023, 1, 10)
-    );
-    Ingredient pasta = new Ingredient(
-        "parmesan", 200, 0.5, Unit.GRAM, LocalDate.of(2025, 1, 10)
-    );
-
-    List<Ingredient> ingredients = new ArrayList<>();
-    ingredients.add(egg);
-    ingredients.add(milk);
-    ingredients.add(pasta);
-
-    return ingredients;
   }
 
   /**
@@ -150,7 +148,7 @@ public class MealPlannerTest {
     scrambledEggRecipe.addIngredient(new Ingredient("milk", 100, Unit.GRAM));
 
     Recipe friedEggRecipe = new Recipe("Fried eggs", "simple recipe", "fry the eggs");
-    friedEggRecipe.addIngredient(new Ingredient("egg", 100, Unit.GRAM));
+    friedEggRecipe.addIngredient(new Ingredient("egg", 200, Unit.GRAM));
 
     List<Recipe> recipes = new ArrayList<>();
     recipes.add(carbonaraRecipe);

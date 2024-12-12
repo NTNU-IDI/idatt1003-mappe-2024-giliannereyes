@@ -12,7 +12,7 @@ import java.util.List;
  * recipes that have all ingredients required available.</p>
  *
  * @author Gilianne Reyes
- * @version 1.2
+ * @version 1.3
  * @since 1.1
  */
 public class MealPlanner {
@@ -22,8 +22,8 @@ public class MealPlanner {
   /**
    * Constructs a MealPlanner instance with a fridge and cookbook.
    *
-   * @param fridge is the fridge to retrieve ingredients from.
-   * @param cookbook is the cookbook to retrieve recipes from.
+   * @param fridge is the {@link Fridge} to retrieve ingredients from.
+   * @param cookbook is the {@link Cookbook} to retrieve recipes from.
    *
    * @throws IllegalArgumentException if the fridge or cookbook is null.
    */
@@ -42,7 +42,7 @@ public class MealPlanner {
    *
    * @throws IllegalArgumentException if the recipe name is null or empty.
    */
-  public boolean ingredientsAreAvailableForRecipe(String recipeName) {
+  public boolean areIngredientsAvailableForRecipe(String recipeName) {
     Validation.validateNonEmptyString(recipeName, "Recipe name");
     return cookbook.findRecipeByName(recipeName).map(recipe ->
         recipe.getIngredients().stream()
@@ -58,7 +58,7 @@ public class MealPlanner {
    */
   public List<Recipe> findRecipesWithAvailableIngredients() {
     return cookbook.getRecipes().stream()
-        .filter(recipe -> ingredientsAreAvailableForRecipe(recipe.getName()))
+        .filter(recipe -> areIngredientsAvailableForRecipe(recipe.getName()))
         .toList();
   }
 
@@ -82,7 +82,7 @@ public class MealPlanner {
   /**
    * Sets the fridge.
    *
-   * @param fridge is the fridge to retrieve ingredients from.
+   * @param fridge is the {@link Fridge} object to retrieve ingredients from.
    *
    * @throws IllegalArgumentException if the fridge is null.
    */
@@ -94,7 +94,7 @@ public class MealPlanner {
   /**
    * Sets the cookbook.
    *
-   * @param cookbook is the cookbook to retrieve recipes from.
+   * @param cookbook is the {@link Cookbook} to retrieve recipes from.
    *
    * @throws IllegalArgumentException if the cookbook is null.
    */
