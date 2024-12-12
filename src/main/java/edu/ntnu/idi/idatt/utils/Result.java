@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.utils;
+package edu.ntnu.idi.idatt.utils;
 
 import java.util.Optional;
 

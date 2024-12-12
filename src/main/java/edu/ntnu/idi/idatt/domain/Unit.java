@@ -1,6 +1,6 @@
-package edu.ntnu.iir.bidata.domain;
+package edu.ntnu.idi.idatt.domain;
 
-import edu.ntnu.iir.bidata.utils.Validation;
+import edu.ntnu.idi.idatt.utils.Validation;
 import java.util.Arrays;
 
 /**

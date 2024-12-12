@@ -1,15 +1,15 @@
-package edu.ntnu.iir.bidata;
+package edu.ntnu.idi.idatt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.ntnu.iir.bidata.domain.Ingredient;
-import edu.ntnu.iir.bidata.domain.Recipe;
-import edu.ntnu.iir.bidata.domain.Unit;
-import edu.ntnu.iir.bidata.service.FoodManagementService;
-import edu.ntnu.iir.bidata.utils.Result;
+import edu.ntnu.idi.idatt.domain.Ingredient;
+import edu.ntnu.idi.idatt.domain.Recipe;
+import edu.ntnu.idi.idatt.domain.Unit;
+import edu.ntnu.idi.idatt.service.FoodManagementService;
+import edu.ntnu.idi.idatt.utils.Result;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

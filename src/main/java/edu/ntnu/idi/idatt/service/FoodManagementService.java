@@ -1,12 +1,12 @@
-package edu.ntnu.iir.bidata.service;
+package edu.ntnu.idi.idatt.service;
 
-import edu.ntnu.iir.bidata.domain.Cookbook;
-import edu.ntnu.iir.bidata.domain.Fridge;
-import edu.ntnu.iir.bidata.domain.Ingredient;
-import edu.ntnu.iir.bidata.domain.MealPlanner;
-import edu.ntnu.iir.bidata.domain.Recipe;
-import edu.ntnu.iir.bidata.domain.Unit;
-import edu.ntnu.iir.bidata.utils.Result;
+import edu.ntnu.idi.idatt.domain.Cookbook;
+import edu.ntnu.idi.idatt.domain.Fridge;
+import edu.ntnu.idi.idatt.domain.Ingredient;
+import edu.ntnu.idi.idatt.domain.MealPlanner;
+import edu.ntnu.idi.idatt.domain.Recipe;
+import edu.ntnu.idi.idatt.domain.Unit;
+import edu.ntnu.idi.idatt.utils.Result;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;

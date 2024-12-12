@@ -1,10 +1,10 @@
-package edu.ntnu.iir.bidata.presentation;
+package edu.ntnu.idi.idatt.presentation;
 
-import edu.ntnu.iir.bidata.domain.Recipe;
-import edu.ntnu.iir.bidata.domain.Unit;
-import edu.ntnu.iir.bidata.service.FoodManagementService;
-import edu.ntnu.iir.bidata.utils.InputHandler;
-import edu.ntnu.iir.bidata.utils.Result;
+import edu.ntnu.idi.idatt.domain.Recipe;
+import edu.ntnu.idi.idatt.domain.Unit;
+import edu.ntnu.idi.idatt.service.FoodManagementService;
+import edu.ntnu.idi.idatt.utils.InputHandler;
+import edu.ntnu.idi.idatt.utils.Result;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.LinkedHashMap;

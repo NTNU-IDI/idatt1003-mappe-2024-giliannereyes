@@ -1,4 +1,4 @@
-package edu.ntnu.iir.bidata.domain;
+package edu.ntnu.idi.idatt.domain;
 
 /**
  * Represents the type of unit of measurement.
